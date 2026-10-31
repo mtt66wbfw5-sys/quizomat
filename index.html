@@ -65,15 +65,17 @@ textarea{width:100%;min-height:200px;background:var(--card);border:1px solid var
 input[type=number]{width:4.5em;background:var(--card);border:1px solid var(--ink);border-radius:6px;padding:4px 8px}
 .sm{padding:.4em .85em;font-size:.88rem}
 .ico{display:inline-grid;place-items:center;width:40px;height:40px;padding:0}
-.ico svg,.x svg{width:18px;height:18px;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;fill:none;display:block}
+.ico svg,.x svg,.cnav svg{width:18px;height:18px;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;fill:none;display:block}
 .err{color:var(--bad);font-weight:700;white-space:pre-wrap}
 details{margin:8px 0}summary{cursor:pointer;font-weight:700}
 pre{white-space:pre-wrap;font-size:.85rem;background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:10px}
-@media (max-width:560px){body{font-size:16px}#app{padding:14px 12px 24px}h1{font-size:1.5rem}.x{min-width:40px;min-height:40px}.ico{width:42px;height:42px}.nav button{flex:1;text-align:center}.dstart{display:none}.mstart,.qfoot{display:block;position:sticky;bottom:0;background:var(--bg);padding:10px 0 calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--bd);margin-top:12px;z-index:4}.mstart .btn,.qfoot .btn{width:100%}}
+@media (max-width:560px){body{font-size:16px}#app{padding:14px 12px 24px}h1{font-size:1.5rem}.x{min-width:40px;min-height:40px}.ico{width:42px;height:42px}.nav button{flex:1;text-align:center}.nav .cnav{flex:0 0 auto}.dstart{display:none}.mstart,.qfoot{display:block;position:sticky;bottom:0;background:var(--bg);padding:10px 0 calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--bd);margin-top:12px;z-index:4}.mstart .btn,.qfoot .btn{width:100%}}
 @media (max-width:430px){#app{padding-left:max(14px,env(safe-area-inset-left));padding-right:max(14px,env(safe-area-inset-right))}.q{font-size:1.1rem}.opt{padding:12px;gap:10px}.set{gap:6px}.ql{margin-left:10px}.crs{gap:6px}.chb{font-size:1.05rem}}
 .nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;gap:4px;background:var(--bg);border-bottom:1px solid var(--bd);margin:-6px 0 16px}
-.nav button{background:none;border:0;border-bottom:3px solid transparent;padding:12px 14px;font:inherit;font-weight:700;color:var(--mut);cursor:pointer}
+.nav button{background:none;border:0;border-bottom:3px solid transparent;padding:12px 14px;font:inherit;font-weight:700;color:var(--mut);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px}
 .nav button.on{color:var(--fg);border-bottom-color:var(--ac)}
+.nav .cnav{margin-left:auto;font-size:.88rem}
+.sdot{font-size:.8rem;font-weight:700}.sdot.ok{color:var(--ok)}.sdot.bad{color:var(--bad)}
 .gi{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;padding:10px 0;border-top:1px solid var(--bd)}.gi:first-child{border-top:0}.gi>div{min-width:0}.gc{display:flex;gap:4px;align-items:center;flex:none;margin-left:auto}
 .searching .crs,.searching .grp,.searching .mstart{display:none}
 .srch{width:100%;margin:8px 0 10px;padding:10px 12px;background:var(--card);border:1px solid var(--ink);border-radius:8px;font:inherit;color:inherit}
@@ -95,7 +97,8 @@ pre{white-space:pre-wrap;font-size:.85rem;background:var(--card);border:1px soli
 <script>
 const $app=document.getElementById('app');
 let exp=new Set(),pq=null,col=new Set(),pend=null,rpend=null,gloss=[],courses={},cnames=[],gen={name:'',f:['single','multi','tf']},sets=[],sel=new Set(),opts={n:20,shuffle:true,hideMastered:true,mastery:3},Q=[],idx=0,picked=new Set(),checked=false,log=[],msg='';
-let cedit=null,cdraft='',cerr='',sedit=null,sdraft=null,serr='',qedit=null,qdraft=null,qerr='';
+let cedit=null,cdraft='',cerr='',sedit=null,sdraft=null,serr='',qedit=null,qdraft=null,qerr='',curView='q';
+let gh={token:'',user:'',sha:'',lastSync:0},localTs=0,syncState='idle',syncErr='',syncTimer=null,forceOverwrite=false;
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const IC={
   imp:`<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
@@ -103,7 +106,8 @@ const IC={
   res:`<svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>`,
   del:`<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>`,
   edit:`<svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`,
-  x:`<svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`
+  x:`<svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+  cloud:`<svg viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>`
 };
 const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 function load(){
@@ -112,10 +116,21 @@ function load(){
   try{gloss=JSON.parse(localStorage.getItem('pt:gloss')||'[]')}catch(e){gloss=[]}
   try{col=new Set(JSON.parse(localStorage.getItem('pt:col')||'[]'))}catch(e){col=new Set()}
   try{const o=JSON.parse(localStorage.getItem('pt:opts')||'null');if(o&&typeof o==='object')opts={...opts,...o,n:Math.max(1,+o.n||20),mastery:3}}catch(e){}
+  try{localTs=+localStorage.getItem('pt:ts')||0}catch(e){localTs=0}
+  try{const g=JSON.parse(localStorage.getItem('pt:gh')||'null');if(g&&typeof g==='object')gh={...gh,...g}}catch(e){}
 }
-function saveO(){try{localStorage.setItem('pt:opts',JSON.stringify(opts))}catch(e){}}
-function saveC(){try{localStorage.setItem('pt:courses',JSON.stringify(courses))}catch(e){}}
-function save(){try{localStorage.setItem('pt:sets',JSON.stringify(sets))}catch(e){}}
+function saveGH(){try{localStorage.setItem('pt:gh',JSON.stringify(gh))}catch(e){}}
+function touchLocal(overwrite){
+  localTs=Date.now();
+  if(overwrite)forceOverwrite=true;
+  try{localStorage.setItem('pt:ts',String(localTs))}catch(e){}
+  if(gh.token){clearTimeout(syncTimer);syncTimer=setTimeout(()=>pushCloudNow(),600)}
+}
+function saveO(){try{localStorage.setItem('pt:opts',JSON.stringify(opts))}catch(e){}touchLocal()}
+function saveC(){try{localStorage.setItem('pt:courses',JSON.stringify(courses))}catch(e){}touchLocal()}
+function saveCol(){try{localStorage.setItem('pt:col',JSON.stringify([...col]))}catch(e){}touchLocal()}
+function saveGloss(ow){try{localStorage.setItem('pt:gloss',JSON.stringify(gloss))}catch(e){}touchLocal(ow)}
+function save(ow){try{localStorage.setItem('pt:sets',JSON.stringify(sets))}catch(e){}touchLocal(ow)}
 
 const isMastered=q=>(q.streak||0)>=opts.mastery;
 const qWeight=q=>{
@@ -182,7 +197,7 @@ function togMastery(sid,qi){
 function resetProg(sid){
   if(sid){const s=sets.find(x=>x.id===sid);if(s)s.qs.forEach(q=>{q.streak=0;q.wrong=false})}
   else{sets.forEach(s=>s.qs.forEach(q=>{q.streak=0;q.wrong=false}))}
-  rpend=null;wp=null;save();home();
+  rpend=null;wp=null;save(true);home();
 }
 
 function startCEdit(gi){cedit=gi;cdraft=cnames[gi]||'';cerr='';sedit=null;qedit=null;home()}
@@ -194,8 +209,8 @@ function saveCEdit(gi){
   if(nw!==old){
     sets.forEach(s=>{if(s.course===old)s.course=nw});
     if(courses[old]){courses[nw]=courses[old];delete courses[old];saveC()}
-    if(col.has(old)){col.delete(old);col.add(nw);try{localStorage.setItem('pt:col',JSON.stringify([...col]))}catch(e){}}
-    save();
+    if(col.has(old)){col.delete(old);col.add(nw);saveCol()}
+    save(true);
   }
   cedit=null;cdraft='';cerr='';home();
 }
@@ -280,7 +295,7 @@ function qForm(sid,qi){
   return `<div class="qi"><div class="ge"><label class="mut" for="eq_type">Fragetyp</label><select id="eq_type" onchange="changeQType(this.value)"><option value="single" ${d.type==='single'?'selected':''}>Single Choice</option><option value="multi" ${d.type==='multi'?'selected':''}>Multiple Choice</option><option value="tf" ${isTf?'selected':''}>Wahr / Falsch</option></select><label class="mut" for="eq_q">Frage</label><textarea id="eq_q" style="min-height:64px">${esc(d.q)}</textarea>${isTf?`<label class="mut">Richtige Antwort</label><div class="row" style="margin:4px 0 10px"><label class="row" style="cursor:pointer"><input type="radio" name="eq_tf" value="true" ${d.tfOk?'checked':''}> Wahr</label><label class="row" style="cursor:pointer"><input type="radio" name="eq_tf" value="false" ${!d.tfOk?'checked':''}> Falsch</label></div>`:`<label class="mut" style="margin-bottom:4px">Antwortoptionen (Häkchen = richtig, optional Begründung)</label>${d.opts.map((o,k)=>`<div class="orow"><input class="eq_ok" type="${isSingle?'radio':'checkbox'}" name="eq_ok_grp" title="Als richtige Antwort markieren" ${o.ok?'checked':''}><input class="eq_ot" placeholder="Antwort ${k+1}" value="${esc(o.t)}"><input class="eq_ow" placeholder="Begründung (optional)" value="${esc(o.why)}"><button class="x" type="button" title="Option entfernen" aria-label="Option entfernen" ${d.opts.length<=2?'disabled':''} onclick="delQOpt(${k})">${IC.x}</button></div>`).join('')}<button class="btn sec sm" type="button" style="margin:2px 0 10px" onclick="addQOpt()">+ Option hinzufügen</button>`}<label class="mut" for="eq_exp">Erklärung</label><textarea id="eq_exp" style="min-height:64px">${esc(d.exp)}</textarea><p class="err">${esc(qerr)}</p><div class="row act"><button class="btn sec sm" type="button" onclick="cancelQEdit()">Abbrechen</button><button class="btn sm" type="button" onclick="saveQEdit('${sid}',${qi})">Speichern</button></div></div></div>`;
 }
 
-function home(){$app.className=qsearch.trim()?'searching':'';
+function home(){curView='q';$app.className=qsearch.trim()?'searching':'';
   const groups={};sets.forEach(s=>(groups[s.course]=groups[s.course]||[]).push(s));cnames=Object.keys(groups);
   const total=[...sel].reduce((a,id)=>{const s=sets.find(x=>x.id===id);return a+(s?pool1(s).length:0)},0),qCnt=Math.min(opts.n,total);
   const dl=`<datalist id="cl">${cnames.map(c=>`<option value="${esc(c)}">`).join('')}</datalist>`;
@@ -304,12 +319,12 @@ function optsHtml(total){
   const mastCount=allSelCount-[...sel].reduce((a,id)=>{const s=sets.find(x=>x.id===id);return a+(s?s.qs.filter(q=>!isMastered(q)).length:0)},0);
   return `<div class="row" style="margin:10px 0 4px"><label>Anzahl Fragen <input type="number" min="1" max="200" value="${opts.n}" onchange="opts.n=Math.max(1,+this.value||1);saveO();home()"></label><label class="row"><input type="checkbox" ${opts.shuffle?'checked':''} onchange="opts.shuffle=this.checked;saveO()" style="width:20px;height:20px;accent-color:var(--ac)"> Antworten mischen</label><label class="row"><input type="checkbox" ${opts.hideMastered?'checked':''} onchange="opts.hideMastered=this.checked;saveO();home()" style="width:20px;height:20px;accent-color:var(--ac)"> Gemeisterte ausblenden</label></div><p class="mut">${total?`${total} Fragen für das Quiz verfügbar`+(mastCount&&opts.hideMastered?` (${mastCount} bereits gemeisterte ausgeblendet)`:''):allSelCount&&opts.hideMastered&&mastCount===allSelCount?'Alle ausgewählten Fragen sind bereits gemeistert! Deaktiviere „Gemeisterte ausblenden“ oder setze den Lernstand zurück.':'Wähle mindestens ein Kapitel aus.'}</p>`;
 }
-function wipe(k){if(k==='q'){sets=[];sel=new Set();exp=new Set();save();wp=null;home()}else{gloss=[];try{localStorage.setItem('pt:gloss','[]')}catch(e){}wp=null;glosView()}}
+function wipe(k){if(k==='q'){sets=[];sel=new Set();exp=new Set();save(true);wp=null;home()}else{gloss=[];saveGloss(true);wp=null;glosView()}}
 const allSel=l=>l.every(s=>sel.has(s.id));
-function fold(gi){const c=cnames[gi];col.has(c)?col.delete(c):col.add(c);try{localStorage.setItem('pt:col',JSON.stringify([...col]))}catch(e){}home()}
+function fold(gi){const c=cnames[gi];col.has(c)?col.delete(c):col.add(c);saveCol();home()}
 function togC(gi,on){sets.filter(s=>s.course===cnames[gi]).forEach(s=>on?sel.add(s.id):sel.delete(s.id));home()}
 function openS(id){exp.has(id)?exp.delete(id):exp.add(id);pq=null;qedit=null;home()}
-function delQ(id,i){const s=sets.find(x=>x.id===id);if(!s)return;s.qs.splice(i,1);if(!s.qs.length){sets=sets.filter(x=>x.id!==id);sel.delete(id);exp.delete(id)}pq=null;save();home()}
+function delQ(id,i){const s=sets.find(x=>x.id===id);if(!s)return;s.qs.splice(i,1);if(!s.qs.length){sets=sets.filter(x=>x.id!==id);sel.delete(id);exp.delete(id)}pq=null;save(true);home()}
 const exportQ=b=>exportData(b,'fragen'),exportG=b=>exportData(b,'glossar'),exportC=(b,gi)=>exportData(b,'kurs',cnames[gi]);
 function exportData(b,kind,crs){const h0=b.innerHTML;
   const list=kind==='kurs'?sets.filter(s=>s.course===crs):sets;
@@ -322,7 +337,7 @@ function exportData(b,kind,crs){const h0=b.innerHTML;
   setTimeout(()=>{b.innerHTML=h0},2000)}
 function tog(id){sel.has(id)?sel.delete(id):sel.add(id);home()}
 function del(id){pend=pend===id?null:id;rpend=null;home()}
-function del2(id){sets=sets.filter(x=>x.id!==id);sel.delete(id);pend=null;save();home()}
+function del2(id){sets=sets.filter(x=>x.id!==id);sel.delete(id);pend=null;save(true);home()}
 
 const GPROMPT=`Erstelle aus den angehängten Unterlagen ein Glossar der wichtigsten Fachbegriffe als JSON. Jeder Begriff bekommt eine Erklärung in ca. 100 Worten, "alias" listet Schreibvarianten (Plural, Abkürzung). Gib nur einen JSON-Codeblock in genau diesem Format aus:
 
@@ -331,7 +346,25 @@ function parseGloss(txt){let d;try{d=JSON.parse(txt.trim().replace(/^```(?:json)
   const l=(Array.isArray(d)?d:[d]).flatMap(x=>x&&x.glossar?x.glossar:x&&x.begriff?[x]:[]);
   if(!l.length)throw new Error('Kein Glossar gefunden. Erwartet wird {"glossar":[{"begriff":…,"info":…}]}.');
   const bad=l.findIndex(g=>!g.begriff||!g.info);if(bad>=0)throw new Error('Eintrag '+(bad+1)+': „begriff“ und „info“ sind Pflicht.');return l}
-const nav=a=>`<nav class='nav'><button class='${a==='q'?'on':''}' onclick="wp=null;qsearch='';home()">Fragen</button><button class='${a==='g'?'on':''}' onclick='glos()'>Glossar</button></nav>`;
+function syncBadge(){
+  if(!gh.token)return '';
+  if(syncState==='syncing')return `<span class="sdot">…</span>`;
+  if(syncState==='err')return `<span class="sdot bad">!</span>`;
+  if(syncState==='ok'||gh.lastSync)return `<span class="sdot ok">✓</span>`;
+  return '';
+}
+function syncTitle(){
+  if(!gh.token)return 'Cloud-Sync einrichten';
+  if(syncState==='syncing')return 'Cloud-Sync läuft …';
+  if(syncState==='err')return 'Cloud-Sync Fehler: '+syncErr;
+  return 'Cloud-Sync aktiv'+(gh.lastSync?' (zuletzt '+new Date(gh.lastSync).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})+' Uhr)':'');
+}
+function updSyncUI(){
+  const el=document.getElementById('cs');if(el)el.innerHTML=syncBadge();
+  const b=document.querySelector('.cnav');if(b)b.title=syncTitle();
+  if(curView==='c')cloudView();
+}
+const nav=a=>`<nav class='nav'><button class='${a==='q'?'on':''}' onclick="wp=null;qsearch='';home()">Fragen</button><button class='${a==='g'?'on':''}' onclick='glos()'>Glossar</button><button class='cnav ${a==='c'?'on':''}' title="${esc(syncTitle())}" aria-label="Cloud-Sync" onclick='cloudView()'>${IC.cloud}<span id="cs">${syncBadge()}</span></button></nav>`;
 let gpend=null,qsearch='',gq='',gedit=null,gdraft=null,gerr='';
 function glos(){gpend=null;wp=null;gedit=null;gdraft=null;gq='';glosView()}
 function searchHtml(){return `<input id="qs" type="search" class="srch" placeholder="Fragen durchsuchen …" value="${esc(qsearch)}" oninput="qSearch(this.value)"><div id="res">${resHtml()}</div>`}
@@ -345,7 +378,7 @@ function gForm(g){const d=gdraft||{b:g.b,i:g.i,a:g.a.join(', ')};return `<div cl
 function glList(){const t=gq.trim().toLowerCase();const l=[...gloss].sort((a,b)=>a.b.localeCompare(b.b,'de')).filter(g=>!t||(g.b+' '+g.a.join(' ')+' '+g.i).toLowerCase().includes(t));
   if(!l.length)return `<div class="card" style="margin-top:14px"><p class="mut">${gloss.length?'Keine Treffer.':'Noch keine Begriffe. Importiere ein Glossar.'}</p></div>`;
   return `<div class="card" style="margin-top:14px">${l.map(g=>gedit===g.b?gForm(g):gRow(g)).join('')}</div>`}
-function glosView(){$app.className='';
+function glosView(){curView='g';$app.className='';
   $app.innerHTML=`${nav('g')}<h1>Glossar</h1><p class="mut">${gloss.length} Begriffe. Sie erscheinen nach dem Prüfen einer Antwort neben der Frage.</p><div class="row act"><button class="btn sec ico" title="Glossar importieren" aria-label="Glossar importieren" onclick="imp('glossar')">${IC.imp}</button>${gloss.length?`<button class="btn sec ico" title="Glossar exportieren" aria-label="Glossar exportieren" onclick="exportG(this)">${IC.exp}</button><span class="gc" style="gap:8px">${wp==='g'?`<span class="mut">Löschen?</span><button class="btn sm" onclick="wipe('g')">Ja</button><button class="btn sec sm" onclick="wp=null;glosView()">Nein</button>`:`<button class="btn sec ico" title="Gesamtes Glossar löschen" aria-label="Gesamtes Glossar löschen" onclick="wp='g';glosView()">${IC.del}</button>`}</span>`:''}</div>${gloss.length?`<input id="gs" type="search" class="srch" placeholder="Glossar durchsuchen …" value="${esc(gq)}" oninput="gSearch(this.value)">`:''}<div id="gl">${glList()}</div>`}
 function gSearch(v){gq=v;document.getElementById('gl').innerHTML=glList()}
 function saveG(old){const b=document.getElementById('eb').value.trim(),i=document.getElementById('ei').value.trim(),a=document.getElementById('ea').value.split(',').map(x=>x.trim()).filter(Boolean);
@@ -353,10 +386,10 @@ function saveG(old){const b=document.getElementById('eb').value.trim(),i=documen
   if(!b||!i){gerr='Begriff und Erklärung dürfen nicht leer sein.';glosView();return}
   if(gloss.some(g=>g.b!==old&&g.b.toLowerCase()===b.toLowerCase())){gerr='Diesen Begriff gibt es schon.';glosView();return}
   const k=gloss.findIndex(g=>g.b===old);if(k>=0)gloss[k]={b,i,a};gedit=null;gdraft=null;gerr='';
-  try{localStorage.setItem('pt:gloss',JSON.stringify(gloss))}catch(e){}glosView()}
-function delG(b){gloss=gloss.filter(g=>g.b!==b);gpend=null;try{localStorage.setItem('pt:gloss',JSON.stringify(gloss))}catch(e){}glosView()}
+  saveGloss();glosView()}
+function delG(b){gloss=gloss.filter(g=>g.b!==b);gpend=null;saveGloss(true);glosView()}
 let impMode='fragen';
-function imp(m){impMode=m||'fragen';$app.className='';
+function imp(m){curView='i';impMode=m||'fragen';$app.className='';
   const fi=`<label class="btn sec" style="position:relative;overflow:hidden;display:inline-flex;align-items:center;cursor:pointer">Datei wählen<input id="fi" type="file" accept=".json,application/json,text/plain" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer" onclick="this.value=''" onchange="fromFile(this)"></label>`;
   if(impMode==='glossar'){$app.innerHTML=`${nav('g')}<h1>Glossar importieren</h1><p class='mut'>Füge das JSON ein, ziehe eine .json-Datei in das Feld oder wähle sie über „Datei wählen“. Gleiche Begriffe werden überschrieben.</p><textarea id='t' placeholder='JSON hier einfügen oder .json-Datei hierher ziehen …' ondragover="event.preventDefault()" ondrop="dropFile(event)"></textarea><p class='err' id='e'>${esc(msg)}</p><div class='row'><button class='btn' onclick='doImp()'>Importieren</button>${fi}<button class='btn sec' onclick="msg='';glos()">Zurück</button></div><h2>Glossar mit Claude erstellen</h2><p class='mut'>Unterlagen in Claude hochladen und diesen Auftrag einfügen.</p><button class='btn sec' onclick='clip(GPROMPT,this)'>Auftrag kopieren</button><details><summary>Auftrag anzeigen</summary><pre>${esc(GPROMPT)}</pre></details>`;return}
   $app.innerHTML=`${nav('q')}<h1>Fragen importieren</h1>
@@ -440,7 +473,7 @@ function start(pool){
   Q=qs.map(q=>{const ref=q._ref||q;return{...ref,_ref:ref,_newlyMastered:false,opts:(opts.shuffle&&!ref.fixed)?shuf(ref.opts):ref.opts.slice()}});
   idx=0;log=[];picked=new Set();checked=false;quiz();
 }
-function quiz(){
+function quiz(){curView='z';
   const q=Q[idx],src=q._ref||q,multi=q.type==='multi',st=src.streak||0,m=isMastered(src);
   $app.className='wide';$app.innerHTML=`<div class='cols'><div class='qhead'><div class="row" style="justify-content:space-between"><span class="mut">Frage ${idx+1} von ${Q.length}</span><button class="x" onclick="home()">Abbrechen</button></div>
   <div class="bar"><i style="width:${(idx+(checked?1:0))/Q.length*100}%"></i></div>
@@ -467,7 +500,7 @@ function check(){
 }
 function next(){picked=new Set();checked=false;idx++;idx<Q.length?quiz():result()}
 
-function result(){$app.className='';
+function result(){curView='r';$app.className='';
   const ok=log.filter(Boolean).length,pct=Math.round(ok/Q.length*100),wrong=Q.filter((_,i)=>!log[i]),newlyM=Q.filter(q=>q._newlyMastered).length;
   $app.innerHTML=`${nav('q')}<h1>Ergebnis</h1><div class="card"><div class="score">${ok} / ${Q.length}</div><p class="mut">${pct} % richtig${newlyM?` · ${newlyM} ${newlyM===1?'Frage':'Fragen'} neu gemeistert ✓`:''}</p></div>
   <div class="row act" style="margin-top:14px">${wrong.length?`<button class="btn" onclick="start(wrongPool())">Falsche Fragen wiederholen (${wrong.length})</button>`:''}<button class="btn sec" onclick="home()">Zur Übersicht</button></div>
@@ -479,8 +512,192 @@ function side(q){
   if(!checked)return `<div class='card ph'><p class='mut' style='margin:0'>Nach dem Prüfen der Antwort erscheinen hier passende Begriffe aus dem Glossar.</p></div>`;
   const t=terms(q);
   return `<div class='card'><b>Weiterführende Informationen</b>${t.length?t.map(g=>`<p class='term'><b>${esc(g.b)}</b> – ${esc(g.i)}</p>`).join(''):`<p class='mut'>Zu dieser Frage ist noch kein Begriff im Glossar hinterlegt.</p>`}</div>`}
-function addGloss(l){l.forEach(g=>{if(!g||!g.begriff||!g.info)return;const o={b:String(g.begriff),i:String(g.info),a:[].concat(g.alias||[]).map(String)};const i=gloss.findIndex(x=>x.b.toLowerCase()===o.b.toLowerCase());i<0?gloss.push(o):gloss[i]=o});try{localStorage.setItem('pt:gloss',JSON.stringify(gloss))}catch(e){}}
+function addGloss(l,noSave){l.forEach(g=>{if(!g||!g.begriff||!g.info)return;const o={b:String(g.begriff),i:String(g.info),a:[].concat(g.alias||[]).map(String)};const i=gloss.findIndex(x=>x.b.toLowerCase()===o.b.toLowerCase());i<0?gloss.push(o):gloss[i]=o});if(!noSave)saveGloss()}
 function wrongPool(){return Q.filter((_,i)=>!log[i])}
+
+const b64Enc=s=>{let b='';const u=new TextEncoder().encode(s);for(let i=0;i<u.length;i++)b+=String.fromCharCode(u[i]);return btoa(b)};
+const b64Dec=s=>new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\s+/g,'')),c=>c.charCodeAt(0)));
+const SYNC_REPO='quizomat-sync',SYNC_FILE='state.json';
+
+async function ghReq(method,path,body,tok){
+  const r=await fetch('https://api.github.com'+path,{
+    method,cache:'no-store',
+    headers:{Authorization:'Bearer '+(tok||gh.token),Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28',...(body?{'Content-Type':'application/json'}:{})},
+    body:body?JSON.stringify(body):undefined
+  });
+  const txt=await r.text();let j=null;try{j=txt?JSON.parse(txt):null}catch(e){}
+  return{status:r.status,ok:r.ok,data:j};
+}
+
+async function ensureCloudRepo(tok){
+  const u=await ghReq('GET','/user',null,tok);
+  if(!u.ok||!u.data||!u.data.login)throw new Error('Ungültiger GitHub-Token oder fehlende Berechtigung.');
+  const login=u.data.login;
+  const rp=await ghReq('GET',`/repos/${login}/${SYNC_REPO}`,null,tok);
+  if(rp.status===404){
+    const cr=await ghReq('POST','/user/repos',{name:SYNC_REPO,private:true,auto_init:true,description:'Privater Cloud-Speicher für Quizomat 9001'},tok);
+    if(!cr.ok)throw new Error('Privates Sync-Repository konnte nicht angelegt werden (hat der Token die „repo“-Berechtigung?).');
+  }
+  return login;
+}
+
+async function fetchCloudState(){
+  if(!gh.user)gh.user=await ensureCloudRepo(gh.token);
+  const r=await ghReq('GET',`/repos/${gh.user}/${SYNC_REPO}/contents/${SYNC_FILE}`);
+  if(r.status===404)return{sha:'',data:null};
+  if(!r.ok)throw new Error('Fehler beim Laden aus der Cloud ('+r.status+').');
+  let raw=r.data.content||'';
+  if(!raw&&r.data.sha){
+    const bl=await ghReq('GET',`/repos/${gh.user}/${SYNC_REPO}/git/blobs/${r.data.sha}`);
+    if(bl.ok&&bl.data)raw=bl.data.content||'';
+  }
+  const parsed=raw?JSON.parse(b64Dec(raw)):null;
+  return{sha:r.data.sha||'',data:parsed};
+}
+
+function applyCloudState(d){
+  if(!d||typeof d!=='object')return;
+  const prevSel=new Set(sel),hadSets=sets.length>0;
+  if(Array.isArray(d.sets))sets=d.sets;
+  if(Array.isArray(d.gloss))gloss=d.gloss;
+  if(d.courses&&typeof d.courses==='object')courses=d.courses;
+  if(Array.isArray(d.col))col=new Set(d.col);
+  if(d.opts&&typeof d.opts==='object')opts={...opts,...d.opts,n:Math.max(1,+d.opts.n||20),mastery:3};
+  localTs=d.updatedAt||Date.now();
+  try{
+    localStorage.setItem('pt:sets',JSON.stringify(sets));
+    localStorage.setItem('pt:gloss',JSON.stringify(gloss));
+    localStorage.setItem('pt:courses',JSON.stringify(courses));
+    localStorage.setItem('pt:col',JSON.stringify([...col]));
+    localStorage.setItem('pt:opts',JSON.stringify(opts));
+    localStorage.setItem('pt:ts',String(localTs));
+  }catch(e){}
+  sel=new Set();
+  sets.forEach(s=>{if(!hadSets||prevSel.has(s.id))sel.add(s.id)});
+  if(!sel.size)sets.forEach(s=>sel.add(s.id));
+}
+
+async function pushCloudNow(retry){
+  if(!gh.token)return;
+  clearTimeout(syncTimer);
+  syncState='syncing';syncErr='';updSyncUI();
+  try{
+    if(!gh.user)gh.user=await ensureCloudRepo(gh.token);
+    if(!gh.sha&&!retry){
+      const cur=await fetchCloudState();
+      gh.sha=cur.sha;
+    }
+    if(!localTs){localTs=Date.now();try{localStorage.setItem('pt:ts',String(localTs))}catch(e){}}
+    const payload={updatedAt:localTs,sets,gloss,courses,col:[...col],opts};
+    const res=await ghReq('PUT',`/repos/${gh.user}/${SYNC_REPO}/contents/${SYNC_FILE}`,{
+      message:'Sync Quizomat 9001',
+      content:b64Enc(JSON.stringify(payload)),
+      ...(gh.sha?{sha:gh.sha}:{})
+    });
+    if((res.status===409||res.status===422)&&!retry){
+      const cur=await fetchCloudState();
+      gh.sha=cur.sha;
+      if(!forceOverwrite&&cur.data){
+        if(Array.isArray(cur.data.sets))mergeSets(cur.data.sets);
+        if(Array.isArray(cur.data.gloss))addGloss(cur.data.gloss.map(g=>({begriff:g.b,info:g.i,alias:g.a})),true);
+        try{localStorage.setItem('pt:sets',JSON.stringify(sets));localStorage.setItem('pt:gloss',JSON.stringify(gloss))}catch(e){}
+      }
+      return await pushCloudNow(true);
+    }
+    if(!res.ok)throw new Error('Speichern in Cloud fehlgeschlagen ('+res.status+').');
+    gh.sha=(res.data&&res.data.content&&res.data.content.sha)||gh.sha;
+    gh.lastSync=Date.now();forceOverwrite=false;saveGH();
+    syncState='ok';updSyncUI();
+  }catch(e){
+    syncState='err';syncErr=e.message||'Synchronisationsfehler';updSyncUI();
+  }
+}
+
+async function pullCloud(isConnect){
+  if(!gh.token)return;
+  syncState='syncing';syncErr='';updSyncUI();
+  try{
+    const rem=await fetchCloudState();
+    gh.sha=rem.sha;
+    const d=rem.data,remTs=(d&&d.updatedAt)||0;
+    if(isConnect){
+      if(d&&(sets.length||gloss.length)){
+        if(Array.isArray(d.sets))mergeSets(d.sets);
+        if(Array.isArray(d.gloss))addGloss(d.gloss.map(g=>({begriff:g.b,info:g.i,alias:g.a})),true);
+        localTs=Date.now();
+        try{localStorage.setItem('pt:sets',JSON.stringify(sets));localStorage.setItem('pt:gloss',JSON.stringify(gloss));localStorage.setItem('pt:ts',String(localTs))}catch(e){}
+        await pushCloudNow(true);
+      }else if(d){
+        applyCloudState(d);
+        gh.lastSync=Date.now();saveGH();syncState='ok';
+      }else{
+        await pushCloudNow(true);
+      }
+    }else if(d&&remTs>localTs){
+      applyCloudState(d);
+      gh.lastSync=Date.now();saveGH();syncState='ok';
+    }else if(localTs>remTs&&(sets.length||gloss.length||forceOverwrite)){
+      await pushCloudNow(true);
+      return;
+    }else{
+      gh.lastSync=Date.now();saveGH();syncState='ok';
+    }
+    updSyncUI();
+    if(curView==='q'&&cedit===null&&sedit===null&&qedit===null&&!qsearch)home();
+    else if(curView==='g'&&gedit===null&&!gq)glosView();
+  }catch(e){
+    syncState='err';syncErr=e.message||'Synchronisationsfehler';updSyncUI();
+  }
+}
+
+function cloudView(){
+  curView='c';$app.className='';
+  const last=gh.lastSync?new Date(gh.lastSync).toLocaleString('de-DE',{dateStyle:'short',timeStyle:'short'})+' Uhr':'Noch nicht synchronisiert';
+  $app.innerHTML=`${nav('c')}<h1>Cloud-Sync</h1>
+  <p class="mut">Synchronisiert deine Fragen, deinen Lernstand und dein Glossar automatisch über ein privates GitHub-Repository (<b>${SYNC_REPO}</b>) zwischen Mac und iPhone.</p>
+  ${gh.token?`<div class="card" style="margin-top:14px">
+    <p><b>Status:</b> ${syncState==='syncing'?'Synchronisiere …':syncState==='err'?`<span style="color:var(--bad)">Fehler (${esc(syncErr)})</span>`:`<span style="color:var(--ok)">✓ Verbunden${gh.user?` als @${esc(gh.user)}`:''}</span>`}</p>
+    <p class="mut">Privates Repository: <code>${esc(gh.user||'…')}/${SYNC_REPO}</code><br>Letzter Abgleich: ${esc(last)}</p>
+    <div class="row" style="margin-top:12px">
+      <button class="btn" ${syncState==='syncing'?'disabled':''} onclick="pullCloud(false)">Jetzt synchronisieren</button>
+      <button class="btn sec" onclick="disconnectCloud()">Verbindung trennen</button>
+    </div>
+  </div>`:`<div class="card ge" style="margin-top:14px">
+    <label for="ght"><b>GitHub Personal Access Token</b></label>
+    <p class="mut" style="margin:2px 0 8px">Gib deinen GitHub-Token (<code>ghp_…</code> mit <code>repo</code>-Berechtigung) ein. Der Token wird ausschließlich lokal auf diesem Gerät gespeichert.</p>
+    <input id="ght" type="password" placeholder="ghp_…" autocomplete="off">
+    <p class="err">${esc(syncErr)}</p>
+    <div class="row" style="margin-top:8px">
+      <button class="btn" ${syncState==='syncing'?'disabled':''} onclick="connectCloud()">${syncState==='syncing'?'Verbinde …':'Verbinden & Synchronisieren'}</button>
+    </div>
+  </div>`}`;
+}
+
+async function connectCloud(){
+  const el=document.getElementById('ght'),tok=(el?el.value:'').trim();
+  if(!tok){syncErr='Bitte gib einen GitHub-Token ein.';cloudView();return}
+  syncState='syncing';syncErr='';cloudView();
+  try{
+    const user=await ensureCloudRepo(tok);
+    gh={token:tok,user,sha:'',lastSync:0};
+    saveGH();
+    await pullCloud(true);
+  }catch(e){
+    gh={token:'',user:'',sha:'',lastSync:0};saveGH();
+    syncState='err';syncErr=e.message||'Verbindung fehlgeschlagen.';cloudView();
+  }
+}
+
+function disconnectCloud(){
+  clearTimeout(syncTimer);
+  gh={token:'',user:'',sha:'',lastSync:0};syncState='idle';syncErr='';
+  try{localStorage.removeItem('pt:gh')}catch(e){}
+  cloudView();
+}
+
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible'&&gh.token&&syncState!=='syncing')pullCloud(false);
+});
 
 document.addEventListener('keydown',ev=>{
   if(!$app.classList.contains('wide')||!Q.length)return;
@@ -497,7 +714,7 @@ document.addEventListener('keydown',ev=>{
   }
 });
 
-load();sets.forEach(s=>sel.add(s.id));home();
+load();sets.forEach(s=>sel.add(s.id));home();if(gh.token)pullCloud(false);
 </script>
 </body>
 </html>

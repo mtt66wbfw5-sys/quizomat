@@ -24,7 +24,10 @@ Interaktiver Prüfungs- und Vorlesungstrainer zum Üben, Auswerten und Verwalten
 - **Import & Export (inkl. Duplikatschutz & Lernstand):**
   - Fragen und Glossare können per JSON-Text, Dateiauswahl oder Drag & Drop importiert werden.
   - Bereits vorhandene Kurse, Kapitel und Fragen werden beim Import automatisch zusammengeführt (keine doppelten Fragen), wobei der höhere Lernstand erhalten bleibt.
-  - Export aller Fragen, einzelner Kurse oder des Glossars als `.json`-Datei (inkl. aktuellem Lernstand `streak` / `wrong` zur Synchronisation zwischen Mac und iPhone).
+  - Export aller Fragen, einzelner Kurse oder des Glossars als `.json`-Datei (inkl. aktuellem Lernstand `streak` / `wrong`).
+- **Automatischer Cloud-Sync (GitHub):**
+  - Über das Wolken-Symbol in der oberen Navigationsleiste kann ein GitHub Personal Access Token (`repo`-Berechtigung) hinterlegt werden.
+  - Quizomat legt automatisch ein privates Repository (`quizomat-sync`) an und synchronisiert Fragen, Lernstand und Glossar im Hintergrund zwischen Mac und iPhone.
 - **Optimiert für Mac & iPhone:**
   - **Mac / Desktop:** Zweispaltiges Quiz-Layout und vollständige Tastatursteuerung (`1`–`9` zur Antwortauswahl, `Enter` / `Leertaste` zum Prüfen & Weiterblättern, `Esc` zum Abbrechen).
   - **iPhone / Mobil:** Einhand-optimierte Sticky-Buttons am unteren Bildschirmrand, Safe-Area-Unterstützung und als Vollbild-Web-App über *„Teilen → Zum Home-Bildschirm“* installierbar.
