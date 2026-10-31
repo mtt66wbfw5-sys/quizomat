@@ -13,7 +13,7 @@
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#3a4553;--bg:#12161c;--fg:#e7ebf0;--mut:#98a3b1;--card:#1a2029;--bd:#2a323d;--ac:#8aa8e8;--acfg:#0f141a;--hi:#8aa8e8;--ok:#6cc58a;--okbg:#17301f;--bad:#f08a8a;--badbg:#351c1c;color-scheme:dark}}
 :root[data-theme="dark"]{--ink:#3a4553;--bg:#12161c;--fg:#e7ebf0;--mut:#98a3b1;--card:#1a2029;--bd:#2a323d;--ac:#8aa8e8;--acfg:#0f141a;--hi:#8aa8e8;--ok:#6cc58a;--okbg:#17301f;--bad:#f08a8a;--badbg:#351c1c;color-scheme:dark}
 html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%;text-size-adjust:100%}
-html,body{max-width:100%;overflow-x:hidden}
+html,body{max-width:100%;overflow-x:clip}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.55 "Atkinson Hyperlegible",system-ui,sans-serif;overflow-wrap:anywhere}
 #app{width:100%;max-width:720px;margin:0 auto;padding:20px 16px 60px}
@@ -69,13 +69,13 @@ input[type=number]{width:4.5em;background:var(--card);border:1px solid var(--ink
 .err{color:var(--bad);font-weight:700;white-space:pre-wrap}
 details{margin:8px 0}summary{cursor:pointer;font-weight:700}
 pre{white-space:pre-wrap;font-size:.85rem;background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:10px}
-@media (max-width:560px){body{font-size:16px}#app{padding:14px 12px 24px}h1{font-size:1.5rem}.x{min-width:40px;min-height:40px}.ico{width:42px;height:42px}.nav button{flex:1;text-align:center}.nav .cnav{flex:0 0 auto}.dstart{display:none}.mstart,.qfoot{display:block;position:sticky;bottom:0;background:var(--bg);padding:10px 0 calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--bd);margin-top:12px;z-index:4}.mstart .btn,.qfoot .btn{width:100%}}
-@media (max-width:430px){#app{padding-left:max(14px,env(safe-area-inset-left));padding-right:max(14px,env(safe-area-inset-right))}.q{font-size:1.1rem}.opt{padding:12px;gap:10px}.set{gap:6px}.ql{margin-left:10px}.crs{gap:6px}.chb{font-size:1.05rem}}
 .nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;gap:4px;background:var(--bg);border-bottom:1px solid var(--bd);margin:-6px 0 16px}
 .nav button{background:none;border:0;border-bottom:3px solid transparent;padding:12px 14px;font:inherit;font-weight:700;color:var(--mut);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px}
 .nav button.on{color:var(--fg);border-bottom-color:var(--ac)}
 .nav .cnav{margin-left:auto;font-size:.88rem}
 .sdot{font-size:.8rem;font-weight:700}.sdot.ok{color:var(--ok)}.sdot.bad{color:var(--bad)}
+@media (max-width:560px){body{font-size:16px}#app{padding:14px 12px calc(134px + env(safe-area-inset-bottom,0px))}h1{font-size:1.5rem}.x{min-width:40px;min-height:40px}.ico{width:42px;height:42px}.nav{position:fixed;top:auto;bottom:0;left:0;right:0;height:calc(52px + env(safe-area-inset-bottom,0px));padding:0 8px env(safe-area-inset-bottom,0px);margin:0;background:var(--card);border-bottom:0;border-top:1px solid var(--bd);z-index:6}.nav button{flex:1;text-align:center;border-bottom:0;border-top:3px solid transparent;padding:10px 6px}.nav button.on{border-bottom-color:transparent;border-top-color:var(--ac)}.nav .cnav{margin-left:0;font-size:inherit}.dstart{display:none}.mstart{display:block;position:fixed;left:0;right:0;bottom:calc(52px + env(safe-area-inset-bottom,0px));background:var(--bg);padding:8px 14px;border-top:1px solid var(--bd);margin:0;z-index:5}.qfoot{display:block;position:fixed;left:0;right:0;bottom:0;background:var(--bg);padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--bd);margin:0;z-index:5}.mstart .btn,.qfoot .btn{width:100%}}
+@media (max-width:430px){#app{padding-left:max(14px,env(safe-area-inset-left));padding-right:max(14px,env(safe-area-inset-right))}.q{font-size:1.1rem}.opt{padding:12px;gap:10px}.set{gap:6px}.ql{margin-left:10px}.crs{gap:6px}.chb{font-size:1.05rem}}
 .gi{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;padding:10px 0;border-top:1px solid var(--bd)}.gi:first-child{border-top:0}.gi>div{min-width:0}.gc{display:flex;gap:4px;align-items:center;flex:none;margin-left:auto}
 .searching .crs,.searching .grp,.searching .mstart{display:none}
 .srch{width:100%;margin:8px 0 10px;padding:10px 12px;background:var(--card);border:1px solid var(--ink);border-radius:8px;font:inherit;color:inherit}
@@ -364,7 +364,7 @@ function updSyncUI(){
   const b=document.querySelector('.cnav');if(b)b.title=syncTitle();
   if(curView==='c')cloudView();
 }
-const nav=a=>`<nav class='nav'><button class='${a==='q'?'on':''}' onclick="wp=null;qsearch='';home()">Fragen</button><button class='${a==='g'?'on':''}' onclick='glos()'>Glossar</button><button class='cnav ${a==='c'?'on':''}' title="${esc(syncTitle())}" aria-label="Cloud-Sync" onclick='cloudView()'>${IC.cloud}<span id="cs">${syncBadge()}</span></button></nav>`;
+const nav=a=>`<nav class='nav'><button class='${a==='q'?'on':''}' onclick="wp=null;qsearch='';home()">Fragen</button><button class='${a==='g'?'on':''}' onclick='glos()'>Glossar</button><button class='cnav ${a==='c'?'on':''}' title="${esc(syncTitle())}" aria-label="Cloud-Sync" onclick='cloudView()'>${IC.cloud}<span>Cloud</span><span id="cs">${syncBadge()}</span></button></nav>`;
 let gpend=null,qsearch='',gq='',gedit=null,gdraft=null,gerr='';
 function glos(){gpend=null;wp=null;gedit=null;gdraft=null;gq='';glosView()}
 function searchHtml(){return `<input id="qs" type="search" class="srch" placeholder="Fragen durchsuchen …" value="${esc(qsearch)}" oninput="qSearch(this.value)"><div id="res">${resHtml()}</div>`}
