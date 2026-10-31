@@ -9,11 +9,11 @@
 <title>Quizomat 9001</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap">
 <style>
-:root{--ink:#c5ccd6;--bg:#f5f6f8;--fg:#1c2430;--mut:#5b6675;--card:#fff;--bd:#dde1e7;--ac:#2f4b8f;--acfg:#fff;--hi:#2f4b8f;--ok:#1f7a45;--okbg:#e6f3ea;--bad:#b23a3a;--badbg:#f8e9e9;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#3a4553;--bg:#12161c;--fg:#e7ebf0;--mut:#98a3b1;--card:#1a2029;--bd:#2a323d;--ac:#8aa8e8;--acfg:#0f141a;--hi:#8aa8e8;--ok:#6cc58a;--okbg:#17301f;--bad:#f08a8a;--badbg:#351c1c;color-scheme:dark}}
-:root[data-theme="dark"]{--ink:#3a4553;--bg:#12161c;--fg:#e7ebf0;--mut:#98a3b1;--card:#1a2029;--bd:#2a323d;--ac:#8aa8e8;--acfg:#0f141a;--hi:#8aa8e8;--ok:#6cc58a;--okbg:#17301f;--bad:#f08a8a;--badbg:#351c1c;color-scheme:dark}
+:root{--ink:#c5ccd6;--bg:#f5f6f8;--fg:#1c2430;--mut:#5b6675;--card:#fff;--bd:#dde1e7;--ac:#2f4b8f;--acfg:#fff;--hi:#2f4b8f;--ok:#1f7a45;--okbg:#e6f3ea;--bad:#b23a3a;--badbg:#f8e9e9;--warn:#9a5b00;--warnbg:#fff3db;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#3a4553;--bg:#12161c;--fg:#e7ebf0;--mut:#98a3b1;--card:#1a2029;--bd:#2a323d;--ac:#8aa8e8;--acfg:#0f141a;--hi:#8aa8e8;--ok:#6cc58a;--okbg:#17301f;--bad:#f08a8a;--badbg:#351c1c;--warn:#f2b84b;--warnbg:#352912;color-scheme:dark}}
+:root[data-theme="dark"]{--ink:#3a4553;--bg:#12161c;--fg:#e7ebf0;--mut:#98a3b1;--card:#1a2029;--bd:#2a323d;--ac:#8aa8e8;--acfg:#0f141a;--hi:#8aa8e8;--ok:#6cc58a;--okbg:#17301f;--bad:#f08a8a;--badbg:#351c1c;--warn:#f2b84b;--warnbg:#352912;color-scheme:dark}
 html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%;text-size-adjust:100%}
-html,body{max-width:100%;overflow-x:hidden}
+html,body{max-width:100%;overflow-x:clip}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.55 "Atkinson Hyperlegible",system-ui,sans-serif;overflow-wrap:anywhere}
 #app{width:100%;max-width:720px;margin:0 auto;padding:20px 16px 60px}
@@ -65,27 +65,30 @@ textarea{width:100%;min-height:200px;background:var(--card);border:1px solid var
 input[type=number]{width:4.5em;background:var(--card);border:1px solid var(--ink);border-radius:6px;padding:4px 8px}
 .sm{padding:.4em .85em;font-size:.88rem}
 .ico{display:inline-grid;place-items:center;width:40px;height:40px;padding:0}
-.ico svg,.x svg,.cnav svg{width:18px;height:18px;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;fill:none;display:block}
+.ico svg,.x svg,.cnav svg,.badge svg{width:18px;height:18px;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;fill:none;display:block}
+.badge svg{width:14px;height:14px}
 .err{color:var(--bad);font-weight:700;white-space:pre-wrap}
 details{margin:8px 0}summary{cursor:pointer;font-weight:700}
 pre{white-space:pre-wrap;font-size:.85rem;background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:10px}
-@media (max-width:560px){body{font-size:16px}#app{padding:14px 12px 24px}h1{font-size:1.5rem}.x{min-width:40px;min-height:40px}.ico{width:42px;height:42px}.nav button{flex:1;text-align:center}.nav .cnav{flex:0 0 auto}.dstart{display:none}.mstart,.qfoot{display:block;position:sticky;bottom:0;background:var(--bg);padding:10px 0 calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--bd);margin-top:12px;z-index:4}.mstart .btn,.qfoot .btn{width:100%}}
-@media (max-width:430px){#app{padding-left:max(14px,env(safe-area-inset-left));padding-right:max(14px,env(safe-area-inset-right))}.q{font-size:1.1rem}.opt{padding:12px;gap:10px}.set{gap:6px}.ql{margin-left:10px}.crs{gap:6px}.chb{font-size:1.05rem}}
 .nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;gap:4px;background:var(--bg);border-bottom:1px solid var(--bd);margin:-6px 0 16px}
 .nav button{background:none;border:0;border-bottom:3px solid transparent;padding:12px 14px;font:inherit;font-weight:700;color:var(--mut);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px}
 .nav button.on{color:var(--fg);border-bottom-color:var(--ac)}
 .nav .cnav{margin-left:auto;font-size:.88rem}
 .sdot{font-size:.8rem;font-weight:700}.sdot.ok{color:var(--ok)}.sdot.bad{color:var(--bad)}
+@media (max-width:560px){body{font-size:16px}#app{padding:14px 12px calc(134px + env(safe-area-inset-bottom,0px))}h1{font-size:1.5rem}.x{min-width:40px;min-height:40px}.ico{width:42px;height:42px}.nav{position:fixed;top:auto;bottom:0;left:0;right:0;height:calc(52px + env(safe-area-inset-bottom,0px));padding:0 8px env(safe-area-inset-bottom,0px);margin:0;background:var(--card);border-bottom:0;border-top:1px solid var(--bd);z-index:6}.nav button{flex:1;text-align:center;border-bottom:0;border-top:3px solid transparent;padding:10px 6px}.nav button.on{border-bottom-color:transparent;border-top-color:var(--ac)}.nav .cnav{margin-left:0;font-size:inherit}.dstart{display:none}.mstart{display:block;position:fixed;left:0;right:0;bottom:calc(52px + env(safe-area-inset-bottom,0px));background:var(--bg);padding:8px 14px;border-top:1px solid var(--bd);margin:0;z-index:5}.qfoot{display:block;position:fixed;left:0;right:0;bottom:0;background:var(--bg);padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--bd);margin:0;z-index:5}.mstart .btn,.qfoot .btn{width:100%}}
+@media (max-width:430px){#app{padding-left:max(14px,env(safe-area-inset-left));padding-right:max(14px,env(safe-area-inset-right))}.q{font-size:1.1rem}.opt{padding:12px;gap:10px}.set{gap:6px}.ql{margin-left:10px}.crs{gap:6px}.chb{font-size:1.05rem}}
 .gi{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;padding:10px 0;border-top:1px solid var(--bd)}.gi:first-child{border-top:0}.gi>div{min-width:0}.gc{display:flex;gap:4px;align-items:center;flex:none;margin-left:auto}
-.searching .crs,.searching .grp,.searching .mstart{display:none}
+.searching .crs,.searching .grp,.searching .mstart,.searching .fbox{display:none}
 .srch{width:100%;margin:8px 0 10px;padding:10px 12px;background:var(--card);border:1px solid var(--ink);border-radius:8px;font:inherit;color:inherit}
 .lnk{background:none;border:0;font:inherit;color:inherit;text-align:left;padding:0;cursor:pointer;width:100%}
 .ge{flex-basis:100%;width:100%}
 .ge input:not([type=checkbox]):not([type=radio]),.ge textarea,.ge select{width:100%;margin:2px 0 8px;padding:8px 10px;background:var(--card);border:1px solid var(--ink);border-radius:8px;font:inherit;color:inherit}
 .ge label{display:block}
-.badge{display:inline-flex;align-items:center;gap:4px;font-size:.8rem;font-weight:700;min-height:30px;padding:3px 10px;border-radius:99px;border:1px solid var(--bd);background:var(--bg);color:var(--mut);cursor:pointer;white-space:nowrap}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:.8rem;font-weight:700;min-height:30px;padding:3px 10px;border-radius:99px;border:1px solid var(--bd);background:var(--bg);color:var(--mut);cursor:pointer;white-space:nowrap}
 .badge.ok{border-color:var(--ok);background:var(--okbg);color:var(--ok)}
 .badge.bad{border-color:var(--bad);background:var(--badbg);color:var(--bad)}
+.badge.warn{border-color:var(--warn);background:var(--warnbg);color:var(--warn)}
+.x.warn{color:var(--warn)}.x.warn svg,.badge.warn svg{fill:currentColor}
 .orow{display:grid;grid-template-columns:auto 1fr 1fr auto;gap:8px;align-items:center;margin-bottom:6px}
 .orow input:not([type=checkbox]):not([type=radio]){margin:0}
 .orow input[type=checkbox],.orow input[type=radio]{width:20px;height:20px;accent-color:var(--ac)}
@@ -107,7 +110,8 @@ const IC={
   del:`<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>`,
   edit:`<svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`,
   x:`<svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
-  cloud:`<svg viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>`
+  cloud:`<svg viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>`,
+  flag:`<svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>`
 };
 const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 function load(){
@@ -163,16 +167,16 @@ function parseSets(txt){
     const qs=s.fragen.map((f,i)=>{
       const w='Frage '+(i+1)+': ';
       if(!f.frage)throw new Error(w+'„frage“ fehlt.');
-      const st=Math.max(0,parseInt(f.streak,10)||0),wr=!!f.wrong;
+      const st=Math.max(0,parseInt(f.streak,10)||0),wr=!!f.wrong,fl=!!(f.flagged||f.markiert);
       if(f.typ==='tf'){
         const t=f.richtig===true||(Array.isArray(f.richtig)&&f.richtig[0]===0);
-        return{q:f.frage,type:'single',exp:f.erklaerung||'',opts:[{t:'Wahr',ok:t,why:''},{t:'Falsch',ok:!t,why:''}],fixed:true,streak:st,wrong:wr};
+        return{q:f.frage,type:'single',exp:f.erklaerung||'',opts:[{t:'Wahr',ok:t,why:''},{t:'Falsch',ok:!t,why:''}],fixed:true,streak:st,wrong:wr,flagged:fl};
       }
       if(!Array.isArray(f.optionen)||f.optionen.length<2)throw new Error(w+'mindestens 2 „optionen“ nötig.');
       const raw=[].concat(f.richtig??[]);
       const r=raw.map(x=>typeof x==='number'||(typeof x==='string'&&x.trim()!=='')?Number(x):NaN);
       if(!r.length||r.some(x=>!(x>=0&&x<f.optionen.length)))throw new Error(w+'„richtig“ verweist auf eine nicht vorhandene Option.');
-      return{q:f.frage,type:(f.typ==='multi'||r.length>1)?'multi':'single',exp:f.erklaerung||'',streak:st,wrong:wr,
+      return{q:f.frage,type:(f.typ==='multi'||r.length>1)?'multi':'single',exp:f.erklaerung||'',streak:st,wrong:wr,flagged:fl,
         opts:f.optionen.map((t,k)=>({t:String(t),ok:r.includes(k),why:(f.begruendungen&&f.begruendungen[k])||''}))};
     });
     out.push({id:Date.now().toString(36)+'-'+si,course:s.kurs||'Ohne Kurs',title:s.titel||'Ohne Titel',qs});
@@ -192,6 +196,26 @@ function togMastery(sid,qi){
   const q=s.qs[qi];
   if(isMastered(q)){q.streak=0;q.wrong=false}else{q.streak=opts.mastery;q.wrong=false}
   save();home();
+}
+
+function togFlag(sid,qi,stay){
+  const s=sets.find(x=>x.id===sid);if(!s||!s.qs[qi])return;
+  s.qs[qi].flagged=!s.qs[qi].flagged;
+  save(true);if(!stay)curView==='r'?result():home();
+}
+function togQuizFlag(){
+  const q=Q[idx],src=q&&(q._ref||q);if(!src)return;
+  src.flagged=!src.flagged;q.flagged=src.flagged;
+  save(true);quiz();
+}
+function flaggedAll(){
+  const out=[];
+  sets.forEach(s=>s.qs.forEach((q,qi)=>{if(q.flagged)out.push([s,q,qi])}));
+  return out;
+}
+function flaggedHtml(){
+  const fl=flaggedAll();if(!fl.length)return '';
+  return `<div class="card fbox" style="margin:12px 0;border-color:var(--warn)"><div class="row" style="justify-content:space-between;margin-bottom:4px"><b style="color:var(--warn);display:inline-flex;align-items:center;gap:6px">${IC.flag} Zum Bearbeiten markiert (${fl.length})</b></div>${fl.map(([s,q,qi])=>`<div class="qi"><button class="lnk" onclick="goQEdit('${s.id}',${qi})"><span class="mut">${esc(s.course)} › ${esc(s.title)}</span><br>${esc(q.q)}</button><span class="gc"><button class="btn sec sm" onclick="goQEdit('${s.id}',${qi})">Bearbeiten</button><button class="x warn" title="Markierung aufheben" aria-label="Markierung aufheben" onclick="togFlag('${s.id}',${qi})">${IC.flag}</button></span></div>`).join('')}</div>`;
 }
 
 function resetProg(sid){
@@ -276,7 +300,7 @@ function saveQEdit(sid,qi){
   const orig=s.qs[qi],qTxt=qdraft.q.trim(),expTxt=qdraft.exp.trim();
   if(!qTxt){qerr='Der Fragetext darf nicht leer sein.';home();return}
   if(qdraft.type==='tf'){
-    s.qs[qi]={q:qTxt,type:'single',fixed:true,exp:expTxt,streak:orig.streak||0,wrong:!!orig.wrong,
+    s.qs[qi]={q:qTxt,type:'single',fixed:true,exp:expTxt,streak:orig.streak||0,wrong:!!orig.wrong,flagged:false,
       opts:[{t:'Wahr',ok:!!qdraft.tfOk,why:''},{t:'Falsch',ok:!qdraft.tfOk,why:''}]};
   }else{
     if(qdraft.opts.length<2){qerr='Mindestens 2 Antwortoptionen sind nötig.';home();return}
@@ -284,10 +308,10 @@ function saveQEdit(sid,qi){
     const okCnt=qdraft.opts.filter(o=>o.ok).length;
     if(!okCnt){qerr='Bitte mindestens eine richtige Antwort markieren.';home();return}
     if(qdraft.type==='single'&&okCnt>1){qerr='Bei Single Choice darf nur genau eine Antwort richtig sein.';home();return}
-    s.qs[qi]={q:qTxt,type:qdraft.type,exp:expTxt,streak:orig.streak||0,wrong:!!orig.wrong,
+    s.qs[qi]={q:qTxt,type:qdraft.type,exp:expTxt,streak:orig.streak||0,wrong:!!orig.wrong,flagged:false,
       opts:qdraft.opts.map(o=>({t:o.t.trim(),ok:!!o.ok,why:o.why.trim()}))};
   }
-  qedit=null;qdraft=null;qerr='';save();home();
+  qedit=null;qdraft=null;qerr='';save(true);home();
 }
 
 function qForm(sid,qi){
@@ -300,12 +324,12 @@ function home(){curView='q';$app.className=qsearch.trim()?'searching':'';
   const total=[...sel].reduce((a,id)=>{const s=sets.find(x=>x.id===id);return a+(s?pool1(s).length:0)},0),qCnt=Math.min(opts.n,total);
   const dl=`<datalist id="cl">${cnames.map(c=>`<option value="${esc(c)}">`).join('')}</datalist>`;
   $app.innerHTML=`${nav('q')}<div class="row" style="justify-content:space-between;align-items:center"><h1>Quizomat 9001</h1>${sets.length?`<button class="btn dstart" ${total?'':'disabled'} onclick="start()">Quiz starten</button>`:''}</div><p class="mut">Fragen aus deinen Vorlesungsunterlagen üben und auswerten.</p>
-  ${topBar()}${sets.length?optsHtml(total)+searchHtml():''}${dl}
+  ${topBar()}${sets.length?optsHtml(total)+searchHtml()+flaggedHtml():''}${dl}
   ${sets.length?Object.entries(groups).map(([c,l],gi)=>{
     const mC=l.reduce((a,s)=>a+masteredInSet(s),0),allC=l.reduce((a,s)=>a+s.qs.length,0);
     return `<div class="crs"><input type="checkbox" aria-label="Alle Kapitel auswählen" ${allSel(l)?'checked':''} onchange="togC(${gi},this.checked)"><button class="chb" aria-expanded="${!col.has(c)}" onclick="fold(${gi})"><span>${col.has(c)?'▸':'▾'}</span><span>${esc(c)}</span><span class="mut">${l.length} Kapitel · ${allC} Fragen${mC?` · ${mC} ✓ gemeistert`:''}</span></button><span class="gc"><button class="x" title="Kurs exportieren" aria-label="Kurs exportieren" onclick="exportC(this,${gi})">${IC.exp}</button><button class="x" title="Kurs bearbeiten" aria-label="Kurs bearbeiten" onclick="startCEdit(${gi})">${IC.edit}</button></span></div>${cedit===gi?`<div class="card ge" style="margin-bottom:10px"><label class="mut" for="ecn">Kursname bearbeiten</label><input id="ecn" value="${esc(cdraft)}"><p class="err">${esc(cerr)}</p><div class="row act"><button class="btn sec sm" onclick="cancelCEdit()">Abbrechen</button><button class="btn sm" onclick="saveCEdit(${gi})">Speichern</button></div></div>`:''}${col.has(c)?'':`<div class="card grp">${l.map(s=>{
       const mS=masteredInSet(s),hasP=s.qs.some(q=>(q.streak||0)>0||q.wrong);
-      return `<div class="set"><input type="checkbox" aria-label="${esc(s.title)} auswählen" ${sel.has(s.id)?'checked':''} onchange="tog('${s.id}')"><button class="sb" aria-expanded="${exp.has(s.id)}" onclick="openS('${s.id}')"><span>${exp.has(s.id)?'▾':'▸'}</span><span>${esc(s.title)}<span class="mut"> – ${s.qs.length} Fragen${mS?` (${mS} ✓ gemeistert)`:''}</span></span></button><span class="gc">${rpend===s.id?`<span class="mut">Zurücksetzen?</span><button class="btn sm" onclick="resetProg('${s.id}')">Ja</button><button class="btn sec sm" onclick="rpend=null;home()">Nein</button>`:hasP?`<button class="x" title="Lernstand dieses Kapitels zurücksetzen" aria-label="Lernstand zurücksetzen" onclick="rpend='${s.id}';pend=null;home()">${IC.res}</button>`:''}<button class="x" title="Kapitel bearbeiten" aria-label="Kapitel bearbeiten" onclick="startSEdit('${s.id}')">${IC.edit}</button>${pend===s.id?`<span class="mut">Löschen?</span><button class="btn sm" onclick="del2('${s.id}')">Ja</button><button class="btn sec sm" onclick="del('${s.id}')">Nein</button>`:`<button class="x" title="Set löschen" aria-label="Set löschen" onclick="del('${s.id}')">${IC.x}</button>`}</span>${sedit===s.id?`<div class="ge" style="margin-top:6px"><label class="mut" for="esc_c">Kurs</label><input id="esc_c" list="cl" value="${esc(sdraft.course)}"><label class="mut" for="esc_t">Thema / Kapitel</label><input id="esc_t" value="${esc(sdraft.title)}"><p class="err">${esc(serr)}</p><div class="row act"><button class="btn sec sm" onclick="cancelSEdit()">Abbrechen</button><button class="btn sm" onclick="saveSEdit('${s.id}')">Speichern</button></div></div>`:''}${exp.has(s.id)?`<div class="ql">${s.qs.map((q,i)=>qedit===s.id+':'+i?qForm(s.id,i):`<div class="qi"><span>${esc(q.q)}</span><span class="gc">${qBadge(s.id,i,q)}<button class="x" title="Frage bearbeiten" aria-label="Frage bearbeiten" onclick="startQEdit('${s.id}',${i})">${IC.edit}</button>${pq===s.id+':'+i?`<button class="btn sm" onclick="delQ('${s.id}',${i})">Löschen</button><button class="btn sec sm" onclick="pq=null;home()">Nein</button>`:`<button class="x" title="Frage löschen" aria-label="Frage löschen" onclick="pq='${s.id}:${i}';home()">${IC.x}</button>`}</span></div>`).join('')}</div>`:''}</div>`}).join('')}</div>`}`}).join('')+`<div class="mstart"><button class="btn" ${total?'':'disabled'} onclick="start()">Quiz starten${qCnt?` (${qCnt} ${qCnt===1?'Frage':'Fragen'})`:''}</button></div>`
+      return `<div class="set"><input type="checkbox" aria-label="${esc(s.title)} auswählen" ${sel.has(s.id)?'checked':''} onchange="tog('${s.id}')"><button class="sb" aria-expanded="${exp.has(s.id)}" onclick="openS('${s.id}')"><span>${exp.has(s.id)?'▾':'▸'}</span><span>${esc(s.title)}<span class="mut"> – ${s.qs.length} Fragen${mS?` (${mS} ✓ gemeistert)`:''}</span></span></button><span class="gc">${rpend===s.id?`<span class="mut">Zurücksetzen?</span><button class="btn sm" onclick="resetProg('${s.id}')">Ja</button><button class="btn sec sm" onclick="rpend=null;home()">Nein</button>`:hasP?`<button class="x" title="Lernstand dieses Kapitels zurücksetzen" aria-label="Lernstand zurücksetzen" onclick="rpend='${s.id}';pend=null;home()">${IC.res}</button>`:''}<button class="x" title="Kapitel bearbeiten" aria-label="Kapitel bearbeiten" onclick="startSEdit('${s.id}')">${IC.edit}</button>${pend===s.id?`<span class="mut">Löschen?</span><button class="btn sm" onclick="del2('${s.id}')">Ja</button><button class="btn sec sm" onclick="del('${s.id}')">Nein</button>`:`<button class="x" title="Set löschen" aria-label="Set löschen" onclick="del('${s.id}')">${IC.x}</button>`}</span>${sedit===s.id?`<div class="ge" style="margin-top:6px"><label class="mut" for="esc_c">Kurs</label><input id="esc_c" list="cl" value="${esc(sdraft.course)}"><label class="mut" for="esc_t">Thema / Kapitel</label><input id="esc_t" value="${esc(sdraft.title)}"><p class="err">${esc(serr)}</p><div class="row act"><button class="btn sec sm" onclick="cancelSEdit()">Abbrechen</button><button class="btn sm" onclick="saveSEdit('${s.id}')">Speichern</button></div></div>`:''}${exp.has(s.id)?`<div class="ql">${s.qs.map((q,i)=>qedit===s.id+':'+i?qForm(s.id,i):`<div class="qi"><span>${esc(q.q)}</span><span class="gc">${qBadge(s.id,i,q)}<button class="x${q.flagged?' warn':''}" title="${q.flagged?'Markierung aufheben':'Zum Bearbeiten markieren'}" aria-label="Markieren" onclick="togFlag('${s.id}',${i})">${IC.flag}</button><button class="x" title="Frage bearbeiten" aria-label="Frage bearbeiten" onclick="startQEdit('${s.id}',${i})">${IC.edit}</button>${pq===s.id+':'+i?`<button class="btn sm" onclick="delQ('${s.id}',${i})">Löschen</button><button class="btn sec sm" onclick="pq=null;home()">Nein</button>`:`<button class="x" title="Frage löschen" aria-label="Frage löschen" onclick="pq='${s.id}:${i}';home()">${IC.x}</button>`}</span></div>`).join('')}</div>`:''}</div>`}).join('')}</div>`}`}).join('')+`<div class="mstart"><button class="btn" ${total?'':'disabled'} onclick="start()">Quiz starten${qCnt?` (${qCnt} ${qCnt===1?'Frage':'Fragen'})`:''}</button></div>`
   :`<div class="card" style="margin-top:18px"><p><b>Noch keine Fragen vorhanden.</b></p><p class="mut">Lass dir in Claude aus deinen Unterlagen ein Fragenset als JSON erstellen und füge es hier ein.</p></div>`}
 `;
 }
@@ -328,7 +352,7 @@ function delQ(id,i){const s=sets.find(x=>x.id===id);if(!s)return;s.qs.splice(i,1
 const exportQ=b=>exportData(b,'fragen'),exportG=b=>exportData(b,'glossar'),exportC=(b,gi)=>exportData(b,'kurs',cnames[gi]);
 function exportData(b,kind,crs){const h0=b.innerHTML;
   const list=kind==='kurs'?sets.filter(s=>s.course===crs):sets;
-  const out=kind==='glossar'?{glossar:gloss.map(g=>({begriff:g.b,info:g.i,...(g.a.length?{alias:g.a}:{})}))}:list.map(s=>({kurs:s.course,titel:s.title,fragen:s.qs.map(q=>({...(q.fixed?{typ:'tf',frage:q.q,richtig:q.opts[0].ok,erklaerung:q.exp}:{typ:q.type,frage:q.q,optionen:q.opts.map(o=>o.t),richtig:q.opts.map((o,i)=>o.ok?i:-1).filter(i=>i>=0),erklaerung:q.exp,...(q.opts.some(o=>o.why)?{begruendungen:q.opts.map(o=>o.why||'')}:{})}),...(q.streak?{streak:q.streak}:{}),...(q.wrong?{wrong:true}:{})}))}));
+  const out=kind==='glossar'?{glossar:gloss.map(g=>({begriff:g.b,info:g.i,...(g.a.length?{alias:g.a}:{})}))}:list.map(s=>({kurs:s.course,titel:s.title,fragen:s.qs.map(q=>({...(q.fixed?{typ:'tf',frage:q.q,richtig:q.opts[0].ok,erklaerung:q.exp}:{typ:q.type,frage:q.q,optionen:q.opts.map(o=>o.t),richtig:q.opts.map((o,i)=>o.ok?i:-1).filter(i=>i>=0),erklaerung:q.exp,...(q.opts.some(o=>o.why)?{begruendungen:q.opts.map(o=>o.why||'')}:{})}),...(q.streak?{streak:q.streak}:{}),...(q.wrong?{wrong:true}:{}),...(q.flagged?{flagged:true}:{})}))}));
   const slug=crs?'-'+(crs.toLowerCase().replace(/[^a-z0-9äöüß]+/g,'-').replace(/^-|-$/g,'')||'kurs'):'';
   try{const u=URL.createObjectURL(new Blob([JSON.stringify(out,null,1)],{type:'application/json'}));
     const a=document.createElement('a');a.href=u;a.download='quizomat-'+kind+slug+'-'+new Date().toISOString().slice(0,10)+'.json';
@@ -364,15 +388,15 @@ function updSyncUI(){
   const b=document.querySelector('.cnav');if(b)b.title=syncTitle();
   if(curView==='c')cloudView();
 }
-const nav=a=>`<nav class='nav'><button class='${a==='q'?'on':''}' onclick="wp=null;qsearch='';home()">Fragen</button><button class='${a==='g'?'on':''}' onclick='glos()'>Glossar</button><button class='cnav ${a==='c'?'on':''}' title="${esc(syncTitle())}" aria-label="Cloud-Sync" onclick='cloudView()'>${IC.cloud}<span id="cs">${syncBadge()}</span></button></nav>`;
+const nav=a=>`<nav class='nav'><button class='${a==='q'?'on':''}' onclick="wp=null;qsearch='';home()">Fragen</button><button class='${a==='g'?'on':''}' onclick='glos()'>Glossar</button><button class='cnav ${a==='c'?'on':''}' title="${esc(syncTitle())}" aria-label="Cloud-Sync" onclick='cloudView()'>${IC.cloud}<span>Cloud</span><span id="cs">${syncBadge()}</span></button></nav>`;
 let gpend=null,qsearch='',gq='',gedit=null,gdraft=null,gerr='';
 function glos(){gpend=null;wp=null;gedit=null;gdraft=null;gq='';glosView()}
 function searchHtml(){return `<input id="qs" type="search" class="srch" placeholder="Fragen durchsuchen …" value="${esc(qsearch)}" oninput="qSearch(this.value)"><div id="res">${resHtml()}</div>`}
 function resHtml(){const t=qsearch.trim().toLowerCase();if(!t)return '';const r=[];sets.forEach(s=>s.qs.forEach((q,qi)=>{if((q.q+' '+q.opts.map(o=>o.t).join(' ')+' '+q.exp).toLowerCase().includes(t))r.push([s,q,qi])}));
-  return `<p class="mut">${r.length} Treffer</p>`+(r.length?`<div class="card">${r.slice(0,50).map(([s,q,qi])=>`<div class="qi"><button class="lnk" data-s="${s.id}" onclick="goQ(this.dataset.s)"><span class="mut">${esc(s.course)} › ${esc(s.title)}</span><br>${esc(q.q)}</button><span class="gc">${qBadge(s.id,qi,q)}<button class="x" title="Frage bearbeiten" aria-label="Frage bearbeiten" onclick="goQEdit('${s.id}',${qi})">${IC.edit}</button></span></div>`).join('')}</div>`+(r.length>50?'<p class="mut">Es werden nur die ersten 50 Treffer angezeigt.</p>':''):'')}
+  return `<p class="mut">${r.length} Treffer</p>`+(r.length?`<div class="card">${r.slice(0,50).map(([s,q,qi])=>`<div class="qi"><button class="lnk" data-s="${s.id}" onclick="goQ(this.dataset.s)"><span class="mut">${esc(s.course)} › ${esc(s.title)}</span><br>${esc(q.q)}</button><span class="gc">${qBadge(s.id,qi,q)}<button class="x${q.flagged?' warn':''}" title="${q.flagged?'Markierung aufheben':'Zum Bearbeiten markieren'}" aria-label="Markieren" onclick="togFlag('${s.id}',${qi})">${IC.flag}</button><button class="x" title="Frage bearbeiten" aria-label="Frage bearbeiten" onclick="goQEdit('${s.id}',${qi})">${IC.edit}</button></span></div>`).join('')}</div>`+(r.length>50?'<p class="mut">Es werden nur die ersten 50 Treffer angezeigt.</p>':''):'')}
 function qSearch(v){qsearch=v;$app.classList.toggle('searching',!!v.trim());document.getElementById('res').innerHTML=resHtml()}
 function goQ(id){const s=sets.find(x=>x.id===id);qsearch='';exp.add(id);if(s)col.delete(s.course);home()}
-function goQEdit(id,qi){const s=sets.find(x=>x.id===id);qsearch='';exp.add(id);if(s)col.delete(s.course);startQEdit(id,qi)}
+function goQEdit(id,qi){const s=sets.find(x=>x.id===id);qsearch='';exp.add(id);if(s)col.delete(s.course);startQEdit(id,qi);setTimeout(()=>{const el=document.getElementById('eq_q');if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.focus()}},30)}
 function gRow(g){return `<div class="gi"><div><b>${esc(g.b)}</b>${g.a.length?`<span class="mut"> · ${esc(g.a.join(', '))}</span>`:''}<p class="mut" style="margin:.2em 0 0">${esc(g.i)}</p></div>${gpend===g.b?`<span class="gc"><span class="mut">Löschen?</span><button class="btn sm" data-b="${esc(g.b)}" onclick="delG(this.dataset.b)">Ja</button><button class="btn sec sm" onclick="gpend=null;glosView()">Nein</button></span>`:`<span class="gc"><button class="x" title="Begriff bearbeiten" aria-label="Begriff bearbeiten" data-b="${esc(g.b)}" onclick="gedit=this.dataset.b;gdraft=null;gerr='';glosView()">${IC.edit}</button><button class="x" title="Begriff löschen" aria-label="Begriff löschen" data-b="${esc(g.b)}" onclick="gpend=this.dataset.b;glosView()">${IC.x}</button></span>`}</div>`}
 function gForm(g){const d=gdraft||{b:g.b,i:g.i,a:g.a.join(', ')};return `<div class="gi ge"><div style="width:100%"><label class="mut" for="eb">Begriff</label><input id="eb" value="${esc(d.b)}"><label class="mut" for="ei">Erklärung</label><textarea id="ei" style="min-height:90px">${esc(d.i)}</textarea><label class="mut" for="ea">Alias (durch Komma getrennt)</label><input id="ea" value="${esc(d.a)}"><p class="err">${esc(gerr)}</p><div class="row act"><button class="btn sec sm" onclick="gedit=null;gdraft=null;gerr='';glosView()">Abbrechen</button><button class="btn sm" data-b="${esc(g.b)}" onclick="saveG(this.dataset.b)">Speichern</button></div></div></div>`}
 function glList(){const t=gq.trim().toLowerCase();const l=[...gloss].sort((a,b)=>a.b.localeCompare(b.b,'de')).filter(g=>!t||(g.b+' '+g.a.join(' ')+' '+g.i).toLowerCase().includes(t));
@@ -426,6 +450,7 @@ function mergeSets(incoming){
         eq.type=nq.type;eq.fixed=nq.fixed;eq.exp=nq.exp;eq.opts=nq.opts;
         eq.streak=Math.max(eq.streak||0,nq.streak||0);
         eq.wrong=nq.streak>0?false:(nq.wrong??eq.wrong);
+        eq.flagged=!!(eq.flagged||nq.flagged);
       }else{
         ex.qs.push(nq);
       }
@@ -475,7 +500,7 @@ function start(pool){
 }
 function quiz(){curView='z';
   const q=Q[idx],src=q._ref||q,multi=q.type==='multi',st=src.streak||0,m=isMastered(src);
-  $app.className='wide';$app.innerHTML=`<div class='cols'><div class='qhead'><div class="row" style="justify-content:space-between"><span class="mut">Frage ${idx+1} von ${Q.length}</span><button class="x" onclick="home()">Abbrechen</button></div>
+  $app.className='wide';$app.innerHTML=`<div class='cols'><div class='qhead'><div class="row" style="justify-content:space-between"><span class="mut">Frage ${idx+1} von ${Q.length}</span><span class="gc"><button class="badge${src.flagged?' warn':''}" title="Frage zum späteren Bearbeiten markieren (Taste M)" onclick="togQuizFlag()">${IC.flag} ${src.flagged?'Markiert':'Später bearbeiten'}</button><button class="x" onclick="home()">Abbrechen</button></span></div>
   <div class="bar"><i style="width:${(idx+(checked?1:0))/Q.length*100}%"></i></div>
   <p class="q">${esc(q.q)}</p>${multi?'<p class="mut">Mehrere Antworten können richtig sein.</p>':''}</div><div class='opts'>
   ${q.opts.map((o,i)=>{
@@ -504,6 +529,7 @@ function result(){curView='r';$app.className='';
   const ok=log.filter(Boolean).length,pct=Math.round(ok/Q.length*100),wrong=Q.filter((_,i)=>!log[i]),newlyM=Q.filter(q=>q._newlyMastered).length;
   $app.innerHTML=`${nav('q')}<h1>Ergebnis</h1><div class="card"><div class="score">${ok} / ${Q.length}</div><p class="mut">${pct} % richtig${newlyM?` · ${newlyM} ${newlyM===1?'Frage':'Fragen'} neu gemeistert ✓`:''}</p></div>
   <div class="row act" style="margin-top:14px">${wrong.length?`<button class="btn" onclick="start(wrongPool())">Falsche Fragen wiederholen (${wrong.length})</button>`:''}<button class="btn sec" onclick="home()">Zur Übersicht</button></div>
+  ${flaggedHtml()}
   ${wrong.length?`<h2>Das war falsch</h2>`+wrong.map(q=>`<details><summary>${esc(q.q)}</summary><p><b>Richtig:</b> ${q.opts.filter(o=>o.ok).map(o=>esc(o.t)).join('; ')}</p><p class="mut">${esc(q.exp)}</p></details>`).join(''):'<p><b>Alles richtig.</b> Zeit für das nächste Thema.</p>'}`;
 }
 function has(t,w,short){let i=t.indexOf(w);while(i>=0){if(!short)return true;const a=t[i-1]||' ',b=t[i+w.length]||' ';if(!/[a-zäöüß]/.test(a)&&!/[a-zäöüß]/.test(b))return true;i=t.indexOf(w,i+1)}return false}
@@ -711,6 +737,8 @@ document.addEventListener('keydown',ev=>{
   }else if((ev.key==='Enter'||ev.key===' ')&&tag!=='BUTTON'){
     if(!checked&&picked.size){ev.preventDefault();check()}
     else if(checked){ev.preventDefault();next()}
+  }else if((ev.key==='m'||ev.key==='M')&&!ev.metaKey&&!ev.ctrlKey&&!ev.altKey){
+    ev.preventDefault();togQuizFlag();
   }else if(ev.key==='Escape'){
     ev.preventDefault();home();
   }
