@@ -71,7 +71,7 @@ Interaktiver Prüfungs- und Vorlesungstrainer zum Üben, Auswerten und Verwalten
   "glossar": [
     {
       "begriff": "Fachbegriff",
-      "info": "Kurze Erklärung in 1–2 Sätzen.",
+      "info": "Erklärung des Begriffs in ca. 100 Worten.",
       "alias": ["Pluralform", "Abkürzung"]
     }
   ]

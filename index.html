@@ -324,7 +324,7 @@ function tog(id){sel.has(id)?sel.delete(id):sel.add(id);home()}
 function del(id){pend=pend===id?null:id;rpend=null;home()}
 function del2(id){sets=sets.filter(x=>x.id!==id);sel.delete(id);pend=null;save();home()}
 
-const GPROMPT=`Erstelle aus den angehängten Unterlagen ein Glossar der wichtigsten Fachbegriffe als JSON. Jeder Begriff bekommt 1–2 Sätze Erklärung, "alias" listet Schreibvarianten (Plural, Abkürzung). Gib nur einen JSON-Codeblock in genau diesem Format aus:
+const GPROMPT=`Erstelle aus den angehängten Unterlagen ein Glossar der wichtigsten Fachbegriffe als JSON. Jeder Begriff bekommt eine Erklärung in ca. 100 Worten, "alias" listet Schreibvarianten (Plural, Abkürzung). Gib nur einen JSON-Codeblock in genau diesem Format aus:
 
 {"glossar":[{"begriff":"…","info":"…","alias":["…"]}]}`;
 function parseGloss(txt){let d;try{d=JSON.parse(txt.trim().replace(/^```(?:json)?|```$/g,'').trim())}catch(e){throw new Error('Kein gültiges JSON: '+e.message)}
