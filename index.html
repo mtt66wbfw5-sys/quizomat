@@ -695,9 +695,11 @@ function disconnectCloud(){
   cloudView();
 }
 
-document.addEventListener('visibilitychange',()=>{
-  if(document.visibilityState==='visible'&&gh.token&&syncState!=='syncing')pullCloud(false);
-});
+const autoPull=()=>{if(document.visibilityState==='visible'&&gh.token&&syncState!=='syncing')pullCloud(false)};
+document.addEventListener('visibilitychange',autoPull);
+window.addEventListener('focus',autoPull);
+window.addEventListener('pageshow',autoPull);
+window.addEventListener('online',autoPull);
 
 document.addEventListener('keydown',ev=>{
   if(!$app.classList.contains('wide')||!Q.length)return;
