@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Quizomat 9001">
+<title>Quizomat 9001</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+:root{--ink:#c5ccd6;--bg:#f5f6f8;--fg:#1c2430;--mut:#5b6675;--card:#fff;--bd:#dde1e7;--ac:#2f4b8f;--acfg:#fff;--hi:#2f4b8f;--ok:#1f7a45;--okbg:#e6f3ea;--bad:#b23a3a;--badbg:#f8e9e9;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#3a4553;--bg:#12161c;--fg:#e7ebf0;--mut:#98a3b1;--card:#1a2029;--bd:#2a323d;--ac:#8aa8e8;--acfg:#0f141a;--hi:#8aa8e8;--ok:#6cc58a;--okbg:#17301f;--bad:#f08a8a;--badbg:#351c1c;color-scheme:dark}}
+:root[data-theme="dark"]{--ink:#3a4553;--bg:#12161c;--fg:#e7ebf0;--mut:#98a3b1;--card:#1a2029;--bd:#2a323d;--ac:#8aa8e8;--acfg:#0f141a;--hi:#8aa8e8;--ok:#6cc58a;--okbg:#17301f;--bad:#f08a8a;--badbg:#351c1c;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html,body{max-width:100%;overflow-x:hidden}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.55 "Atkinson Hyperlegible",system-ui,sans-serif;overflow-wrap:anywhere}
+#app{width:100%;max-width:720px;margin:0 auto;padding:20px 16px 60px}
+#app.wide{max-width:1240px}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:28px;align-items:start}
+.cols>*{min-width:0}
+.qhead{grid-column:1;grid-row:1}.opts{grid-column:1;grid-row:2}.qfoot{grid-column:1;grid-row:3}
+.side{grid-column:2;grid-row:2 / span 2;display:grid;gap:14px}
+@media (max-width:880px){.cols{grid-template-columns:minmax(0,1fr)}.qhead,.opts,.qfoot,.side{grid-column:1;grid-row:auto}.qhead{order:0}.opts{order:1}.side{order:2;margin:14px 0}.qfoot{order:3}.ph{display:none}.ge .act{justify-content:flex-end}}
+.ph{border-style:dashed}
+.mstart{display:none}
+.term{margin:.7em 0 0;font-size:.95rem}
+.crs{display:flex;align-items:center;gap:8px;margin:1.3em 0 .4em}.crs input[type=checkbox]{width:22px;height:22px;accent-color:var(--ac);flex:none;cursor:pointer}
+.chb{background:none;border:0;font:inherit;font-weight:700;font-size:1.15rem;cursor:pointer;text-align:left;padding:6px 0;color:var(--fg);display:flex;gap:8px;flex-wrap:wrap;align-items:baseline;flex:1}.chb .mut{font-weight:400}
+.sb{background:none;border:0;font:inherit;cursor:pointer;text-align:left;padding:6px 0;color:var(--fg);display:flex;gap:8px;align-items:baseline;flex:1;min-width:140px}
+h1,h2,.q,.score,.btn,.chb{font-family:"Atkinson Hyperlegible",system-ui,sans-serif}
+h1{font-size:1.7rem;font-weight:700;margin:.1em 0;display:block}
+h2{font-size:1.15rem;margin:1.4em 0 .5em}
+p{margin:.4em 0}.mut{color:var(--mut);font-size:.92rem}
+button,textarea,input,select{font:inherit;color:inherit;touch-action:manipulation}
+input,textarea,select{font-size:16px}
+img,svg,pre,textarea,button,.card{max-width:100%}.row>*{min-width:0}
+.btn{background:var(--ac);color:var(--acfg);border:1px solid var(--ac);border-radius:8px;padding:.65em 1.1em;font-weight:700;cursor:pointer;box-shadow:none}
+.btn.sec{background:var(--card);color:var(--fg);border:1px solid var(--ink)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn:focus-visible,.opt:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,.x:focus-visible,.badge:focus-visible,.chb:focus-visible,.sb:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.card{background:var(--card);border:1px solid var(--ink);border-radius:10px;padding:14px 16px;box-shadow:none}
+.set{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 0;border-top:1px solid var(--bd)}
+.ql{flex-basis:100%;margin:0 0 4px 28px}.qi{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:8px 0;border-top:1px dashed var(--bd);font-size:.93rem}.qi>span:first-child{flex:1;min-width:160px}
+.set:first-of-type{border-top:0}
+.set input[type=checkbox]{width:22px;height:22px;accent-color:var(--ac);cursor:pointer;flex:none}
+.x{background:none;border:0;border-radius:8px;color:var(--mut);cursor:pointer;font-size:1.05rem;min-width:36px;min-height:36px;padding:6px;display:inline-grid;place-items:center}
+@media (hover:hover){.x:hover{background:color-mix(in srgb,var(--fg) 8%,transparent);color:var(--fg)}}
+.bar{height:6px;border:0;background:var(--bd);border-radius:3px;overflow:hidden;margin:10px 0 18px}
+.bar i{display:block;height:100%;background:var(--hi)}
+.q{font-size:1.2rem;font-weight:700;margin:.2em 0 .8em}
+.opt{display:flex;gap:12px;width:100%;text-align:left;background:var(--card);border:1px solid var(--ink);border-radius:8px;padding:12px 14px;margin:0 0 10px;cursor:pointer;box-shadow:none}
+.opt .m{flex:none;width:22px;height:22px;border:2px solid var(--mut);border-radius:50%;margin-top:2px;display:grid;place-items:center;font-size:.8rem;font-weight:700}
+.opt.multi .m{border-radius:5px}
+.opt.sel{border-color:var(--ac);background:color-mix(in srgb,var(--ac) 10%,var(--card))}.opt.sel .m{background:var(--ac);border-color:var(--ac);color:var(--acfg)}
+.opt.ok{border-color:var(--ok);background:var(--okbg);border-width:2px}.opt.bad{border-color:var(--bad);background:var(--badbg);border-width:2px}
+.opt.ok .m{background:var(--ok);border-color:var(--ok);color:var(--bg)}.opt.bad .m{background:var(--bad);border-color:var(--bad);color:var(--bg)}
+.opt.miss{border-style:dashed}
+.why{display:block;font-size:.93rem;color:var(--mut);margin-top:4px}
+.exp{border-left:4px solid var(--ac);padding:8px 14px;margin:14px 0;background:var(--card);border-radius:0 8px 8px 0}
+.score{font-size:2.6rem;font-weight:700;line-height:1;color:var(--fg)}
+textarea{width:100%;min-height:200px;background:var(--card);border:1px solid var(--ink);border-radius:8px;padding:10px;font:14px/1.4 ui-monospace,monospace}
+input[type=number]{width:4.5em;background:var(--card);border:1px solid var(--ink);border-radius:6px;padding:4px 8px}
+.sm{padding:.4em .85em;font-size:.88rem}
+.ico{display:inline-grid;place-items:center;width:40px;height:40px;padding:0}
+.ico svg,.x svg{width:18px;height:18px;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;fill:none;display:block}
+.err{color:var(--bad);font-weight:700;white-space:pre-wrap}
+details{margin:8px 0}summary{cursor:pointer;font-weight:700}
+pre{white-space:pre-wrap;font-size:.85rem;background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:10px}
+@media (max-width:560px){body{font-size:16px}#app{padding:14px 12px 24px}h1{font-size:1.5rem}.x{min-width:40px;min-height:40px}.ico{width:42px;height:42px}.nav button{flex:1;text-align:center}.dstart{display:none}.mstart,.qfoot{display:block;position:sticky;bottom:0;background:var(--bg);padding:10px 0 calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--bd);margin-top:12px;z-index:4}.mstart .btn,.qfoot .btn{width:100%}}
+@media (max-width:430px){#app{padding-left:max(14px,env(safe-area-inset-left));padding-right:max(14px,env(safe-area-inset-right))}.q{font-size:1.1rem}.opt{padding:12px;gap:10px}.set{gap:6px}.ql{margin-left:10px}.crs{gap:6px}.chb{font-size:1.05rem}}
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;gap:4px;background:var(--bg);border-bottom:1px solid var(--bd);margin:-6px 0 16px}
+.nav button{background:none;border:0;border-bottom:3px solid transparent;padding:12px 14px;font:inherit;font-weight:700;color:var(--mut);cursor:pointer}
+.nav button.on{color:var(--fg);border-bottom-color:var(--ac)}
+.gi{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;padding:10px 0;border-top:1px solid var(--bd)}.gi:first-child{border-top:0}.gi>div{min-width:0}.gc{display:flex;gap:4px;align-items:center;flex:none;margin-left:auto}
+.searching .crs,.searching .grp,.searching .mstart{display:none}
+.srch{width:100%;margin:8px 0 10px;padding:10px 12px;background:var(--card);border:1px solid var(--ink);border-radius:8px;font:inherit;color:inherit}
+.lnk{background:none;border:0;font:inherit;color:inherit;text-align:left;padding:0;cursor:pointer;width:100%}
+.ge{flex-basis:100%;width:100%}
+.ge input:not([type=checkbox]):not([type=radio]),.ge textarea,.ge select{width:100%;margin:2px 0 8px;padding:8px 10px;background:var(--card);border:1px solid var(--ink);border-radius:8px;font:inherit;color:inherit}
+.ge label{display:block}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:.8rem;font-weight:700;min-height:30px;padding:3px 10px;border-radius:99px;border:1px solid var(--bd);background:var(--bg);color:var(--mut);cursor:pointer;white-space:nowrap}
+.badge.ok{border-color:var(--ok);background:var(--okbg);color:var(--ok)}
+.badge.bad{border-color:var(--bad);background:var(--badbg);color:var(--bad)}
+.orow{display:grid;grid-template-columns:auto 1fr 1fr auto;gap:8px;align-items:center;margin-bottom:6px}
+.orow input:not([type=checkbox]):not([type=radio]){margin:0}
+.orow input[type=checkbox],.orow input[type=radio]{width:20px;height:20px;accent-color:var(--ac)}
+@media (max-width:560px){.orow{grid-template-columns:auto 1fr auto}.orow .eq_ow{grid-column:2 / 4}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const $app=document.getElementById('app');
+let exp=new Set(),pq=null,col=new Set(),pend=null,rpend=null,gloss=[],courses={},cnames=[],gen={name:'',f:['single','multi','tf']},sets=[],sel=new Set(),opts={n:20,shuffle:true,hideMastered:true,mastery:3},Q=[],idx=0,picked=new Set(),checked=false,log=[],msg='';
+let cedit=null,cdraft='',cerr='',sedit=null,sdraft=null,serr='',qedit=null,qdraft=null,qerr='';
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const IC={
+  imp:`<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
+  exp:`<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`,
+  res:`<svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>`,
+  del:`<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>`,
+  edit:`<svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`,
+  x:`<svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`
+};
+const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+function load(){
+  try{sets=JSON.parse(localStorage.getItem('pt:sets')||'[]')}catch(e){sets=[]}
+  try{courses=JSON.parse(localStorage.getItem('pt:courses')||'{}')}catch(e){courses={}}
+  try{gloss=JSON.parse(localStorage.getItem('pt:gloss')||'[]')}catch(e){gloss=[]}
+  try{col=new Set(JSON.parse(localStorage.getItem('pt:col')||'[]'))}catch(e){col=new Set()}
+  try{const o=JSON.parse(localStorage.getItem('pt:opts')||'null');if(o&&typeof o==='object')opts={...opts,...o,n:Math.max(1,+o.n||20),mastery:3}}catch(e){}
+}
+function saveO(){try{localStorage.setItem('pt:opts',JSON.stringify(opts))}catch(e){}}
+function saveC(){try{localStorage.setItem('pt:courses',JSON.stringify(courses))}catch(e){}}
+function save(){try{localStorage.setItem('pt:sets',JSON.stringify(sets))}catch(e){}}
+
+const isMastered=q=>(q.streak||0)>=opts.mastery;
+const qWeight=q=>{
+  if(isMastered(q))return opts.hideMastered?0:1;
+  const st=q.streak||0;
+  if(st===0)return q.wrong?6:4;
+  if(st===1)return 2;
+  return 1;
+};
+const pool1=s=>opts.hideMastered?s.qs.filter(q=>!isMastered(q)):s.qs;
+const masteredInSet=s=>s.qs.filter(isMastered).length;
+const hasAnyProgress=()=>sets.some(s=>s.qs.some(q=>(q.streak||0)>0||q.wrong));
+
+const PROMPT=`Erstelle aus den angehängten Unterlagen [ANZAHL] Prüfungsfragen als JSON. Mische Single Choice (typ "single"), Multiple Choice mit mehreren richtigen Antworten (typ "multi") und Wahr/Falsch (typ "tf"). Falsche Antworten sollen plausibel sein und typische Verwechslungen aus dem Stoff abbilden. Gib nur einen JSON-Codeblock in genau diesem Format aus:
+
+{"kurs":"Name des Kurses","titel":"Thema / Vorlesung","fragen":[
+ {"typ":"single","frage":"…","optionen":["A","B","C","D"],"richtig":[1],"erklaerung":"Warum die richtige Antwort stimmt.","begruendungen":["Warum A falsch ist","Warum B richtig ist","…","…"]},
+ {"typ":"multi","frage":"…","optionen":["…","…","…","…"],"richtig":[0,2],"erklaerung":"…"},
+ {"typ":"tf","frage":"Aussage …","richtig":true,"erklaerung":"…"}
+]}
+
+"richtig" enthält die Indizes (ab 0) der richtigen Optionen. "begruendungen" ist optional und enthält pro Option eine kurze Begründung.`;
+
+function parseSets(txt){
+  let d;try{d=JSON.parse(txt.trim().replace(/^```(?:json)?|```$/g,'').trim())}catch(e){throw new Error('Kein gültiges JSON: '+e.message)}
+  const list=Array.isArray(d)?d:[d],out=[];
+  list.forEach((s,si)=>{
+    if(s&&Array.isArray(s.glossar)&&!s.fragen)return;
+    if(!s||!Array.isArray(s.fragen)||!s.fragen.length)throw new Error('Set '+(si+1)+': „fragen“ fehlt oder ist leer.');
+    const qs=s.fragen.map((f,i)=>{
+      const w='Frage '+(i+1)+': ';
+      if(!f.frage)throw new Error(w+'„frage“ fehlt.');
+      const st=Math.max(0,parseInt(f.streak,10)||0),wr=!!f.wrong;
+      if(f.typ==='tf'){
+        const t=f.richtig===true||(Array.isArray(f.richtig)&&f.richtig[0]===0);
+        return{q:f.frage,type:'single',exp:f.erklaerung||'',opts:[{t:'Wahr',ok:t,why:''},{t:'Falsch',ok:!t,why:''}],fixed:true,streak:st,wrong:wr};
+      }
+      if(!Array.isArray(f.optionen)||f.optionen.length<2)throw new Error(w+'mindestens 2 „optionen“ nötig.');
+      const raw=[].concat(f.richtig??[]);
+      const r=raw.map(x=>typeof x==='number'||(typeof x==='string'&&x.trim()!=='')?Number(x):NaN);
+      if(!r.length||r.some(x=>!(x>=0&&x<f.optionen.length)))throw new Error(w+'„richtig“ verweist auf eine nicht vorhandene Option.');
+      return{q:f.frage,type:(f.typ==='multi'||r.length>1)?'multi':'single',exp:f.erklaerung||'',streak:st,wrong:wr,
+        opts:f.optionen.map((t,k)=>({t:String(t),ok:r.includes(k),why:(f.begruendungen&&f.begruendungen[k])||''}))};
+    });
+    out.push({id:Date.now().toString(36)+'-'+si,course:s.kurs||'Ohne Kurs',title:s.titel||'Ohne Titel',qs});
+  });
+  return out;
+}
+
+function qBadge(sid,qi,q){
+  const st=q.streak||0,m=isMastered(q);
+  if(m)return `<button class="badge ok" title="Gemeistert (${st}× richtig in Folge) – Klicken zum Zurücksetzen" onclick="togMastery('${sid}',${qi})">✓ Gemeistert (${st})</button>`;
+  const dots='●'.repeat(Math.min(st,opts.mastery))+'○'.repeat(Math.max(0,opts.mastery-st));
+  return `<button class="badge${q.wrong?' bad':''}" title="${q.wrong?'Zuletzt falsch – ':''}Lernstand ${st}/${opts.mastery} (Klicken um als gemeistert zu markieren)" onclick="togMastery('${sid}',${qi})">${dots}</button>`;
+}
+
+function togMastery(sid,qi){
+  const s=sets.find(x=>x.id===sid);if(!s||!s.qs[qi])return;
+  const q=s.qs[qi];
+  if(isMastered(q)){q.streak=0;q.wrong=false}else{q.streak=opts.mastery;q.wrong=false}
+  save();home();
+}
+
+function resetProg(sid){
+  if(sid){const s=sets.find(x=>x.id===sid);if(s)s.qs.forEach(q=>{q.streak=0;q.wrong=false})}
+  else{sets.forEach(s=>s.qs.forEach(q=>{q.streak=0;q.wrong=false}))}
+  rpend=null;wp=null;save();home();
+}
+
+function startCEdit(gi){cedit=gi;cdraft=cnames[gi]||'';cerr='';sedit=null;qedit=null;home()}
+function cancelCEdit(){cedit=null;cdraft='';cerr='';home()}
+function saveCEdit(gi){
+  const old=cnames[gi],el=document.getElementById('ecn'),nw=(el?el.value:cdraft).trim();
+  cdraft=el?el.value:cdraft;
+  if(!nw){cerr='Kursname darf nicht leer sein.';home();return}
+  if(nw!==old){
+    sets.forEach(s=>{if(s.course===old)s.course=nw});
+    if(courses[old]){courses[nw]=courses[old];delete courses[old];saveC()}
+    if(col.has(old)){col.delete(old);col.add(nw);try{localStorage.setItem('pt:col',JSON.stringify([...col]))}catch(e){}}
+    save();
+  }
+  cedit=null;cdraft='';cerr='';home();
+}
+
+function startSEdit(sid){
+  const s=sets.find(x=>x.id===sid);if(!s)return;
+  sedit=sid;sdraft={course:s.course,title:s.title};serr='';cedit=null;qedit=null;home();
+}
+function cancelSEdit(){sedit=null;sdraft=null;serr='';home()}
+function saveSEdit(sid){
+  const s=sets.find(x=>x.id===sid);if(!s)return;
+  const cEl=document.getElementById('esc_c'),tEl=document.getElementById('esc_t');
+  const c=(cEl?cEl.value:sdraft.course).trim(),t=(tEl?tEl.value:sdraft.title).trim();
+  sdraft={course:cEl?cEl.value:c,title:tEl?tEl.value:t};
+  if(!c||!t){serr='Kurs und Thema dürfen nicht leer sein.';home();return}
+  s.course=c;s.title=t;sedit=null;sdraft=null;serr='';save();home();
+}
+
+function startQEdit(sid,qi){
+  const s=sets.find(x=>x.id===sid);if(!s||!s.qs[qi])return;
+  const q=s.qs[qi];
+  qedit=sid+':'+qi;
+  qdraft={
+    type:q.fixed?'tf':q.type,
+    q:q.q,
+    exp:q.exp||'',
+    tfOk:q.fixed?!!(q.opts[0]&&q.opts[0].ok):true,
+    opts:q.fixed?[{t:'',ok:true,why:''},{t:'',ok:false,why:''}]:q.opts.map(o=>({t:o.t,ok:!!o.ok,why:o.why||''}))
+  };
+  qerr='';cedit=null;sedit=null;home();
+}
+function cancelQEdit(){qedit=null;qdraft=null;qerr='';home()}
+function syncQDraft(){
+  if(!qdraft)return;
+  const qEl=document.getElementById('eq_q'),eEl=document.getElementById('eq_exp'),tEl=document.getElementById('eq_type');
+  if(qEl)qdraft.q=qEl.value;
+  if(eEl)qdraft.exp=eEl.value;
+  if(tEl)qdraft.type=tEl.value;
+  if(qdraft.type==='tf'){
+    const r=document.querySelector('input[name="eq_tf"]:checked');
+    if(r)qdraft.tfOk=r.value==='true';
+  }else{
+    const oks=[...document.querySelectorAll('.eq_ok')],ots=[...document.querySelectorAll('.eq_ot')],ows=[...document.querySelectorAll('.eq_ow')];
+    if(ots.length){
+      qdraft.opts=ots.map((el,k)=>({t:el.value,ok:!!(oks[k]&&oks[k].checked),why:ows[k]?ows[k].value:''}));
+    }
+  }
+}
+function changeQType(nt){
+  syncQDraft();
+  qdraft.type=nt;
+  if(nt!=='tf'&&(!qdraft.opts||qdraft.opts.length<2))qdraft.opts=[{t:'',ok:true,why:''},{t:'',ok:false,why:''}];
+  if(nt==='single'&&qdraft.opts.filter(o=>o.ok).length>1){
+    let first=true;qdraft.opts.forEach(o=>{if(o.ok){if(first)first=false;else o.ok=false}});
+  }
+  qerr='';home();
+}
+function addQOpt(){syncQDraft();qdraft.opts.push({t:'',ok:false,why:''});qerr='';home()}
+function delQOpt(k){syncQDraft();if(qdraft.opts.length>2){qdraft.opts.splice(k,1);qerr='';home()}}
+function saveQEdit(sid,qi){
+  syncQDraft();
+  const s=sets.find(x=>x.id===sid);if(!s||!s.qs[qi])return;
+  const orig=s.qs[qi],qTxt=qdraft.q.trim(),expTxt=qdraft.exp.trim();
+  if(!qTxt){qerr='Der Fragetext darf nicht leer sein.';home();return}
+  if(qdraft.type==='tf'){
+    s.qs[qi]={q:qTxt,type:'single',fixed:true,exp:expTxt,streak:orig.streak||0,wrong:!!orig.wrong,
+      opts:[{t:'Wahr',ok:!!qdraft.tfOk,why:''},{t:'Falsch',ok:!qdraft.tfOk,why:''}]};
+  }else{
+    if(qdraft.opts.length<2){qerr='Mindestens 2 Antwortoptionen sind nötig.';home();return}
+    if(qdraft.opts.some(o=>!o.t.trim())){qerr='Alle Antwortoptionen müssen einen Text enthalten.';home();return}
+    const okCnt=qdraft.opts.filter(o=>o.ok).length;
+    if(!okCnt){qerr='Bitte mindestens eine richtige Antwort markieren.';home();return}
+    if(qdraft.type==='single'&&okCnt>1){qerr='Bei Single Choice darf nur genau eine Antwort richtig sein.';home();return}
+    s.qs[qi]={q:qTxt,type:qdraft.type,exp:expTxt,streak:orig.streak||0,wrong:!!orig.wrong,
+      opts:qdraft.opts.map(o=>({t:o.t.trim(),ok:!!o.ok,why:o.why.trim()}))};
+  }
+  qedit=null;qdraft=null;qerr='';save();home();
+}
+
+function qForm(sid,qi){
+  const d=qdraft,isTf=d.type==='tf',isSingle=d.type==='single';
+  return `<div class="qi"><div class="ge"><label class="mut" for="eq_type">Fragetyp</label><select id="eq_type" onchange="changeQType(this.value)"><option value="single" ${d.type==='single'?'selected':''}>Single Choice</option><option value="multi" ${d.type==='multi'?'selected':''}>Multiple Choice</option><option value="tf" ${isTf?'selected':''}>Wahr / Falsch</option></select><label class="mut" for="eq_q">Frage</label><textarea id="eq_q" style="min-height:64px">${esc(d.q)}</textarea>${isTf?`<label class="mut">Richtige Antwort</label><div class="row" style="margin:4px 0 10px"><label class="row" style="cursor:pointer"><input type="radio" name="eq_tf" value="true" ${d.tfOk?'checked':''}> Wahr</label><label class="row" style="cursor:pointer"><input type="radio" name="eq_tf" value="false" ${!d.tfOk?'checked':''}> Falsch</label></div>`:`<label class="mut" style="margin-bottom:4px">Antwortoptionen (Häkchen = richtig, optional Begründung)</label>${d.opts.map((o,k)=>`<div class="orow"><input class="eq_ok" type="${isSingle?'radio':'checkbox'}" name="eq_ok_grp" title="Als richtige Antwort markieren" ${o.ok?'checked':''}><input class="eq_ot" placeholder="Antwort ${k+1}" value="${esc(o.t)}"><input class="eq_ow" placeholder="Begründung (optional)" value="${esc(o.why)}"><button class="x" type="button" title="Option entfernen" aria-label="Option entfernen" ${d.opts.length<=2?'disabled':''} onclick="delQOpt(${k})">${IC.x}</button></div>`).join('')}<button class="btn sec sm" type="button" style="margin:2px 0 10px" onclick="addQOpt()">+ Option hinzufügen</button>`}<label class="mut" for="eq_exp">Erklärung</label><textarea id="eq_exp" style="min-height:64px">${esc(d.exp)}</textarea><p class="err">${esc(qerr)}</p><div class="row act"><button class="btn sec sm" type="button" onclick="cancelQEdit()">Abbrechen</button><button class="btn sm" type="button" onclick="saveQEdit('${sid}',${qi})">Speichern</button></div></div></div>`;
+}
+
+function home(){$app.className=qsearch.trim()?'searching':'';
+  const groups={};sets.forEach(s=>(groups[s.course]=groups[s.course]||[]).push(s));cnames=Object.keys(groups);
+  const total=[...sel].reduce((a,id)=>{const s=sets.find(x=>x.id===id);return a+(s?pool1(s).length:0)},0),qCnt=Math.min(opts.n,total);
+  const dl=`<datalist id="cl">${cnames.map(c=>`<option value="${esc(c)}">`).join('')}</datalist>`;
+  $app.innerHTML=`${nav('q')}<div class="row" style="justify-content:space-between;align-items:center"><h1>Quizomat 9001</h1>${sets.length?`<button class="btn dstart" ${total?'':'disabled'} onclick="start()">Quiz starten</button>`:''}</div><p class="mut">Fragen aus deinen Vorlesungsunterlagen üben und auswerten.</p>
+  ${topBar()}${sets.length?optsHtml(total)+searchHtml():''}${dl}
+  ${sets.length?Object.entries(groups).map(([c,l],gi)=>{
+    const mC=l.reduce((a,s)=>a+masteredInSet(s),0),allC=l.reduce((a,s)=>a+s.qs.length,0);
+    return `<div class="crs"><input type="checkbox" aria-label="Alle Kapitel auswählen" ${allSel(l)?'checked':''} onchange="togC(${gi},this.checked)"><button class="chb" aria-expanded="${!col.has(c)}" onclick="fold(${gi})"><span>${col.has(c)?'▸':'▾'}</span><span>${esc(c)}</span><span class="mut">${l.length} Kapitel · ${allC} Fragen${mC?` · ${mC} ✓ gemeistert`:''}</span></button><span class="gc"><button class="x" title="Kurs exportieren" aria-label="Kurs exportieren" onclick="exportC(this,${gi})">${IC.exp}</button><button class="x" title="Kurs bearbeiten" aria-label="Kurs bearbeiten" onclick="startCEdit(${gi})">${IC.edit}</button></span></div>${cedit===gi?`<div class="card ge" style="margin-bottom:10px"><label class="mut" for="ecn">Kursname bearbeiten</label><input id="ecn" value="${esc(cdraft)}"><p class="err">${esc(cerr)}</p><div class="row act"><button class="btn sec sm" onclick="cancelCEdit()">Abbrechen</button><button class="btn sm" onclick="saveCEdit(${gi})">Speichern</button></div></div>`:''}${col.has(c)?'':`<div class="card grp">${l.map(s=>{
+      const mS=masteredInSet(s),hasP=s.qs.some(q=>(q.streak||0)>0||q.wrong);
+      return `<div class="set"><input type="checkbox" aria-label="${esc(s.title)} auswählen" ${sel.has(s.id)?'checked':''} onchange="tog('${s.id}')"><button class="sb" aria-expanded="${exp.has(s.id)}" onclick="openS('${s.id}')"><span>${exp.has(s.id)?'▾':'▸'}</span><span>${esc(s.title)}<span class="mut"> – ${s.qs.length} Fragen${mS?` (${mS} ✓ gemeistert)`:''}</span></span></button><span class="gc">${rpend===s.id?`<span class="mut">Zurücksetzen?</span><button class="btn sm" onclick="resetProg('${s.id}')">Ja</button><button class="btn sec sm" onclick="rpend=null;home()">Nein</button>`:hasP?`<button class="x" title="Lernstand dieses Kapitels zurücksetzen" aria-label="Lernstand zurücksetzen" onclick="rpend='${s.id}';pend=null;home()">${IC.res}</button>`:''}<button class="x" title="Kapitel bearbeiten" aria-label="Kapitel bearbeiten" onclick="startSEdit('${s.id}')">${IC.edit}</button>${pend===s.id?`<span class="mut">Löschen?</span><button class="btn sm" onclick="del2('${s.id}')">Ja</button><button class="btn sec sm" onclick="del('${s.id}')">Nein</button>`:`<button class="x" title="Set löschen" aria-label="Set löschen" onclick="del('${s.id}')">${IC.x}</button>`}</span>${sedit===s.id?`<div class="ge" style="margin-top:6px"><label class="mut" for="esc_c">Kurs</label><input id="esc_c" list="cl" value="${esc(sdraft.course)}"><label class="mut" for="esc_t">Thema / Kapitel</label><input id="esc_t" value="${esc(sdraft.title)}"><p class="err">${esc(serr)}</p><div class="row act"><button class="btn sec sm" onclick="cancelSEdit()">Abbrechen</button><button class="btn sm" onclick="saveSEdit('${s.id}')">Speichern</button></div></div>`:''}${exp.has(s.id)?`<div class="ql">${s.qs.map((q,i)=>qedit===s.id+':'+i?qForm(s.id,i):`<div class="qi"><span>${esc(q.q)}</span><span class="gc">${qBadge(s.id,i,q)}<button class="x" title="Frage bearbeiten" aria-label="Frage bearbeiten" onclick="startQEdit('${s.id}',${i})">${IC.edit}</button>${pq===s.id+':'+i?`<button class="btn sm" onclick="delQ('${s.id}',${i})">Löschen</button><button class="btn sec sm" onclick="pq=null;home()">Nein</button>`:`<button class="x" title="Frage löschen" aria-label="Frage löschen" onclick="pq='${s.id}:${i}';home()">${IC.x}</button>`}</span></div>`).join('')}</div>`:''}</div>`}).join('')}</div>`}`}).join('')+`<div class="mstart"><button class="btn" ${total?'':'disabled'} onclick="start()">Quiz starten${qCnt?` (${qCnt} ${qCnt===1?'Frage':'Fragen'})`:''}</button></div>`
+  :`<div class="card" style="margin-top:18px"><p><b>Noch keine Fragen vorhanden.</b></p><p class="mut">Lass dir in Claude aus deinen Unterlagen ein Fragenset als JSON erstellen und füge es hier ein.</p></div>`}
+`;
+}
+let wp=null;
+function topBar(){
+  const hasP=hasAnyProgress();
+  return `<div class="row act" style="margin:12px 0 6px"><button class="btn sec ico" title="Fragen importieren" aria-label="Fragen importieren" onclick="imp('fragen')">${IC.imp}</button>${sets.length?`<button class="btn sec ico" title="Alle Fragen exportieren" aria-label="Alle Fragen exportieren" onclick="exportQ(this)">${IC.exp}</button><span class="gc" style="gap:8px">${hasP?(wp==='r'?`<span class="mut">Zurücksetzen?</span><button class="btn sm" onclick="resetProg()">Ja</button><button class="btn sec sm" onclick="wp=null;home()">Nein</button>`:`<button class="btn sec ico" title="Lernstand zurücksetzen" aria-label="Lernstand zurücksetzen" onclick="wp='r';home()">${IC.res}</button>`):''}${wp==='q'?`<span class="mut">Löschen?</span><button class="btn sm" onclick="wipe('q')">Ja</button><button class="btn sec sm" onclick="wp=null;home()">Nein</button>`:`<button class="btn sec ico" title="Alle Fragen löschen" aria-label="Alle Fragen löschen" onclick="wp='q';home()">${IC.del}</button>`}</span>`:''}</div>`;
+}
+function optsHtml(total){
+  const allSelCount=[...sel].reduce((a,id)=>{const s=sets.find(x=>x.id===id);return a+(s?s.qs.length:0)},0);
+  const mastCount=allSelCount-[...sel].reduce((a,id)=>{const s=sets.find(x=>x.id===id);return a+(s?s.qs.filter(q=>!isMastered(q)).length:0)},0);
+  return `<div class="row" style="margin:10px 0 4px"><label>Anzahl Fragen <input type="number" min="1" max="200" value="${opts.n}" onchange="opts.n=Math.max(1,+this.value||1);saveO();home()"></label><label class="row"><input type="checkbox" ${opts.shuffle?'checked':''} onchange="opts.shuffle=this.checked;saveO()" style="width:20px;height:20px;accent-color:var(--ac)"> Antworten mischen</label><label class="row"><input type="checkbox" ${opts.hideMastered?'checked':''} onchange="opts.hideMastered=this.checked;saveO();home()" style="width:20px;height:20px;accent-color:var(--ac)"> Gemeisterte ausblenden</label></div><p class="mut">${total?`${total} Fragen für das Quiz verfügbar`+(mastCount&&opts.hideMastered?` (${mastCount} bereits gemeisterte ausgeblendet)`:''):allSelCount&&opts.hideMastered&&mastCount===allSelCount?'Alle ausgewählten Fragen sind bereits gemeistert! Deaktiviere „Gemeisterte ausblenden“ oder setze den Lernstand zurück.':'Wähle mindestens ein Kapitel aus.'}</p>`;
+}
+function wipe(k){if(k==='q'){sets=[];sel=new Set();exp=new Set();save();wp=null;home()}else{gloss=[];try{localStorage.setItem('pt:gloss','[]')}catch(e){}wp=null;glosView()}}
+const allSel=l=>l.every(s=>sel.has(s.id));
+function fold(gi){const c=cnames[gi];col.has(c)?col.delete(c):col.add(c);try{localStorage.setItem('pt:col',JSON.stringify([...col]))}catch(e){}home()}
+function togC(gi,on){sets.filter(s=>s.course===cnames[gi]).forEach(s=>on?sel.add(s.id):sel.delete(s.id));home()}
+function openS(id){exp.has(id)?exp.delete(id):exp.add(id);pq=null;qedit=null;home()}
+function delQ(id,i){const s=sets.find(x=>x.id===id);if(!s)return;s.qs.splice(i,1);if(!s.qs.length){sets=sets.filter(x=>x.id!==id);sel.delete(id);exp.delete(id)}pq=null;save();home()}
+const exportQ=b=>exportData(b,'fragen'),exportG=b=>exportData(b,'glossar'),exportC=(b,gi)=>exportData(b,'kurs',cnames[gi]);
+function exportData(b,kind,crs){const h0=b.innerHTML;
+  const list=kind==='kurs'?sets.filter(s=>s.course===crs):sets;
+  const out=kind==='glossar'?{glossar:gloss.map(g=>({begriff:g.b,info:g.i,...(g.a.length?{alias:g.a}:{})}))}:list.map(s=>({kurs:s.course,titel:s.title,fragen:s.qs.map(q=>({...(q.fixed?{typ:'tf',frage:q.q,richtig:q.opts[0].ok,erklaerung:q.exp}:{typ:q.type,frage:q.q,optionen:q.opts.map(o=>o.t),richtig:q.opts.map((o,i)=>o.ok?i:-1).filter(i=>i>=0),erklaerung:q.exp,...(q.opts.some(o=>o.why)?{begruendungen:q.opts.map(o=>o.why||'')}:{})}),...(q.streak?{streak:q.streak}:{}),...(q.wrong?{wrong:true}:{})}))}));
+  const slug=crs?'-'+(crs.toLowerCase().replace(/[^a-z0-9äöüß]+/g,'-').replace(/^-|-$/g,'')||'kurs'):'';
+  try{const u=URL.createObjectURL(new Blob([JSON.stringify(out,null,1)],{type:'application/json'}));
+    const a=document.createElement('a');a.href=u;a.download='quizomat-'+kind+slug+'-'+new Date().toISOString().slice(0,10)+'.json';
+    document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);b.textContent='✓'}
+  catch(e){b.textContent='!'}
+  setTimeout(()=>{b.innerHTML=h0},2000)}
+function tog(id){sel.has(id)?sel.delete(id):sel.add(id);home()}
+function del(id){pend=pend===id?null:id;rpend=null;home()}
+function del2(id){sets=sets.filter(x=>x.id!==id);sel.delete(id);pend=null;save();home()}
+
+const GPROMPT=`Erstelle aus den angehängten Unterlagen ein Glossar der wichtigsten Fachbegriffe als JSON. Jeder Begriff bekommt 1–2 Sätze Erklärung, "alias" listet Schreibvarianten (Plural, Abkürzung). Gib nur einen JSON-Codeblock in genau diesem Format aus:
+
+{"glossar":[{"begriff":"…","info":"…","alias":["…"]}]}`;
+function parseGloss(txt){let d;try{d=JSON.parse(txt.trim().replace(/^```(?:json)?|```$/g,'').trim())}catch(e){throw new Error('Kein gültiges JSON: '+e.message)}
+  const l=(Array.isArray(d)?d:[d]).flatMap(x=>x&&x.glossar?x.glossar:x&&x.begriff?[x]:[]);
+  if(!l.length)throw new Error('Kein Glossar gefunden. Erwartet wird {"glossar":[{"begriff":…,"info":…}]}.');
+  const bad=l.findIndex(g=>!g.begriff||!g.info);if(bad>=0)throw new Error('Eintrag '+(bad+1)+': „begriff“ und „info“ sind Pflicht.');return l}
+const nav=a=>`<nav class='nav'><button class='${a==='q'?'on':''}' onclick="wp=null;qsearch='';home()">Fragen</button><button class='${a==='g'?'on':''}' onclick='glos()'>Glossar</button></nav>`;
+let gpend=null,qsearch='',gq='',gedit=null,gdraft=null,gerr='';
+function glos(){gpend=null;wp=null;gedit=null;gdraft=null;gq='';glosView()}
+function searchHtml(){return `<input id="qs" type="search" class="srch" placeholder="Fragen durchsuchen …" value="${esc(qsearch)}" oninput="qSearch(this.value)"><div id="res">${resHtml()}</div>`}
+function resHtml(){const t=qsearch.trim().toLowerCase();if(!t)return '';const r=[];sets.forEach(s=>s.qs.forEach((q,qi)=>{if((q.q+' '+q.opts.map(o=>o.t).join(' ')+' '+q.exp).toLowerCase().includes(t))r.push([s,q,qi])}));
+  return `<p class="mut">${r.length} Treffer</p>`+(r.length?`<div class="card">${r.slice(0,50).map(([s,q,qi])=>`<div class="qi"><button class="lnk" data-s="${s.id}" onclick="goQ(this.dataset.s)"><span class="mut">${esc(s.course)} › ${esc(s.title)}</span><br>${esc(q.q)}</button><span class="gc">${qBadge(s.id,qi,q)}<button class="x" title="Frage bearbeiten" aria-label="Frage bearbeiten" onclick="goQEdit('${s.id}',${qi})">${IC.edit}</button></span></div>`).join('')}</div>`+(r.length>50?'<p class="mut">Es werden nur die ersten 50 Treffer angezeigt.</p>':''):'')}
+function qSearch(v){qsearch=v;$app.classList.toggle('searching',!!v.trim());document.getElementById('res').innerHTML=resHtml()}
+function goQ(id){const s=sets.find(x=>x.id===id);qsearch='';exp.add(id);if(s)col.delete(s.course);home()}
+function goQEdit(id,qi){const s=sets.find(x=>x.id===id);qsearch='';exp.add(id);if(s)col.delete(s.course);startQEdit(id,qi)}
+function gRow(g){return `<div class="gi"><div><b>${esc(g.b)}</b>${g.a.length?`<span class="mut"> · ${esc(g.a.join(', '))}</span>`:''}<p class="mut" style="margin:.2em 0 0">${esc(g.i)}</p></div>${gpend===g.b?`<span class="gc"><span class="mut">Löschen?</span><button class="btn sm" data-b="${esc(g.b)}" onclick="delG(this.dataset.b)">Ja</button><button class="btn sec sm" onclick="gpend=null;glosView()">Nein</button></span>`:`<span class="gc"><button class="x" title="Begriff bearbeiten" aria-label="Begriff bearbeiten" data-b="${esc(g.b)}" onclick="gedit=this.dataset.b;gdraft=null;gerr='';glosView()">${IC.edit}</button><button class="x" title="Begriff löschen" aria-label="Begriff löschen" data-b="${esc(g.b)}" onclick="gpend=this.dataset.b;glosView()">${IC.x}</button></span>`}</div>`}
+function gForm(g){const d=gdraft||{b:g.b,i:g.i,a:g.a.join(', ')};return `<div class="gi ge"><div style="width:100%"><label class="mut" for="eb">Begriff</label><input id="eb" value="${esc(d.b)}"><label class="mut" for="ei">Erklärung</label><textarea id="ei" style="min-height:90px">${esc(d.i)}</textarea><label class="mut" for="ea">Alias (durch Komma getrennt)</label><input id="ea" value="${esc(d.a)}"><p class="err">${esc(gerr)}</p><div class="row act"><button class="btn sec sm" onclick="gedit=null;gdraft=null;gerr='';glosView()">Abbrechen</button><button class="btn sm" data-b="${esc(g.b)}" onclick="saveG(this.dataset.b)">Speichern</button></div></div></div>`}
+function glList(){const t=gq.trim().toLowerCase();const l=[...gloss].sort((a,b)=>a.b.localeCompare(b.b,'de')).filter(g=>!t||(g.b+' '+g.a.join(' ')+' '+g.i).toLowerCase().includes(t));
+  if(!l.length)return `<div class="card" style="margin-top:14px"><p class="mut">${gloss.length?'Keine Treffer.':'Noch keine Begriffe. Importiere ein Glossar.'}</p></div>`;
+  return `<div class="card" style="margin-top:14px">${l.map(g=>gedit===g.b?gForm(g):gRow(g)).join('')}</div>`}
+function glosView(){$app.className='';
+  $app.innerHTML=`${nav('g')}<h1>Glossar</h1><p class="mut">${gloss.length} Begriffe. Sie erscheinen nach dem Prüfen einer Antwort neben der Frage.</p><div class="row act"><button class="btn sec ico" title="Glossar importieren" aria-label="Glossar importieren" onclick="imp('glossar')">${IC.imp}</button>${gloss.length?`<button class="btn sec ico" title="Glossar exportieren" aria-label="Glossar exportieren" onclick="exportG(this)">${IC.exp}</button><span class="gc" style="gap:8px">${wp==='g'?`<span class="mut">Löschen?</span><button class="btn sm" onclick="wipe('g')">Ja</button><button class="btn sec sm" onclick="wp=null;glosView()">Nein</button>`:`<button class="btn sec ico" title="Gesamtes Glossar löschen" aria-label="Gesamtes Glossar löschen" onclick="wp='g';glosView()">${IC.del}</button>`}</span>`:''}</div>${gloss.length?`<input id="gs" type="search" class="srch" placeholder="Glossar durchsuchen …" value="${esc(gq)}" oninput="gSearch(this.value)">`:''}<div id="gl">${glList()}</div>`}
+function gSearch(v){gq=v;document.getElementById('gl').innerHTML=glList()}
+function saveG(old){const b=document.getElementById('eb').value.trim(),i=document.getElementById('ei').value.trim(),a=document.getElementById('ea').value.split(',').map(x=>x.trim()).filter(Boolean);
+  gdraft={b:document.getElementById('eb').value,i:document.getElementById('ei').value,a:document.getElementById('ea').value};
+  if(!b||!i){gerr='Begriff und Erklärung dürfen nicht leer sein.';glosView();return}
+  if(gloss.some(g=>g.b!==old&&g.b.toLowerCase()===b.toLowerCase())){gerr='Diesen Begriff gibt es schon.';glosView();return}
+  const k=gloss.findIndex(g=>g.b===old);if(k>=0)gloss[k]={b,i,a};gedit=null;gdraft=null;gerr='';
+  try{localStorage.setItem('pt:gloss',JSON.stringify(gloss))}catch(e){}glosView()}
+function delG(b){gloss=gloss.filter(g=>g.b!==b);gpend=null;try{localStorage.setItem('pt:gloss',JSON.stringify(gloss))}catch(e){}glosView()}
+let impMode='fragen';
+function imp(m){impMode=m||'fragen';$app.className='';
+  const fi=`<label class="btn sec" style="position:relative;overflow:hidden;display:inline-flex;align-items:center;cursor:pointer">Datei wählen<input id="fi" type="file" accept=".json,application/json,text/plain" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer" onclick="this.value=''" onchange="fromFile(this)"></label>`;
+  if(impMode==='glossar'){$app.innerHTML=`${nav('g')}<h1>Glossar importieren</h1><p class='mut'>Füge das JSON ein, ziehe eine .json-Datei in das Feld oder wähle sie über „Datei wählen“. Gleiche Begriffe werden überschrieben.</p><textarea id='t' placeholder='JSON hier einfügen oder .json-Datei hierher ziehen …' ondragover="event.preventDefault()" ondrop="dropFile(event)"></textarea><p class='err' id='e'>${esc(msg)}</p><div class='row'><button class='btn' onclick='doImp()'>Importieren</button>${fi}<button class='btn sec' onclick="msg='';glos()">Zurück</button></div><h2>Glossar mit Claude erstellen</h2><p class='mut'>Unterlagen in Claude hochladen und diesen Auftrag einfügen.</p><button class='btn sec' onclick='clip(GPROMPT,this)'>Auftrag kopieren</button><details><summary>Auftrag anzeigen</summary><pre>${esc(GPROMPT)}</pre></details>`;return}
+  $app.innerHTML=`${nav('q')}<h1>Fragen importieren</h1>
+  <p class="mut">Füge das JSON von Claude ein, ziehe eine .json-Datei in das Feld oder lade sie über „Datei wählen“. Mehrere Sets in einer Liste sind möglich.</p>
+  <textarea id="t" placeholder="JSON hier einfügen oder .json-Datei hierher ziehen …" ondragover="event.preventDefault()" ondrop="dropFile(event)"></textarea>
+  <p class="err" id="e">${esc(msg)}</p>
+  <div class="row"><button class="btn" onclick="doImp()">Importieren</button>
+  ${fi}
+  <button class="btn sec" onclick="msg='';home()">Zurück</button></div>
+  <h2>Für jeden neuen Kurs</h2>
+  <p class="mut">Lade deine Unterlagen in Claude hoch und kopiere diesen Auftrag dazu. Ersetze [ANZAHL] durch die gewünschte Zahl. Gib den Kursnamen ein, dann trägt der Auftrag ihn automatisch ein.</p>
+  <label>Kursname <input id="cn" list="cl" oninput="gName(this.value)" style="width:100%;margin-top:4px;background:var(--card);border:1px solid var(--bd);border-radius:6px;padding:8px"></label>
+  <datalist id="cl">${cnames.map(c=>`<option value="${esc(c)}">`).join('')}</datalist>
+  <div id="gen"></div>`;
+  gen={name:'',f:KINDS.map(x=>x[0])};renderGen();
+}
+function readAndImp(f){
+  if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{const t=document.getElementById('t');if(t)t.value=r.result;doImp()};
+  r.onerror=()=>{const e=document.getElementById('e');if(e)e.textContent='Datei konnte nicht gelesen werden.'};
+  r.readAsText(f);
+}
+function fromFile(i){const f=i.files&&i.files[0];if(f)readAndImp(f);i.value=''}
+function dropFile(ev){ev.preventDefault();const f=ev.dataTransfer&&ev.dataTransfer.files&&ev.dataTransfer.files[0];if(f)readAndImp(f)}
+const norm=s=>String(s??'').trim().replace(/\s+/g,' ').toLowerCase();
+function mergeSets(incoming){
+  incoming.forEach(ns=>{
+    let ex=sets.find(s=>norm(s.course)===norm(ns.course)&&norm(s.title)===norm(ns.title));
+    if(!ex){ex={id:ns.id,course:ns.course.trim(),title:ns.title.trim(),qs:[]};sets.push(ex)}
+    ns.qs.forEach(nq=>{
+      const eq=ex.qs.find(q=>norm(q.q)===norm(nq.q));
+      if(eq){
+        eq.type=nq.type;eq.fixed=nq.fixed;eq.exp=nq.exp;eq.opts=nq.opts;
+        eq.streak=Math.max(eq.streak||0,nq.streak||0);
+        eq.wrong=nq.streak>0?false:(nq.wrong??eq.wrong);
+      }else{
+        ex.qs.push(nq);
+      }
+    });
+    sel.add(ex.id);
+  });
+}
+function doImp(){
+  try{if(impMode==='glossar'){addGloss(parseGloss(document.getElementById('t').value));msg='';glos();return}const n=parseSets(document.getElementById('t').value);if(!n.length)throw new Error('Keine Fragen gefunden. Ein Glossar importierst du unter „Glossar importieren“.');mergeSets(n);save();msg='';home()}
+  catch(e){document.getElementById('e').textContent=e.message}
+}
+
+const KINDS=[['single','Single Choice'],['multi','Multiple Choice'],['tf','Wahr/Falsch']];
+const getF=c=>KINDS.map(x=>x[0]);
+function promptFor(c,a){a=a||getF(c);const nm={single:'Single Choice (typ "single", genau eine richtige Antwort)',multi:'Multiple Choice (typ "multi", mehrere richtige Antworten)',tf:'Wahr/Falsch (typ "tf")'};
+  let p=PROMPT.replace(/Mische Single Choice.*?\(typ "tf"\)\./s,'Verwende ausschließlich diese Fragetypen (bei mehreren gemischt): '+a.map(k=>nm[k]).join('; ')+'.');
+  if(c)p=p.replace('"kurs":"Name des Kurses"','"kurs":'+JSON.stringify(c));return p}
+function clip(t,b){(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>b.textContent='Kopiert').catch(()=>{b.textContent='Kopieren nicht möglich'})}
+function renderGen(){const el=document.getElementById('gen');if(!el)return;
+  el.innerHTML=`<button class="btn sec" onclick="copyG(this)">Auftrag kopieren</button><details><summary>Auftrag anzeigen</summary><pre>${esc(promptFor(gen.name.trim(),gen.f))}</pre></details>`}
+function saveGen(){const n=gen.name.trim();if(n){courses[n]=gen.f.slice();saveC()}}
+function gName(v){gen.name=v;const c=courses[v.trim()];if(c)gen.f=c.slice();renderGen()}
+function copyG(b){saveGen();clip(promptFor(gen.name.trim(),gen.f),b)}
+
+function weightedPick(cands,count){
+  const pool=cands.slice(),out=[];
+  while(out.length<count&&pool.length){
+    const ws=pool.map(q=>Math.max(1,qWeight(q._ref||q)));
+    const sum=ws.reduce((a,b)=>a+b,0);
+    let r=Math.random()*sum,pickIdx=pool.length-1;
+    for(let i=0;i<pool.length;i++){r-=ws[i];if(r<=0){pickIdx=i;break}}
+    out.push(pool.splice(pickIdx,1)[0]);
+  }
+  return out;
+}
+
+function start(pool){
+  let qs;
+  if(pool)qs=shuf(pool);
+  else{
+    const cands=[];
+    [...sel].forEach(id=>{const s=sets.find(x=>x.id===id);if(s)pool1(s).forEach(q=>cands.push(q))});
+    qs=weightedPick(shuf(cands),opts.n);
+  }
+  Q=qs.map(q=>{const ref=q._ref||q;return{...ref,_ref:ref,_newlyMastered:false,opts:(opts.shuffle&&!ref.fixed)?shuf(ref.opts):ref.opts.slice()}});
+  idx=0;log=[];picked=new Set();checked=false;quiz();
+}
+function quiz(){
+  const q=Q[idx],src=q._ref||q,multi=q.type==='multi',st=src.streak||0,m=isMastered(src);
+  $app.className='wide';$app.innerHTML=`<div class='cols'><div class='qhead'><div class="row" style="justify-content:space-between"><span class="mut">Frage ${idx+1} von ${Q.length}</span><button class="x" onclick="home()">Abbrechen</button></div>
+  <div class="bar"><i style="width:${(idx+(checked?1:0))/Q.length*100}%"></i></div>
+  <p class="q">${esc(q.q)}</p>${multi?'<p class="mut">Mehrere Antworten können richtig sein.</p>':''}</div><div class='opts'>
+  ${q.opts.map((o,i)=>{
+    let c='opt'+(multi?' multi':''),mk='';
+    if(!checked){if(picked.has(i)){c+=' sel';mk=multi?'✓':''}}
+    else{const p=picked.has(i);if(o.ok&&p){c+=' ok';mk='✓'}else if(o.ok){c+=' ok miss';mk='✓'}else if(p){c+=' bad';mk='✕'}}
+    return `<button class="${c}" ${checked?'disabled':''} onclick="pick(${i})" aria-pressed="${picked.has(i)}"><span class="m">${mk}</span><span>${esc(o.t)}${checked&&o.why?`<span class="why">${esc(o.why)}</span>`:''}${checked&&o.ok&&!picked.has(i)?'<span class="why">Diese Antwort wäre richtig gewesen.</span>':''}</span></button>`}).join('')}
+  ${checked?`<div class="exp"><div class="row" style="justify-content:space-between;margin-bottom:4px"><b>${log[idx]?'Richtig.':'Nicht ganz.'}</b><span class="badge ${m?'ok':src.wrong?'bad':''}" style="cursor:default">${m?`✓ Gemeistert (${st}/${opts.mastery})`:`Lernstand: ${st} / ${opts.mastery}`}</span></div>${esc(q.exp)}</div>`:''}</div><div class='qfoot'>
+  <div class="row">${checked?`<button class="btn" onclick="next()">${idx+1<Q.length?'Weiter':'Ergebnis anzeigen'}</button>`:`<button class="btn" ${picked.size?'':'disabled'} onclick="check()">Antwort prüfen</button>`}</div></div><div class='side'>${side(q)}</div></div>`;
+}
+function pick(i){
+  if(checked)return;
+  if(Q[idx].type==='multi'){picked.has(i)?picked.delete(i):picked.add(i)}else{picked=new Set([i])}
+  quiz();
+}
+function check(){
+  const q=Q[idx],src=q._ref||q,wasM=isMastered(src),ok=q.opts.every((o,i)=>o.ok===picked.has(i));
+  checked=true;log[idx]=ok;
+  if(ok){src.streak=(src.streak||0)+1;src.wrong=false;q._newlyMastered=!wasM&&isMastered(src)}
+  else{src.streak=0;src.wrong=true;q._newlyMastered=false}
+  save();quiz();
+}
+function next(){picked=new Set();checked=false;idx++;idx<Q.length?quiz():result()}
+
+function result(){$app.className='';
+  const ok=log.filter(Boolean).length,pct=Math.round(ok/Q.length*100),wrong=Q.filter((_,i)=>!log[i]),newlyM=Q.filter(q=>q._newlyMastered).length;
+  $app.innerHTML=`${nav('q')}<h1>Ergebnis</h1><div class="card"><div class="score">${ok} / ${Q.length}</div><p class="mut">${pct} % richtig${newlyM?` · ${newlyM} ${newlyM===1?'Frage':'Fragen'} neu gemeistert ✓`:''}</p></div>
+  <div class="row act" style="margin-top:14px">${wrong.length?`<button class="btn" onclick="start(wrongPool())">Falsche Fragen wiederholen (${wrong.length})</button>`:''}<button class="btn sec" onclick="home()">Zur Übersicht</button></div>
+  ${wrong.length?`<h2>Das war falsch</h2>`+wrong.map(q=>`<details><summary>${esc(q.q)}</summary><p><b>Richtig:</b> ${q.opts.filter(o=>o.ok).map(o=>esc(o.t)).join('; ')}</p><p class="mut">${esc(q.exp)}</p></details>`).join(''):'<p><b>Alles richtig.</b> Zeit für das nächste Thema.</p>'}`;
+}
+function has(t,w,short){let i=t.indexOf(w);while(i>=0){if(!short)return true;const a=t[i-1]||' ',b=t[i+w.length]||' ';if(!/[a-zäöüß]/.test(a)&&!/[a-zäöüß]/.test(b))return true;i=t.indexOf(w,i+1)}return false}
+function terms(q){const t=(q.q+' '+q.opts.map(o=>o.t).join(' ')+' '+q.exp).toLowerCase();return gloss.filter(g=>[g.b,...g.a].some(w=>{w=w.toLowerCase();return has(t,w,w.length<=4)})).slice(0,6)}
+function side(q){
+  if(!checked)return `<div class='card ph'><p class='mut' style='margin:0'>Nach dem Prüfen der Antwort erscheinen hier passende Begriffe aus dem Glossar.</p></div>`;
+  const t=terms(q);
+  return `<div class='card'><b>Weiterführende Informationen</b>${t.length?t.map(g=>`<p class='term'><b>${esc(g.b)}</b> – ${esc(g.i)}</p>`).join(''):`<p class='mut'>Zu dieser Frage ist noch kein Begriff im Glossar hinterlegt.</p>`}</div>`}
+function addGloss(l){l.forEach(g=>{if(!g||!g.begriff||!g.info)return;const o={b:String(g.begriff),i:String(g.info),a:[].concat(g.alias||[]).map(String)};const i=gloss.findIndex(x=>x.b.toLowerCase()===o.b.toLowerCase());i<0?gloss.push(o):gloss[i]=o});try{localStorage.setItem('pt:gloss',JSON.stringify(gloss))}catch(e){}}
+function wrongPool(){return Q.filter((_,i)=>!log[i])}
+
+document.addEventListener('keydown',ev=>{
+  if(!$app.classList.contains('wide')||!Q.length)return;
+  const tag=(ev.target&&ev.target.tagName)||'';
+  if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT')return;
+  if(ev.key>='1'&&ev.key<='9'&&!checked){
+    const k=+ev.key-1;
+    if(Q[idx]&&Q[idx].opts[k]){ev.preventDefault();pick(k)}
+  }else if((ev.key==='Enter'||ev.key===' ')&&tag!=='BUTTON'){
+    if(!checked&&picked.size){ev.preventDefault();check()}
+    else if(checked){ev.preventDefault();next()}
+  }else if(ev.key==='Escape'){
+    ev.preventDefault();home();
+  }
+});
+
+load();sets.forEach(s=>sel.add(s.id));home();
+</script>
+</body>
+</html>
