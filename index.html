@@ -16,12 +16,14 @@ html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:10
 html,body{max-width:100%;overflow-x:clip}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.55 "Atkinson Hyperlegible",system-ui,sans-serif;overflow-wrap:anywhere}
-#app{width:100%;max-width:720px;margin:0 auto;padding:20px 16px 60px}
+#app{width:100%;max-width:960px;margin:0 auto;padding:20px 20px 60px}
 #app.wide{max-width:1240px}
-.cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:28px;align-items:start}
+.cols{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);column-gap:28px;align-items:start}
 .cols>*{min-width:0}
-.qhead{grid-column:1;grid-row:1}.opts{grid-column:1;grid-row:2}.qfoot{grid-column:1;grid-row:3}
+.qhead{grid-column:1 / -1;grid-row:1}.opts{grid-column:1;grid-row:2}.qfoot{grid-column:1;grid-row:3}
 .side{grid-column:2;grid-row:2 / span 2;display:grid;gap:14px}
+@media (min-width:561px){.opts.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:10px}.opts.tiles .opt{margin:0;height:100%}}
+@media (min-width:700px){.ggrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 24px}.ggrid .gi:nth-child(-n+2){border-top:0}.ggrid .gi.ge{grid-column:1 / -1;border-top:1px solid var(--bd)}}
 @media (max-width:880px){.cols{grid-template-columns:minmax(0,1fr)}.qhead,.opts,.qfoot,.side{grid-column:1;grid-row:auto}.qhead{order:0}.opts{order:1}.side{order:2;margin:14px 0}.qfoot{order:3}.ph{display:none}.ge .act{justify-content:flex-end}}
 .ph{border-style:dashed}
 .mstart{display:none}
@@ -75,6 +77,8 @@ pre{white-space:pre-wrap;font-size:.85rem;background:var(--card);border:1px soli
 .nav button.on{color:var(--fg);border-bottom-color:var(--ac)}
 .nav .cnav{margin-left:auto;font-size:.88rem}
 .sdot{font-size:.8rem;font-weight:700}.sdot.ok{color:var(--ok)}.sdot.bad{color:var(--bad)}
+@media (pointer:coarse){.x{min-width:42px;min-height:42px}.ico{width:44px;height:44px}.badge{min-height:34px;padding:4px 12px}.crs input[type=checkbox],.set input[type=checkbox],.orow input[type=checkbox],.orow input[type=radio]{width:24px;height:24px}.chb,.sb{min-height:44px;align-items:center}.opt{padding:14px 16px;min-height:52px}.nav button{min-height:48px;padding:12px 16px}}
+@media (min-width:561px) and (max-width:1180px),(pointer:coarse) and (min-width:561px){#app{padding:20px 24px calc(96px + env(safe-area-inset-bottom,0px))}.dstart{display:none}.mstart,.qfoot{display:block;position:fixed;left:0;right:0;bottom:0;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:10px 24px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--bd);margin:0;z-index:5}.qfoot .row{justify-content:center}.mstart .btn,.qfoot .btn{display:block;width:100%;max-width:420px;margin:0 auto;padding:.75em 1.2em;font-size:1.02rem}}
 @media (max-width:560px){body{font-size:16px}#app{padding:14px 12px calc(134px + env(safe-area-inset-bottom,0px))}h1{font-size:1.5rem}.x{min-width:40px;min-height:40px}.ico{width:42px;height:42px}.nav{position:fixed;top:auto;bottom:0;left:0;right:0;height:calc(52px + env(safe-area-inset-bottom,0px));padding:0 8px env(safe-area-inset-bottom,0px);margin:0;background:var(--card);border-bottom:0;border-top:1px solid var(--bd);z-index:6}.nav button{flex:1;text-align:center;border-bottom:0;border-top:3px solid transparent;padding:10px 6px}.nav button.on{border-bottom-color:transparent;border-top-color:var(--ac)}.nav .cnav{margin-left:0;font-size:inherit}.dstart{display:none}.mstart{display:block;position:fixed;left:0;right:0;bottom:calc(52px + env(safe-area-inset-bottom,0px));background:var(--bg);padding:8px 14px;border-top:1px solid var(--bd);margin:0;z-index:5}.qfoot{display:block;position:fixed;left:0;right:0;bottom:0;background:var(--bg);padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--bd);margin:0;z-index:5}.mstart .btn,.qfoot .btn{width:100%}}
 @media (max-width:430px){#app{padding-left:max(14px,env(safe-area-inset-left));padding-right:max(14px,env(safe-area-inset-right))}.q{font-size:1.1rem}.opt{padding:12px;gap:10px}.set{gap:6px}.ql{margin-left:10px}.crs{gap:6px}.chb{font-size:1.05rem}}
 .gi{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;padding:10px 0;border-top:1px solid var(--bd)}.gi:first-child{border-top:0}.gi>div{min-width:0}.gc{display:flex;gap:4px;align-items:center;flex:none;margin-left:auto}
@@ -402,7 +406,7 @@ function gRow(g){return `<div class="gi"><div><b>${esc(g.b)}</b>${g.a.length?`<s
 function gForm(g){const d=gdraft||{b:g.b,i:g.i,a:g.a.join(', ')};return `<div class="gi ge"><div style="width:100%"><label class="mut" for="eb">Begriff</label><input id="eb" value="${esc(d.b)}"><label class="mut" for="ei">Erklärung</label><textarea id="ei" style="min-height:90px">${esc(d.i)}</textarea><label class="mut" for="ea">Alias (durch Komma getrennt)</label><input id="ea" value="${esc(d.a)}"><p class="err">${esc(gerr)}</p><div class="row act"><button class="btn sec sm" onclick="gedit=null;gdraft=null;gerr='';glosView()">Abbrechen</button><button class="btn sm" data-b="${esc(g.b)}" onclick="saveG(this.dataset.b)">Speichern</button></div></div></div>`}
 function glList(){const t=gq.trim().toLowerCase();const l=[...gloss].sort((a,b)=>a.b.localeCompare(b.b,'de')).filter(g=>!t||(g.b+' '+g.a.join(' ')+' '+g.i).toLowerCase().includes(t));
   if(!l.length)return `<div class="card" style="margin-top:14px"><p class="mut">${gloss.length?'Keine Treffer.':'Noch keine Begriffe. Importiere ein Glossar.'}</p></div>`;
-  return `<div class="card" style="margin-top:14px">${l.map(g=>gedit===g.b?gForm(g):gRow(g)).join('')}</div>`}
+  return `<div class="card ggrid" style="margin-top:14px">${l.map(g=>gedit===g.b?gForm(g):gRow(g)).join('')}</div>`}
 function glosView(){curView='g';$app.className='';
   $app.innerHTML=`${nav('g')}<h1>Glossar</h1><p class="mut">${gloss.length} Begriffe. Sie erscheinen nach dem Prüfen einer Antwort neben der Frage.</p><div class="row act"><button class="btn sec ico" title="Glossar importieren" aria-label="Glossar importieren" onclick="imp('glossar')">${IC.imp}</button>${gloss.length?`<button class="btn sec ico" title="Glossar exportieren" aria-label="Glossar exportieren" onclick="exportG(this)">${IC.exp}</button><span class="gc" style="gap:8px">${wp==='g'?`<span class="mut">Löschen?</span><button class="btn sm" onclick="wipe('g')">Ja</button><button class="btn sec sm" onclick="wp=null;glosView()">Nein</button>`:`<button class="btn sec ico" title="Gesamtes Glossar löschen" aria-label="Gesamtes Glossar löschen" onclick="wp='g';glosView()">${IC.del}</button>`}</span>`:''}</div>${gloss.length?`<input id="gs" type="search" class="srch" placeholder="Glossar durchsuchen …" value="${esc(gq)}" oninput="gSearch(this.value)">`:''}<div id="gl">${glList()}</div>`}
 function gSearch(v){gq=v;document.getElementById('gl').innerHTML=glList()}
@@ -500,16 +504,16 @@ function start(pool){
   idx=0;log=[];picked=new Set();checked=false;quiz();toTop();
 }
 function quiz(){curView='z';
-  const q=Q[idx],src=q._ref||q,multi=q.type==='multi',st=src.streak||0,m=isMastered(src);
+  const q=Q[idx],src=q._ref||q,multi=q.type==='multi',tiles=q.opts.every(o=>o.t.length<=55&&!o.why);
   $app.className='wide';$app.innerHTML=`<div class='cols'><div class='qhead'><div class="row" style="justify-content:space-between"><span class="mut">Frage ${idx+1} von ${Q.length}</span><span class="gc"><button class="badge${src.flagged?' warn':''}" title="Frage zum späteren Bearbeiten markieren (Taste M)" onclick="togQuizFlag()">${IC.flag} ${src.flagged?'Markiert':'Später bearbeiten'}</button><button class="x" onclick="home()">Abbrechen</button></span></div>
   <div class="bar"><i style="width:${(idx+(checked?1:0))/Q.length*100}%"></i></div>
-  <p class="q">${esc(q.q)}</p>${multi?'<p class="mut">Mehrere Antworten können richtig sein.</p>':''}</div><div class='opts'>
+  <p class="q">${esc(q.q)}</p>${multi?'<p class="mut">Mehrere Antworten können richtig sein.</p>':''}</div><div class='opts${tiles?' tiles':''}'>
   ${q.opts.map((o,i)=>{
     let c='opt'+(multi?' multi':''),mk='';
     if(!checked){if(picked.has(i)){c+=' sel';mk=multi?'✓':''}}
     else{const p=picked.has(i);if(o.ok&&p){c+=' ok';mk='✓'}else if(o.ok){c+=' ok miss';mk='✓'}else if(p){c+=' bad';mk='✕'}}
     return `<button class="${c}" ${checked?'disabled':''} onclick="pick(${i})" aria-pressed="${picked.has(i)}"><span class="m">${mk}</span><span>${esc(o.t)}${checked&&o.why?`<span class="why">${esc(o.why)}</span>`:''}${checked&&o.ok&&!picked.has(i)?'<span class="why">Diese Antwort wäre richtig gewesen.</span>':''}</span></button>`}).join('')}
-  ${checked?`<div class="exp"><div class="row" style="justify-content:space-between;margin-bottom:4px"><b>${log[idx]?'Richtig.':'Nicht ganz.'}</b><span class="badge ${m?'ok':src.wrong?'bad':''}" style="cursor:default">${m?`✓ Gemeistert (${st}/${opts.mastery})`:`Lernstand: ${st} / ${opts.mastery}`}</span></div>${esc(q.exp)}</div>`:''}</div><div class='qfoot'>
+  </div><div class='qfoot'>
   <div class="row">${checked?`<button class="btn" onclick="next()">${idx+1<Q.length?'Weiter':'Ergebnis anzeigen'}</button>`:`<button class="btn" ${picked.size?'':'disabled'} onclick="check()">Antwort prüfen</button>`}</div></div><div class='side'>${side(q)}</div></div>`;
 }
 function pick(i){
@@ -537,9 +541,9 @@ function result(){const chg=curView!=='r';curView='r';$app.className='';
 function has(t,w,short){let i=t.indexOf(w);while(i>=0){if(!short)return true;const a=t[i-1]||' ',b=t[i+w.length]||' ';if(!/[a-zäöüß]/.test(a)&&!/[a-zäöüß]/.test(b))return true;i=t.indexOf(w,i+1)}return false}
 function terms(q){const t=(q.q+' '+q.opts.map(o=>o.t).join(' ')+' '+q.exp).toLowerCase();return gloss.filter(g=>[g.b,...g.a].some(w=>{w=w.toLowerCase();return has(t,w,w.length<=4)})).slice(0,6)}
 function side(q){
-  if(!checked)return `<div class='card ph'><p class='mut' style='margin:0'>Nach dem Prüfen der Antwort erscheinen hier passende Begriffe aus dem Glossar.</p></div>`;
-  const t=terms(q);
-  return `<div class='card'><b>Weiterführende Informationen</b>${t.length?t.map(g=>`<p class='term'><b>${esc(g.b)}</b> – ${esc(g.i)}</p>`).join(''):`<p class='mut'>Zu dieser Frage ist noch kein Begriff im Glossar hinterlegt.</p>`}</div>`}
+  if(!checked)return `<div class='card ph'><p class='mut' style='margin:0'>Nach dem Prüfen der Antwort erscheinen hier die Erklärung und passende Begriffe aus dem Glossar.</p></div>`;
+  const src=q._ref||q,st=src.streak||0,m=isMastered(src),t=terms(q);
+  return `<div class="exp" style="margin:0"><div class="row" style="justify-content:space-between;margin-bottom:4px"><b>${log[idx]?'Richtig.':'Nicht ganz.'}</b><span class="badge ${m?'ok':src.wrong?'bad':''}" style="cursor:default">${m?`✓ Gemeistert (${st}/${opts.mastery})`:`Lernstand: ${st} / ${opts.mastery}`}</span></div>${esc(q.exp)}</div><div class='card'><b>Weiterführende Informationen</b>${t.length?t.map(g=>`<p class='term'><b>${esc(g.b)}</b> – ${esc(g.i)}</p>`).join(''):`<p class='mut'>Zu dieser Frage ist noch kein Begriff im Glossar hinterlegt.</p>`}</div>`}
 function addGloss(l,noSave){l.forEach(g=>{if(!g||!g.begriff||!g.info)return;const o={b:String(g.begriff),i:String(g.info),a:[].concat(g.alias||[]).map(String)};const i=gloss.findIndex(x=>x.b.toLowerCase()===o.b.toLowerCase());i<0?gloss.push(o):gloss[i]=o});if(!noSave)saveGloss()}
 function wrongPool(){return Q.filter((_,i)=>!log[i])}
 
