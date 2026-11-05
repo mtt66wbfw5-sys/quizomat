@@ -61,7 +61,7 @@ img,svg,pre,textarea,button,.card{max-width:100%}.row>*{min-width:0}
 .opt.ok .m{background:var(--ok);border-color:var(--ok);color:var(--bg)}.opt.bad .m{background:var(--bad);border-color:var(--bad);color:var(--bg)}
 .opt.miss{border-style:dashed;box-shadow:none}
 .why{display:block;font-size:.93rem;color:var(--mut);margin-top:4px}
-.exp{border-left:4px solid var(--ac);padding:8px 14px;margin:14px 0;background:var(--card);border-radius:0 8px 8px 0}
+.exp{border:1px solid color-mix(in srgb,var(--ac) 40%,var(--bd));border-left:4px solid var(--ac);padding:12px 14px;margin:14px 0;background:color-mix(in srgb,var(--ac) 8%,var(--card));border-radius:8px}
 .score{font-size:2.6rem;font-weight:700;line-height:1;color:var(--fg)}
 textarea{width:100%;min-height:200px;background:var(--card);border:1px solid var(--ink);border-radius:8px;padding:10px;font:14px/1.4 ui-monospace,monospace}
 input[type=number]{width:4.5em;background:var(--card);border:1px solid var(--ink);border-radius:6px;padding:4px 8px}
@@ -670,7 +670,7 @@ function resQList(title){
       else if(o.ok){c+=' ok miss';mk='✓';note='Richtige Antwort'}
       else if(pk){c+=' bad';mk='✕';note='Deine Antwort (falsch)'}
       return `<div class="${c}" style="cursor:default${!o.ok&&!pk?';opacity:.72':''}"><span class="m">${mk}</span><span>${esc(o.t)}${note||o.why?`<span class="why">${note?`<b>${note}</b>${o.why?' · ':''}`:''}${esc(o.why||'')}</span>`:''}</span></div>`;
-    }).join('')}${q.exp?`<div class="exp" style="margin:6px 0 2px;background:var(--bg)"><b>Erklärung:</b> ${esc(q.exp)}</div>`:''}</div>`:''}</div>`;
+    }).join('')}${q.exp?`<div class="exp" style="margin:8px 0 2px"><b style="color:var(--ac);display:block;margin-bottom:2px">Begründung</b>${esc(q.exp)}</div>`:''}</div>`:''}</div>`;
   }).join('')}`;
 }
 
@@ -702,7 +702,7 @@ function terms(q){const t=(q.q+' '+q.opts.map(o=>o.t).join(' ')+' '+q.exp).toLow
 function side(q){
   if(!checked)return `<div class='card ph'><p class='mut' style='margin:0'>Nach dem Prüfen der Antwort erscheinen hier die Erklärung und passende Begriffe aus dem Glossar.</p></div>`;
   const src=q._ref||q,st=src.streak||0,m=isMastered(src),t=terms(q),whys=q.opts.filter(o=>o.why);
-  return `<div class="exp" style="margin:0"><div class="row" style="justify-content:space-between;margin-bottom:4px"><b>${log[idx]?'Richtig.':'Nicht ganz.'}</b><span class="badge ${m?'ok':src.wrong?'bad':''}" style="cursor:default">${m?`✓ Gemeistert (${st}/${opts.mastery})`:`Lernstand: ${st} / ${opts.mastery}`}</span></div>${esc(q.exp)}${whys.length?`<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--bd)">${whys.map(o=>`<p class="why" style="margin:4px 0"><b style="color:var(${o.ok?'--ok':'--bad'})">${o.ok?'✓':'✕'} ${esc(o.t)}:</b> ${esc(o.why)}</p>`).join('')}</div>`:''}</div><div class='card'><b>Weiterführende Informationen</b>${t.length?t.map(g=>`<p class='term'><b>${esc(g.b)}</b> – ${esc(g.i)}</p>`).join(''):`<p class='mut'>Zu dieser Frage ist noch kein Begriff im Glossar hinterlegt.</p>`}</div>`}
+  return `<div class="exp" style="margin:0"><div class="row" style="justify-content:space-between;margin-bottom:4px"><b style="color:var(--ac)">${log[idx]?'Richtig – Begründung':'Nicht ganz – Begründung'}</b><span class="badge ${m?'ok':src.wrong?'bad':''}" style="cursor:default">${m?`✓ Gemeistert (${st}/${opts.mastery})`:`Lernstand: ${st} / ${opts.mastery}`}</span></div>${esc(q.exp)}${whys.length?`<div style="margin-top:8px;padding-top:8px;border-top:1px solid color-mix(in srgb,var(--ac) 25%,var(--bd))">${whys.map(o=>`<p class="why" style="margin:4px 0"><b style="color:var(${o.ok?'--ok':'--bad'})">${o.ok?'✓':'✕'} ${esc(o.t)}:</b> ${esc(o.why)}</p>`).join('')}</div>`:''}</div><div class='card'><b>Weiterführende Informationen</b>${t.length?t.map(g=>`<p class='term'><b>${esc(g.b)}</b> – ${esc(g.i)}</p>`).join(''):`<p class='mut'>Zu dieser Frage ist noch kein Begriff im Glossar hinterlegt.</p>`}</div>`}
 function addGloss(l,noSave){l.forEach(g=>{if(!g||!g.begriff||!g.info)return;const o={b:String(g.begriff),i:String(g.info),a:[].concat(g.alias||[]).map(String)};const i=gloss.findIndex(x=>x.b.toLowerCase()===o.b.toLowerCase());i<0?gloss.push(o):gloss[i]=o});if(!noSave)saveGloss()}
 function wrongPool(){return Q.filter((_,i)=>!log[i])}
 
