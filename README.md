@@ -12,25 +12,37 @@ Interaktiver Prüfungs- und Vorlesungstrainer zum Üben, Auswerten und Verwalten
   - **Single Choice** (`single`) – genau eine richtige Antwort
   - **Multiple Choice** (`multi`) – mehrere richtige Antworten möglich
   - **Wahr / Falsch** (`tf`) – Aussagen bewerten
-- **Adaptives Lernsystem:**
+- **Übungsmodus (Adaptives Lernsystem):**
+  - Fragen und Antwortoptionen werden bei jedem Durchgang automatisch gemischt.
   - Jede Frage merkt sich die Serie richtiger Antworten in Folge (`streak`) sowie Fehlversuche (`wrong`).
-  - **Gemeistert ab 3× richtig in Folge (`✓ Gemeistert`):** Gemeisterte Fragen können im Quiz automatisch ausgeblendet werden.
+  - **Gemeistert ab 3× richtig in Folge (`✓ Gemeistert`):** Gemeisterte Fragen werden beim Üben automatisch ausgeblendet, damit der Fokus auf noch offenen Fragen liegt.
   - **Intelligente Gewichtung:** Zuletzt falsch beantwortete und noch unbekannte Fragen werden bei der Quiz-Zusammenstellung bevorzugt gezogen.
-  - Der Lernstand lässt sich pro Frage per Klick umschalten sowie pro Kapitel oder global zurücksetzen.
+  - Der Lernstand lässt sich jederzeit pro Frage per Klick umschalten sowie pro Kapitel oder global zurücksetzen.
+- **Prüfungsmodus & Notenschemata:**
+  - **Einstellbarer Countdown-Timer:** Prüfungszeit in Minuten frei wählbar; mit visueller Warnung (ab 5 Min. gelb, ab 1 Min. rot) und automatischer Abgabe bei Zeitablauf.
+  - **Prüfungsnahe Fragenauswahl:** Zieht proportional aus allen ausgewählten Kapiteln (inklusive bereits gemeisterter Fragen) ohne sofortiges Feedback während der Bearbeitung.
+  - **Fragen-Navigator:** Freies Springen zwischen allen Prüfungsfragen, Statusanzeige (beantwortet / offen) und **„⚑ Später prüfen“**-Lesezeichen (Taste `L`).
+  - **Kursabhängige Benotung (Noten 1 bis 5):** Pro Kurs kann zwischen drei Notenschemata gewählt werden (*Sehr gut, Gut, Befriedigend, Genügend, Nicht genügend*):
+    - **Positiv ab 50 %** (1: ≥ 87,5 % · 2: ≥ 75 % · 3: ≥ 62,5 % · 4: ≥ 50 % · 5: < 50 %)
+    - **Positiv ab 60 %** (1: ≥ 90 % · 2: ≥ 80 % · 3: ≥ 70 % · 4: ≥ 60 % · 5: < 60 %)
+    - **Positiv ab 70 %** (1: ≥ 92,5 % · 2: ≥ 85 % · 3: ≥ 77,5 % · 4: ≥ 70 % · 5: < 70 %)
+  - **Detaillierte Klausureinsicht & Auswertung:** Aufschlüsselung nach Kapiteln sowie aufklappbare Übersicht aller beantworteten Fragen (standardmäßig sind falsch oder unbeantwortet gebliebene Fragen direkt geöffnet) inklusive Einzelbegründungen und Gesamt-Begründung.
 - **Integriertes Glossar:**
-  - Fachbegriffe (inkl. Alias-Schreibweisen) werden beim Prüfen einer Antwort automatisch im Fragetext, den Optionen und der Erklärung erkannt und direkt neben bzw. unter der Frage erläutert.
-- **Direktes Bearbeiten (Inline-Editor):**
-  - Kurse, Kapitel/Themen, einzelne Fragen (inkl. Fragetyp, Antwortoptionen, Begründungen und Erklärung) sowie Glossareinträge lassen sich direkt im Browser bearbeiten.
+  - Fachbegriffe (inkl. Alias-Schreibweisen) werden beim Prüfen einer Antwort automatisch im Fragetext, den Optionen und der Erklärung erkannt und direkt neben der Frage erläutert.
+- **Direktes Bearbeiten, Markieren & Verwalten:**
+  - Kurse (inkl. Notenschema), Kapitel/Themen, einzelne Fragen (inkl. Fragetyp, Antwortoptionen, Begründungen und Erklärung) sowie Glossareinträge lassen sich direkt im Browser bearbeiten oder mit Sicherheitsabfrage löschen.
+  - Fragen können während des Quiz/der Prüfung oder in der Auswertung mit einem Fähnchen (Taste `M`) zum späteren Überarbeiten markiert werden.
 - **Import & Export (inkl. Duplikatschutz & Lernstand):**
   - Fragen und Glossare können per JSON-Text, Dateiauswahl oder Drag & Drop importiert werden.
   - Bereits vorhandene Kurse, Kapitel und Fragen werden beim Import automatisch zusammengeführt (keine doppelten Fragen), wobei der höhere Lernstand erhalten bleibt.
-  - Export aller Fragen, einzelner Kurse oder des Glossars als `.json`-Datei (inkl. aktuellem Lernstand `streak` / `wrong`).
+  - Export aller Fragen, einzelner Kurse oder des Glossars als `.json`-Datei (inkl. aktuellem Lernstand `streak` / `wrong` / `flagged`).
 - **Automatischer Cloud-Sync (GitHub):**
   - Über das Wolken-Symbol in der oberen Navigationsleiste kann ein GitHub Personal Access Token (`repo`-Berechtigung) hinterlegt werden.
-  - Quizomat legt automatisch ein privates Repository (`quizomat-sync`) an und synchronisiert Fragen, Lernstand und Glossar im Hintergrund zwischen Mac und iPhone.
-- **Optimiert für Mac & iPhone:**
-  - **Mac / Desktop:** Zweispaltiges Quiz-Layout und vollständige Tastatursteuerung (`1`–`9` zur Antwortauswahl, `Enter` / `Leertaste` zum Prüfen & Weiterblättern, `Esc` zum Abbrechen).
-  - **iPhone / Mobil:** Einhand-optimierte Sticky-Buttons am unteren Bildschirmrand, Safe-Area-Unterstützung und als Vollbild-Web-App über *„Teilen → Zum Home-Bildschirm“* installierbar.
+  - Quizomat legt automatisch ein privates Repository (`quizomat-sync`) an und synchronisiert Fragen, Kurseinstellungen, Lernstand und Glossar im Hintergrund zwischen Mac, iPad und iPhone.
+- **Optimiert für Mac, iPad & iPhone:**
+  - **Mac / Desktop:** Zweispaltiges Layout mit untereinanderstehenden Antworten und vollständiger Tastatursteuerung (`1`–`9` zur Antwortauswahl, `Enter` / `Leertaste` zum Prüfen & Weiterblättern, `←` / `→` und `L` im Prüfungsmodus, `M` zum Markieren, `Esc` zum Abbrechen).
+  - **iPad / Tablet:** Übersichtliches 2×2-Kachel-Layout für kurze Antwortoptionen, vergrößerte Touch-Ziele und eine fixierte untere Aktionsleiste für bequemes Tippen im Hoch- und Querformat.
+  - **iPhone / Mobil:** Einhand-optimierte untere Navigations- und Aktionsleiste, Safe-Area-Unterstützung und als Vollbild-Web-App über *„Teilen → Zum Home-Bildschirm“* installierbar.
   - Automatischer **Hell-/Dunkelmodus** passend zur Systemeinstellung.
 
 ---
