@@ -527,7 +527,7 @@ function start(pool){
     qs=weightedPick(shuf(cands),opts.n);
   }
   Q=qs.map(q=>{const ref=q._ref||q;return{...ref,_ref:ref,_course:q._course||'',_title:q._title||'',_newlyMastered:false,opts:(opts.shuffle&&!ref.fixed)?shuf(ref.opts):ref.opts.slice()}});
-  idx=0;log=[];picked=new Set();checked=false;quiz();toTop();
+  idx=0;log=[];picked=new Set();examPicks=Q.map(()=>new Set());checked=false;quiz();toTop();
 }
 function startExam(){
   stopExamTimer();
@@ -622,6 +622,7 @@ function pick(i){
 }
 function check(){
   const q=Q[idx],src=q._ref||q,wasM=isMastered(src),ok=q.opts.every((o,i)=>o.ok===picked.has(i));
+  examPicks[idx]=new Set(picked);
   checked=true;log[idx]=ok;
   if(ok){src.streak=(src.streak||0)+1;src.wrong=false;q._newlyMastered=!wasM&&isMastered(src)}
   else{src.streak=0;src.wrong=true;q._newlyMastered=false}
@@ -640,14 +641,30 @@ function examSide(){
   ${examSubPend?`<div class="card" style="border-color:var(--warn);padding:10px 12px;margin-top:8px"><p style="margin:0 0 8px"><b>Noch ${openCnt} ${openCnt===1?'Frage':'Fragen'} unbeantwortet.</b><br><span class="mut">Nicht beantwortete Fragen werden als falsch gewertet.</span></p><div class="row"><button class="btn sm" onclick="finishExam(false)">Jetzt abgeben</button><button class="btn sec sm" onclick="examSubPend=false;quiz()">Weiterarbeiten</button></div></div>`:`<button class="btn${openCnt?' sec':''}" style="width:100%" onclick="tryFinishExam()">Prüfung abgeben (${ansCnt}/${Q.length})</button>`}</div>`;
 }
 
-function examQDetail(q,i){
-  const p=examPicks[i]||new Set(),ok=log[i],whys=q.opts.filter(o=>o.why);
-  const pickedTxt=p.size?q.opts.filter((_,k)=>p.has(k)).map(o=>esc(o.t)).join('; '):'<i>Keine Antwort gewählt</i>';
-  const rightTxt=q.opts.filter(o=>o.ok).map(o=>esc(o.t)).join('; ');
-  return `<details ${!ok?'open':''}><summary><span style="color:var(${ok?'--ok':'--bad'});font-weight:700">${ok?'✓':'✕'} Frage ${i+1}:</span> ${esc(q.q)}</summary><div style="padding:6px 0 4px"><p><b>Deine Antwort:</b> ${pickedTxt}</p>${!ok?`<p><b>Richtig:</b> ${rightTxt}</p>`:''}${q.exp?`<p class="mut">${esc(q.exp)}</p>`:''}${whys.length?`<div style="margin-top:6px">${whys.map(o=>`<p class="why" style="margin:3px 0"><b style="color:var(${o.ok?'--ok':'--bad'})">${o.ok?'✓':'✕'} ${esc(o.t)}:</b> ${esc(o.why)}</p>`).join('')}</div>`:''}</div></details>`;
+let rexp=new Set();
+function togRexp(i){rexp.has(i)?rexp.delete(i):rexp.add(i);result()}
+function togAllRexp(){if(rexp.size===Q.length)rexp.clear();else Q.forEach((_,i)=>rexp.add(i));result()}
+function togResFlag(i){
+  const q=Q[i],src=q&&(q._ref||q);if(!src)return;
+  src.flagged=!src.flagged;q.flagged=src.flagged;
+  save(true);result();
+}
+function resQList(title){
+  return `<div class="row" style="justify-content:space-between;margin:1.4em 0 .5em"><h2 style="margin:0">${title} (${Q.length})</h2><button class="btn sec sm" onclick="togAllRexp()">${rexp.size===Q.length?'Alle zuklappen':'Alle aufklappen'}</button></div>
+  <div class="card grp" style="padding:6px 16px">${Q.map((q,i)=>{
+    const p=examPicks[i]||new Set(),ok=log[i],src=q._ref||q,open=rexp.has(i),multi=q.type==='multi';
+    return `<div class="set"><button class="sb" aria-expanded="${open}" onclick="togRexp(${i})"><span>${open?'▾':'▸'}</span><span>${esc(q.q)}<span class="mut"> – Frage ${i+1}${q._title?` · ${esc(q._title)}`:''}</span></span></button><span class="gc"><span class="badge ${ok?'ok':p.size?'bad':'warn'}" style="cursor:default">${ok?'✓ Richtig':p.size?'✕ Falsch':'Offen'}</span><button class="x${src.flagged?' warn':''}" title="${src.flagged?'Markierung aufheben':'Zum Bearbeiten markieren'}" aria-label="Markieren" onclick="togResFlag(${i})">${IC.flag}</button></span>${open?`<div class="ql" style="margin:8px 0 6px 22px">${!p.size?`<p class="mut" style="margin:0 0 8px;color:var(--warn)"><b>Keine Antwort ausgewählt.</b></p>`:''}${q.opts.map((o,k)=>{
+      const pk=p.has(k);let c='opt'+(multi?' multi':''),mk='',note='';
+      if(o.ok&&pk){c+=' ok';mk='✓';note='Deine Antwort (richtig)'}
+      else if(o.ok){c+=' ok miss';mk='✓';note='Richtige Antwort'}
+      else if(pk){c+=' bad';mk='✕';note='Deine Antwort (falsch)'}
+      return `<div class="${c}" style="cursor:default${!o.ok&&!pk?';opacity:.72':''}"><span class="m">${mk}</span><span>${esc(o.t)}${note||o.why?`<span class="why">${note?`<b>${note}</b>${o.why?' · ':''}`:''}${esc(o.why||'')}</span>`:''}</span></div>`;
+    }).join('')}${q.exp?`<div class="exp" style="margin:6px 0 4px;background:var(--bg)"><b>Erklärung:</b> ${esc(q.exp)}</div>`:''}</div>`:''}</div>`;
+  }).join('')}</div>`;
 }
 
 function result(){stopExamTimer();const chg=curView!=='r';curView='r';$app.className='';
+  if(chg)rexp=new Set(Q.map((_,i)=>i).filter(i=>!log[i]));
   const ok=log.filter(Boolean).length,exactPct=Q.length?ok/Q.length*100:0,pct=Math.round(exactPct),wrong=Q.filter((_,i)=>!log[i]),newlyM=Q.filter(q=>q._newlyMastered).length;
   if(examMode){
     const passPct=getPass(examCourse),gr=calcGrade(exactPct,passPct),st=gr.st;
@@ -659,15 +676,14 @@ function result(){stopExamTimer();const chg=curView!=='r';curView='r';$app.class
     ${chEntries.length>1?`<div class="card" style="margin-top:12px"><b>Auswertung nach Kapiteln</b><div style="margin-top:6px">${chEntries.map(([t,v])=>{const cp=Math.round(v.ok/v.tot*100);return `<div class="qi" style="padding:6px 0"><span>${esc(t)}</span><span class="badge ${cp>=passPct?'ok':'bad'}" style="cursor:default">${v.ok} / ${v.tot} (${cp} %)</span></div>`}).join('')}</div></div>`:''}
     <div class="row act" style="margin-top:14px"><button class="btn" onclick="startExam()">Neue Prüfung starten</button>${wrong.length?`<button class="btn sec" onclick="start(wrongPool())">Falsche Fragen üben (${wrong.length})</button>`:''}<button class="btn sec" onclick="home()">Zur Übersicht</button></div>
     ${flaggedHtml()}
-    <h2>Klausureinsicht (${Q.length} Fragen)</h2>
-    ${Q.map((q,i)=>examQDetail(q,i)).join('')}`;
+    ${resQList('Klausureinsicht')}`;
     if(chg)toTop();
     return;
   }
   $app.innerHTML=`${nav('q')}<h1>Ergebnis</h1><div class="card"><div class="score">${ok} / ${Q.length}</div><p class="mut">${pct} % richtig${newlyM?` · ${newlyM} ${newlyM===1?'Frage':'Fragen'} neu gemeistert ✓`:''}</p></div>
   <div class="row act" style="margin-top:14px">${wrong.length?`<button class="btn" onclick="start(wrongPool())">Falsche Fragen wiederholen (${wrong.length})</button>`:''}<button class="btn sec" onclick="home()">Zur Übersicht</button></div>
   ${flaggedHtml()}
-  ${wrong.length?`<h2>Das war falsch</h2>`+wrong.map(q=>`<details><summary>${esc(q.q)}</summary><p><b>Richtig:</b> ${q.opts.filter(o=>o.ok).map(o=>esc(o.t)).join('; ')}</p><p class="mut">${esc(q.exp)}</p></details>`).join(''):'<p><b>Alles richtig.</b> Zeit für das nächste Thema.</p>'}`;
+  ${resQList('Beantwortete Fragen')}`;
   if(chg)toTop();
 }
 function has(t,w,short){let i=t.indexOf(w);while(i>=0){if(!short)return true;const a=t[i-1]||' ',b=t[i+w.length]||' ';if(!/[a-zäöüß]/.test(a)&&!/[a-zäöüß]/.test(b))return true;i=t.indexOf(w,i+1)}return false}
