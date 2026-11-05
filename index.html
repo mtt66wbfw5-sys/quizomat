@@ -61,7 +61,7 @@ img,svg,pre,textarea,button,.card{max-width:100%}.row>*{min-width:0}
 .opt.ok .m{background:var(--ok);border-color:var(--ok);color:var(--bg)}.opt.bad .m{background:var(--bad);border-color:var(--bad);color:var(--bg)}
 .opt.miss{border-style:dashed;box-shadow:none}
 .why{display:block;font-size:.93rem;color:var(--mut);margin-top:4px}
-.exp{border:1px solid color-mix(in srgb,var(--ac) 40%,var(--bd));border-left:4px solid var(--ac);padding:12px 14px;margin:14px 0;background:color-mix(in srgb,var(--ac) 8%,var(--card));border-radius:8px}
+.exp{border:1.5px solid var(--ac);padding:12px 14px;margin:14px 0;background:color-mix(in srgb,var(--ac) 8%,var(--card));border-radius:8px}
 .score{font-size:2.6rem;font-weight:700;line-height:1;color:var(--fg)}
 textarea{width:100%;min-height:200px;background:var(--card);border:1px solid var(--ink);border-radius:8px;padding:10px;font:14px/1.4 ui-monospace,monospace}
 input[type=number]{width:4.5em;background:var(--card);border:1px solid var(--ink);border-radius:6px;padding:4px 8px}
@@ -617,7 +617,7 @@ function quiz(){curView='z';
     let c='opt'+(multi?' multi':''),mk='';
     if(!checked){if(picked.has(i)){c+=' sel';mk=multi?'✓':''}}
     else{const p=picked.has(i);if(o.ok&&p){c+=' ok';mk='✓'}else if(o.ok){c+=' ok miss';mk='✓'}else if(p){c+=' bad';mk='✕'}}
-    return `<button class="${c}" ${checked?'disabled':''} onclick="pick(${i})" aria-pressed="${picked.has(i)}"><span class="m">${mk}</span><span>${esc(o.t)}</span></button>`}).join('')}
+    return `<button class="${c}" ${checked?'disabled':''} onclick="pick(${i})" aria-pressed="${picked.has(i)}"><span class="m">${mk}</span><span>${esc(o.t)}${checked&&o.why?`<span class="why">${esc(o.why)}</span>`:''}</span></button>`}).join('')}
   </div><div class='qfoot'>
   <div class="row">${checked?`<button class="btn" onclick="next()">${idx+1<Q.length?'Weiter':'Ergebnis anzeigen'}</button>`:`<button class="btn" ${picked.size?'':'disabled'} onclick="check()">Antwort prüfen</button>`}</div></div></div><div class='side'>${side(q)}</div></div>`;
 }
@@ -700,9 +700,9 @@ function result(){stopExamTimer();const chg=curView!=='r';curView='r';$app.class
 function has(t,w,short){let i=t.indexOf(w);while(i>=0){if(!short)return true;const a=t[i-1]||' ',b=t[i+w.length]||' ';if(!/[a-zäöüß]/.test(a)&&!/[a-zäöüß]/.test(b))return true;i=t.indexOf(w,i+1)}return false}
 function terms(q){const t=(q.q+' '+q.opts.map(o=>o.t).join(' ')+' '+q.exp).toLowerCase();return gloss.filter(g=>[g.b,...g.a].some(w=>{w=w.toLowerCase();return has(t,w,w.length<=4)})).slice(0,6)}
 function side(q){
-  if(!checked)return `<div class='card ph'><p class='mut' style='margin:0'>Nach dem Prüfen der Antwort erscheinen hier die Erklärung und passende Begriffe aus dem Glossar.</p></div>`;
-  const src=q._ref||q,st=src.streak||0,m=isMastered(src),t=terms(q),whys=q.opts.filter(o=>o.why);
-  return `<div class="exp" style="margin:0"><div class="row" style="justify-content:space-between;margin-bottom:4px"><b style="color:var(--ac)">${log[idx]?'Richtig – Begründung':'Nicht ganz – Begründung'}</b><span class="badge ${m?'ok':src.wrong?'bad':''}" style="cursor:default">${m?`✓ Gemeistert (${st}/${opts.mastery})`:`Lernstand: ${st} / ${opts.mastery}`}</span></div>${esc(q.exp)}${whys.length?`<div style="margin-top:8px;padding-top:8px;border-top:1px solid color-mix(in srgb,var(--ac) 25%,var(--bd))">${whys.map(o=>`<p class="why" style="margin:4px 0"><b style="color:var(${o.ok?'--ok':'--bad'})">${o.ok?'✓':'✕'} ${esc(o.t)}:</b> ${esc(o.why)}</p>`).join('')}</div>`:''}</div><div class='card'><b>Weiterführende Informationen</b>${t.length?t.map(g=>`<p class='term'><b>${esc(g.b)}</b> – ${esc(g.i)}</p>`).join(''):`<p class='mut'>Zu dieser Frage ist noch kein Begriff im Glossar hinterlegt.</p>`}</div>`}
+  if(!checked)return `<div class='card ph'><p class='mut' style='margin:0'>Nach dem Prüfen der Antwort erscheinen hier die Begründung und passende Begriffe aus dem Glossar.</p></div>`;
+  const src=q._ref||q,st=src.streak||0,m=isMastered(src),t=terms(q);
+  return `<div class="exp" style="margin:0"><div class="row" style="justify-content:space-between;margin-bottom:4px"><b style="color:var(--ac)">${log[idx]?'Richtig – Begründung':'Nicht ganz – Begründung'}</b><span class="badge ${m?'ok':src.wrong?'bad':''}" style="cursor:default">${m?`✓ Gemeistert (${st}/${opts.mastery})`:`Lernstand: ${st} / ${opts.mastery}`}</span></div>${esc(q.exp)}</div><div class='card'><b>Weiterführende Informationen</b>${t.length?t.map(g=>`<p class='term'><b>${esc(g.b)}</b> – ${esc(g.i)}</p>`).join(''):`<p class='mut'>Zu dieser Frage ist noch kein Begriff im Glossar hinterlegt.</p>`}</div>`}
 function addGloss(l,noSave){l.forEach(g=>{if(!g||!g.begriff||!g.info)return;const o={b:String(g.begriff),i:String(g.info),a:[].concat(g.alias||[]).map(String)};const i=gloss.findIndex(x=>x.b.toLowerCase()===o.b.toLowerCase());i<0?gloss.push(o):gloss[i]=o});if(!noSave)saveGloss()}
 function wrongPool(){return Q.filter((_,i)=>!log[i])}
 
