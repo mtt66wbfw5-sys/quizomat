@@ -20,11 +20,11 @@ body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.55 "Atkinson Hype
 #app.wide{max-width:1240px}
 .cols{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);column-gap:28px;align-items:start}
 .cols>*{min-width:0}
-.qhead{grid-column:1 / -1;grid-row:1}.opts{grid-column:1;grid-row:2}.qfoot{grid-column:1;grid-row:3}
-.side{grid-column:2;grid-row:2 / span 2;display:grid;gap:14px}
-@media (min-width:561px){.opts.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:10px}.opts.tiles .opt{margin:0;height:100%}}
+.qhead{grid-column:1 / -1}.qmain{grid-column:1}
+.side{grid-column:2;display:grid;gap:14px}
+@media (pointer:coarse) and (min-width:561px){.opts.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:10px}.opts.tiles .opt{margin:0;height:100%}}
 @media (min-width:700px){.ggrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 24px}.ggrid .gi:nth-child(-n+2){border-top:0}.ggrid .gi.ge{grid-column:1 / -1;border-top:1px solid var(--bd)}}
-@media (max-width:880px){.cols{grid-template-columns:minmax(0,1fr)}.qhead,.opts,.qfoot,.side{grid-column:1;grid-row:auto}.qhead{order:0}.opts{order:1}.side{order:2;margin:14px 0}.qfoot{order:3}.ph{display:none}.ge .act{justify-content:flex-end}}
+@media (max-width:880px){.cols{grid-template-columns:minmax(0,1fr)}.qhead,.qmain,.side{grid-column:1;grid-row:auto}.side{margin:14px 0}.ph{display:none}.ge .act{justify-content:flex-end}}
 .ph{border-style:dashed}
 .mstart{display:none}
 .term{margin:.7em 0 0;font-size:.95rem}
@@ -78,7 +78,7 @@ pre{white-space:pre-wrap;font-size:.85rem;background:var(--card);border:1px soli
 .nav .cnav{margin-left:auto;font-size:.88rem}
 .sdot{font-size:.8rem;font-weight:700}.sdot.ok{color:var(--ok)}.sdot.bad{color:var(--bad)}
 @media (pointer:coarse){.x{min-width:42px;min-height:42px}.ico{width:44px;height:44px}.badge{min-height:34px;padding:4px 12px}.crs input[type=checkbox],.set input[type=checkbox],.orow input[type=checkbox],.orow input[type=radio]{width:24px;height:24px}.chb,.sb{min-height:44px;align-items:center}.opt{padding:14px 16px;min-height:52px}.nav button{min-height:48px;padding:12px 16px}}
-@media (min-width:561px) and (max-width:1180px),(pointer:coarse) and (min-width:561px){#app{padding:20px 24px calc(96px + env(safe-area-inset-bottom,0px))}.dstart{display:none}.mstart,.qfoot{display:block;position:fixed;left:0;right:0;bottom:0;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:10px 24px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--bd);margin:0;z-index:5}.qfoot .row{justify-content:center}.mstart .btn,.qfoot .btn{display:block;width:100%;max-width:420px;margin:0 auto;padding:.75em 1.2em;font-size:1.02rem}}
+@media (pointer:coarse) and (min-width:561px){#app{padding:20px 24px calc(96px + env(safe-area-inset-bottom,0px))}.dstart{display:none}.mstart,.qfoot{display:block;position:fixed;left:0;right:0;bottom:0;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:10px 24px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--bd);margin:0;z-index:5}.qfoot .row{justify-content:center}.mstart .btn,.qfoot .btn{display:block;width:100%;max-width:420px;margin:0 auto;padding:.75em 1.2em;font-size:1.02rem}}
 @media (max-width:560px){body{font-size:16px}#app{padding:14px 12px calc(134px + env(safe-area-inset-bottom,0px))}h1{font-size:1.5rem}.x{min-width:40px;min-height:40px}.ico{width:42px;height:42px}.nav{position:fixed;top:auto;bottom:0;left:0;right:0;height:calc(52px + env(safe-area-inset-bottom,0px));padding:0 8px env(safe-area-inset-bottom,0px);margin:0;background:var(--card);border-bottom:0;border-top:1px solid var(--bd);z-index:6}.nav button{flex:1;text-align:center;border-bottom:0;border-top:3px solid transparent;padding:10px 6px}.nav button.on{border-bottom-color:transparent;border-top-color:var(--ac)}.nav .cnav{margin-left:0;font-size:inherit}.dstart{display:none}.mstart{display:block;position:fixed;left:0;right:0;bottom:calc(52px + env(safe-area-inset-bottom,0px));background:var(--bg);padding:8px 14px;border-top:1px solid var(--bd);margin:0;z-index:5}.qfoot{display:block;position:fixed;left:0;right:0;bottom:0;background:var(--bg);padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--bd);margin:0;z-index:5}.mstart .btn,.qfoot .btn{width:100%}}
 @media (max-width:430px){#app{padding-left:max(14px,env(safe-area-inset-left));padding-right:max(14px,env(safe-area-inset-right))}.q{font-size:1.1rem}.opt{padding:12px;gap:10px}.set{gap:6px}.ql{margin-left:10px}.crs{gap:6px}.chb{font-size:1.05rem}}
 .gi{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;padding:10px 0;border-top:1px solid var(--bd)}.gi:first-child{border-top:0}.gi>div{min-width:0}.gc{display:flex;gap:4px;align-items:center;flex:none;margin-left:auto}
@@ -507,14 +507,14 @@ function quiz(){curView='z';
   const q=Q[idx],src=q._ref||q,multi=q.type==='multi',tiles=q.opts.every(o=>o.t.length<=55&&!o.why);
   $app.className='wide';$app.innerHTML=`<div class='cols'><div class='qhead'><div class="row" style="justify-content:space-between"><span class="mut">Frage ${idx+1} von ${Q.length}</span><span class="gc"><button class="badge${src.flagged?' warn':''}" title="Frage zum späteren Bearbeiten markieren (Taste M)" onclick="togQuizFlag()">${IC.flag} ${src.flagged?'Markiert':'Später bearbeiten'}</button><button class="x" onclick="home()">Abbrechen</button></span></div>
   <div class="bar"><i style="width:${(idx+(checked?1:0))/Q.length*100}%"></i></div>
-  <p class="q">${esc(q.q)}</p>${multi?'<p class="mut">Mehrere Antworten können richtig sein.</p>':''}</div><div class='opts${tiles?' tiles':''}'>
+  <p class="q">${esc(q.q)}</p>${multi?'<p class="mut">Mehrere Antworten können richtig sein.</p>':''}</div><div class='qmain'><div class='opts${tiles?' tiles':''}'>
   ${q.opts.map((o,i)=>{
     let c='opt'+(multi?' multi':''),mk='';
     if(!checked){if(picked.has(i)){c+=' sel';mk=multi?'✓':''}}
     else{const p=picked.has(i);if(o.ok&&p){c+=' ok';mk='✓'}else if(o.ok){c+=' ok miss';mk='✓'}else if(p){c+=' bad';mk='✕'}}
     return `<button class="${c}" ${checked?'disabled':''} onclick="pick(${i})" aria-pressed="${picked.has(i)}"><span class="m">${mk}</span><span>${esc(o.t)}${checked&&o.why?`<span class="why">${esc(o.why)}</span>`:''}${checked&&o.ok&&!picked.has(i)?'<span class="why">Diese Antwort wäre richtig gewesen.</span>':''}</span></button>`}).join('')}
   </div><div class='qfoot'>
-  <div class="row">${checked?`<button class="btn" onclick="next()">${idx+1<Q.length?'Weiter':'Ergebnis anzeigen'}</button>`:`<button class="btn" ${picked.size?'':'disabled'} onclick="check()">Antwort prüfen</button>`}</div></div><div class='side'>${side(q)}</div></div>`;
+  <div class="row">${checked?`<button class="btn" onclick="next()">${idx+1<Q.length?'Weiter':'Ergebnis anzeigen'}</button>`:`<button class="btn" ${picked.size?'':'disabled'} onclick="check()">Antwort prüfen</button>`}</div></div></div><div class='side'>${side(q)}</div></div>`;
 }
 function pick(i){
   if(checked)return;
