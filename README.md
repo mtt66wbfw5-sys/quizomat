@@ -1,4 +1,4 @@
-# Quizomat 9001
+# Quizomat
 
 Interaktiver Prüfungs- und Vorlesungstrainer zum Üben, Auswerten und Verwalten von Prüfungsfragen und Fachbegriffen – komplett in einer einzigen HTML-Datei ohne externe Abhängigkeiten oder Server.
 
