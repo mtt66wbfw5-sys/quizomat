@@ -57,9 +57,9 @@ img,svg,pre,textarea,button,.card{max-width:100%}.row>*{min-width:0}
 .opt .m{flex:none;width:22px;height:22px;border:2px solid var(--mut);border-radius:50%;margin-top:2px;display:grid;place-items:center;font-size:.8rem;font-weight:700}
 .opt.multi .m{border-radius:5px}
 .opt.sel{border-color:var(--ac);background:color-mix(in srgb,var(--ac) 10%,var(--card))}.opt.sel .m{background:var(--ac);border-color:var(--ac);color:var(--acfg)}
-.opt.ok{border-color:var(--ok);background:var(--okbg);border-width:2px}.opt.bad{border-color:var(--bad);background:var(--badbg);border-width:2px}
+.opt.ok{border-color:var(--ok);background:var(--okbg);box-shadow:inset 0 0 0 1px var(--ok)}.opt.bad{border-color:var(--bad);background:var(--badbg);box-shadow:inset 0 0 0 1px var(--bad)}
 .opt.ok .m{background:var(--ok);border-color:var(--ok);color:var(--bg)}.opt.bad .m{background:var(--bad);border-color:var(--bad);color:var(--bg)}
-.opt.miss{border-style:dashed}
+.opt.miss{border-style:dashed;box-shadow:none}
 .why{display:block;font-size:.93rem;color:var(--mut);margin-top:4px}
 .exp{border-left:4px solid var(--ac);padding:8px 14px;margin:14px 0;background:var(--card);border-radius:0 8px 8px 0}
 .score{font-size:2.6rem;font-weight:700;line-height:1;color:var(--fg)}
@@ -504,7 +504,7 @@ function start(pool){
   idx=0;log=[];picked=new Set();checked=false;quiz();toTop();
 }
 function quiz(){curView='z';
-  const q=Q[idx],src=q._ref||q,multi=q.type==='multi',tiles=q.opts.every(o=>o.t.length<=55&&!o.why);
+  const q=Q[idx],src=q._ref||q,multi=q.type==='multi',tiles=q.opts.every(o=>o.t.length<=55);
   $app.className='wide';$app.innerHTML=`<div class='cols'><div class='qhead'><div class="row" style="justify-content:space-between"><span class="mut">Frage ${idx+1} von ${Q.length}</span><span class="gc"><button class="badge${src.flagged?' warn':''}" title="Frage zum späteren Bearbeiten markieren (Taste M)" onclick="togQuizFlag()">${IC.flag} ${src.flagged?'Markiert':'Später bearbeiten'}</button><button class="x" onclick="home()">Abbrechen</button></span></div>
   <div class="bar"><i style="width:${(idx+(checked?1:0))/Q.length*100}%"></i></div>
   <p class="q">${esc(q.q)}</p>${multi?'<p class="mut">Mehrere Antworten können richtig sein.</p>':''}</div><div class='qmain'><div class='opts${tiles?' tiles':''}'>
@@ -512,7 +512,7 @@ function quiz(){curView='z';
     let c='opt'+(multi?' multi':''),mk='';
     if(!checked){if(picked.has(i)){c+=' sel';mk=multi?'✓':''}}
     else{const p=picked.has(i);if(o.ok&&p){c+=' ok';mk='✓'}else if(o.ok){c+=' ok miss';mk='✓'}else if(p){c+=' bad';mk='✕'}}
-    return `<button class="${c}" ${checked?'disabled':''} onclick="pick(${i})" aria-pressed="${picked.has(i)}"><span class="m">${mk}</span><span>${esc(o.t)}${checked&&o.why?`<span class="why">${esc(o.why)}</span>`:''}${checked&&o.ok&&!picked.has(i)?'<span class="why">Diese Antwort wäre richtig gewesen.</span>':''}</span></button>`}).join('')}
+    return `<button class="${c}" ${checked?'disabled':''} onclick="pick(${i})" aria-pressed="${picked.has(i)}"><span class="m">${mk}</span><span>${esc(o.t)}</span></button>`}).join('')}
   </div><div class='qfoot'>
   <div class="row">${checked?`<button class="btn" onclick="next()">${idx+1<Q.length?'Weiter':'Ergebnis anzeigen'}</button>`:`<button class="btn" ${picked.size?'':'disabled'} onclick="check()">Antwort prüfen</button>`}</div></div></div><div class='side'>${side(q)}</div></div>`;
 }
@@ -542,8 +542,8 @@ function has(t,w,short){let i=t.indexOf(w);while(i>=0){if(!short)return true;con
 function terms(q){const t=(q.q+' '+q.opts.map(o=>o.t).join(' ')+' '+q.exp).toLowerCase();return gloss.filter(g=>[g.b,...g.a].some(w=>{w=w.toLowerCase();return has(t,w,w.length<=4)})).slice(0,6)}
 function side(q){
   if(!checked)return `<div class='card ph'><p class='mut' style='margin:0'>Nach dem Prüfen der Antwort erscheinen hier die Erklärung und passende Begriffe aus dem Glossar.</p></div>`;
-  const src=q._ref||q,st=src.streak||0,m=isMastered(src),t=terms(q);
-  return `<div class="exp" style="margin:0"><div class="row" style="justify-content:space-between;margin-bottom:4px"><b>${log[idx]?'Richtig.':'Nicht ganz.'}</b><span class="badge ${m?'ok':src.wrong?'bad':''}" style="cursor:default">${m?`✓ Gemeistert (${st}/${opts.mastery})`:`Lernstand: ${st} / ${opts.mastery}`}</span></div>${esc(q.exp)}</div><div class='card'><b>Weiterführende Informationen</b>${t.length?t.map(g=>`<p class='term'><b>${esc(g.b)}</b> – ${esc(g.i)}</p>`).join(''):`<p class='mut'>Zu dieser Frage ist noch kein Begriff im Glossar hinterlegt.</p>`}</div>`}
+  const src=q._ref||q,st=src.streak||0,m=isMastered(src),t=terms(q),whys=q.opts.filter(o=>o.why);
+  return `<div class="exp" style="margin:0"><div class="row" style="justify-content:space-between;margin-bottom:4px"><b>${log[idx]?'Richtig.':'Nicht ganz.'}</b><span class="badge ${m?'ok':src.wrong?'bad':''}" style="cursor:default">${m?`✓ Gemeistert (${st}/${opts.mastery})`:`Lernstand: ${st} / ${opts.mastery}`}</span></div>${esc(q.exp)}${whys.length?`<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--bd)">${whys.map(o=>`<p class="why" style="margin:4px 0"><b style="color:var(${o.ok?'--ok':'--bad'})">${o.ok?'✓':'✕'} ${esc(o.t)}:</b> ${esc(o.why)}</p>`).join('')}</div>`:''}</div><div class='card'><b>Weiterführende Informationen</b>${t.length?t.map(g=>`<p class='term'><b>${esc(g.b)}</b> – ${esc(g.i)}</p>`).join(''):`<p class='mut'>Zu dieser Frage ist noch kein Begriff im Glossar hinterlegt.</p>`}</div>`}
 function addGloss(l,noSave){l.forEach(g=>{if(!g||!g.begriff||!g.info)return;const o={b:String(g.begriff),i:String(g.info),a:[].concat(g.alias||[]).map(String)};const i=gloss.findIndex(x=>x.b.toLowerCase()===o.b.toLowerCase());i<0?gloss.push(o):gloss[i]=o});if(!noSave)saveGloss()}
 function wrongPool(){return Q.filter((_,i)=>!log[i])}
 
