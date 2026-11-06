@@ -702,7 +702,7 @@ function terms(q){const t=(q.q+' '+q.opts.map(o=>o.t).join(' ')+' '+q.exp).toLow
 function side(q){
   if(!checked)return `<div class='card ph'><p class='mut' style='margin:0'>Nach dem Prüfen der Antwort erscheinen hier die Begründung und passende Begriffe aus dem Glossar.</p></div>`;
   const src=q._ref||q,st=src.streak||0,m=isMastered(src),t=terms(q);
-  return `<div class="exp" style="margin:0"><div class="row" style="justify-content:space-between;margin-bottom:4px"><b style="color:var(--ac)">${log[idx]?'Richtig – Begründung':'Nicht ganz – Begründung'}</b><span class="badge ${m?'ok':src.wrong?'bad':''}" style="cursor:default">${m?`✓ Gemeistert (${st}/${opts.mastery})`:`Lernstand: ${st} / ${opts.mastery}`}</span></div>${esc(q.exp)}</div><div class='card'><b>Weiterführende Informationen</b>${t.length?t.map(g=>`<p class='term'><b>${esc(g.b)}</b> – ${esc(g.i)}</p>`).join(''):`<p class='mut'>Zu dieser Frage ist noch kein Begriff im Glossar hinterlegt.</p>`}</div>`}
+  return `<div class="exp" style="margin:0"><div class="row" style="justify-content:space-between;margin-bottom:4px"><b style="color:var(--ac)">Begründung</b><span class="badge ${m?'ok':src.wrong?'bad':''}" style="cursor:default">${m?`✓ Gemeistert (${st}/${opts.mastery})`:`Lernstand: ${st} / ${opts.mastery}`}</span></div>${esc(q.exp)}</div><div class='card'><b>Weiterführende Informationen</b>${t.length?t.map(g=>`<p class='term'><b>${esc(g.b)}</b> – ${esc(g.i)}</p>`).join(''):`<p class='mut'>Zu dieser Frage ist noch kein Begriff im Glossar hinterlegt.</p>`}</div>`}
 function addGloss(l,noSave){l.forEach(g=>{if(!g||!g.begriff||!g.info)return;const o={b:String(g.begriff),i:String(g.info),a:[].concat(g.alias||[]).map(String)};const i=gloss.findIndex(x=>x.b.toLowerCase()===o.b.toLowerCase());i<0?gloss.push(o):gloss[i]=o});if(!noSave)saveGloss()}
 function wrongPool(){return Q.filter((_,i)=>!log[i])}
 
@@ -845,7 +845,7 @@ function cloudView(){
   const chg=curView!=='c';curView='c';$app.className='';
   const last=gh.lastSync?new Date(gh.lastSync).toLocaleString('de-DE',{dateStyle:'short',timeStyle:'short'})+' Uhr':'Noch nicht synchronisiert';
   $app.innerHTML=`${nav('c')}<h1>Cloud-Sync</h1>
-  <p class="mut">Synchronisiert deine Fragen, deinen Lernstand und dein Glossar automatisch über ein privates GitHub-Repository (<b>${SYNC_REPO}</b>) zwischen Mac und iPhone.</p>
+  <p class="mut">Synchronisiert deine Fragen, deinen Lernstand und dein Glossar automatisch über ein privates GitHub-Repository (<b>${SYNC_REPO}</b>) zwischen Mac, iPad und iPhone.</p>
   ${gh.token?`<div class="card" style="margin-top:14px">
     <p><b>Status:</b> ${syncState==='syncing'?'Synchronisiere …':syncState==='err'?`<span style="color:var(--bad)">Fehler (${esc(syncErr)})</span>`:`<span style="color:var(--ok)">✓ Verbunden${gh.user?` als @${esc(gh.user)}`:''}</span>`}</p>
     <p class="mut">Privates Repository: <code>${esc(gh.user||'…')}/${SYNC_REPO}</code><br>Letzter Abgleich: ${esc(last)}</p>
