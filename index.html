@@ -146,6 +146,19 @@ function load(){
   try{courses=JSON.parse(localStorage.getItem('pt:courses')||'{}')}catch(e){courses={}}
   try{gloss=JSON.parse(localStorage.getItem('pt:gloss')||'[]')}catch(e){gloss=[]}
   try{col=new Set(JSON.parse(localStorage.getItem('pt:col')||'[]'))}catch(e){col=new Set()}
+  try{exp=new Set(JSON.parse(localStorage.getItem('pt:exp')||'[]'))}catch(e){exp=new Set()}
+  try{
+    const rawSel=localStorage.getItem('pt:sel');
+    if(rawSel!==null){
+      const arr=JSON.parse(rawSel);
+      sel=new Set(Array.isArray(arr)?arr.filter(id=>sets.some(s=>s.id===id)):[]);
+    }else{
+      sel=new Set(sets.map(s=>s.id));
+    }
+  }catch(e){
+    sel=new Set(sets.map(s=>s.id));
+  }
+  exp=new Set([...exp].filter(id=>sets.some(s=>s.id===id)));
   try{const o=JSON.parse(localStorage.getItem('pt:opts')||'null');if(o&&typeof o==='object')opts={...opts,...o,n:Math.max(1,+o.n||20),examMins:Math.max(1,+o.examMins||30),pass:[50,60,70].includes(+o.pass)?+o.pass:50,cpass:(o.cpass&&typeof o.cpass==='object')?o.cpass:{},shuffle:true,hideMastered:true,mastery:3}}catch(e){}
   try{localTs=+localStorage.getItem('pt:ts')||0}catch(e){localTs=0}
   try{const g=JSON.parse(localStorage.getItem('pt:gh')||'null');if(g&&typeof g==='object')gh={...gh,...g}}catch(e){}
@@ -160,6 +173,8 @@ function touchLocal(overwrite){
 function saveO(){try{localStorage.setItem('pt:opts',JSON.stringify(opts))}catch(e){}touchLocal()}
 function saveC(){try{localStorage.setItem('pt:courses',JSON.stringify(courses))}catch(e){}touchLocal()}
 function saveCol(){try{localStorage.setItem('pt:col',JSON.stringify([...col]))}catch(e){}touchLocal()}
+function saveSel(){try{localStorage.setItem('pt:sel',JSON.stringify([...sel]))}catch(e){}}
+function saveExp(){try{localStorage.setItem('pt:exp',JSON.stringify([...exp]))}catch(e){}}
 function saveGloss(ow){try{localStorage.setItem('pt:gloss',JSON.stringify(gloss))}catch(e){}touchLocal(ow)}
 function save(ow){try{localStorage.setItem('pt:sets',JSON.stringify(sets))}catch(e){}touchLocal(ow)}
 
@@ -373,12 +388,12 @@ function optsHtml(total,allSelCount){
   const mastCount=allSelCount-[...sel].reduce((a,id)=>{const s=sets.find(x=>x.id===id);return a+(s?s.qs.filter(q=>!isMastered(q)).length:0)},0),ap=activePass(),cs=selCourses();
   return `<div class="row" style="margin:10px 0 4px"><label>Anzahl Fragen <input type="number" min="1" max="200" value="${opts.n}" onchange="opts.n=Math.max(1,+this.value||1);saveO();home()"></label><label>Prüfungszeit (Min.) <input type="number" min="1" max="300" value="${opts.examMins}" onchange="opts.examMins=Math.max(1,+this.value||30);saveO();home()"></label></div><p class="mut">${total?`${total} Fragen zum Üben verfügbar`+(mastCount?` (${mastCount} gemeisterte ausgeblendet · für Prüfung alle ${allSelCount} verfügbar)`:''):allSelCount&&mastCount===allSelCount?`Alle ${allSelCount} ausgewählten Fragen sind gemeistert – setze den Lernstand zurück oder starte eine Prüfung.`:'Wähle mindestens ein Kapitel aus.'}${cs.length===1?` · Kurs „${esc(cs[0])}“ (Positiv ab ${ap} %)`:''}</p>`;
 }
-function wipe(k){if(k==='q'){sets=[];sel=new Set();exp=new Set();save(true);wp=null;home()}else{gloss=[];saveGloss(true);wp=null;glosView()}}
+function wipe(k){if(k==='q'){sets=[];sel=new Set();exp=new Set();saveSel();saveExp();save(true);wp=null;home()}else{gloss=[];saveGloss(true);wp=null;glosView()}}
 const allSel=l=>l.every(s=>sel.has(s.id));
 function fold(gi){const c=cnames[gi];col.has(c)?col.delete(c):col.add(c);saveCol();home()}
-function togC(gi,on){sets.filter(s=>s.course===cnames[gi]).forEach(s=>on?sel.add(s.id):sel.delete(s.id));home()}
-function openS(id){exp.has(id)?exp.delete(id):exp.add(id);pq=null;qedit=null;home()}
-function delQ(id,i){const s=sets.find(x=>x.id===id);if(!s)return;s.qs.splice(i,1);if(!s.qs.length){sets=sets.filter(x=>x.id!==id);sel.delete(id);exp.delete(id)}pq=null;save(true);home()}
+function togC(gi,on){sets.filter(s=>s.course===cnames[gi]).forEach(s=>on?sel.add(s.id):sel.delete(s.id));saveSel();home()}
+function openS(id){exp.has(id)?exp.delete(id):exp.add(id);saveExp();pq=null;qedit=null;home()}
+function delQ(id,i){const s=sets.find(x=>x.id===id);if(!s)return;s.qs.splice(i,1);if(!s.qs.length){sets=sets.filter(x=>x.id!==id);sel.delete(id);exp.delete(id);saveSel();saveExp()}pq=null;save(true);home()}
 const exportQ=b=>exportData(b,'fragen'),exportG=b=>exportData(b,'glossar'),exportC=(b,gi)=>exportData(b,'kurs',cnames[gi]);
 function exportData(b,kind,crs){const h0=b.innerHTML;
   const list=kind==='kurs'?sets.filter(s=>s.course===crs):sets;
@@ -389,9 +404,9 @@ function exportData(b,kind,crs){const h0=b.innerHTML;
     document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);b.textContent='✓'}
   catch(e){b.textContent='!'}
   setTimeout(()=>{b.innerHTML=h0},2000)}
-function tog(id){sel.has(id)?sel.delete(id):sel.add(id);home()}
+function tog(id){sel.has(id)?sel.delete(id):sel.add(id);saveSel();home()}
 function del(id){pend=pend===id?null:id;rpend=null;cpend=null;home()}
-function del2(id){sets=sets.filter(x=>x.id!==id);sel.delete(id);pend=null;save(true);home()}
+function del2(id){sets=sets.filter(x=>x.id!==id);sel.delete(id);exp.delete(id);saveSel();saveExp();pend=null;save(true);home()}
 function delC(gi){cpend=cpend===gi?null:gi;pend=null;rpend=null;home()}
 function delC2(gi){
   const c=cnames[gi];
@@ -399,7 +414,7 @@ function delC2(gi){
     sets.filter(s=>s.course===c).forEach(s=>{sel.delete(s.id);exp.delete(s.id)});
     sets=sets.filter(s=>s.course!==c);
     delete courses[c];col.delete(c);if(opts.cpass)delete opts.cpass[c];
-    save(true);saveC();saveCol();saveO();
+    saveSel();saveExp();saveCol();saveC();saveO();save(true);
   }
   cpend=null;home();
 }
@@ -436,8 +451,8 @@ function searchHtml(){return `<input id="qs" type="search" class="srch" placehol
 function resHtml(){const t=qsearch.trim().toLowerCase();if(!t)return '';const r=[];sets.forEach(s=>s.qs.forEach((q,qi)=>{if((q.q+' '+q.opts.map(o=>o.t).join(' ')+' '+q.exp).toLowerCase().includes(t))r.push([s,q,qi])}));
   return `<p class="mut">${r.length} Treffer</p>`+(r.length?`<div class="card">${r.slice(0,50).map(([s,q,qi])=>`<div class="qi"><button class="lnk" data-s="${s.id}" onclick="goQ(this.dataset.s)"><span class="mut">${esc(s.course)} › ${esc(s.title)}</span><br>${esc(q.q)}</button><span class="gc">${qBadge(s.id,qi,q)}<button class="x${q.flagged?' warn':''}" title="${q.flagged?'Markierung aufheben':'Zum Bearbeiten markieren'}" aria-label="Markieren" onclick="togFlag('${s.id}',${qi})">${IC.flag}</button><button class="x" title="Frage bearbeiten" aria-label="Frage bearbeiten" onclick="goQEdit('${s.id}',${qi})">${IC.edit}</button></span></div>`).join('')}</div>`+(r.length>50?'<p class="mut">Es werden nur die ersten 50 Treffer angezeigt.</p>':''):'')}
 function qSearch(v){qsearch=v;$app.classList.toggle('searching',!!v.trim());document.getElementById('res').innerHTML=resHtml()}
-function goQ(id){const s=sets.find(x=>x.id===id);qsearch='';exp.add(id);if(s)col.delete(s.course);home()}
-function goQEdit(id,qi){const s=sets.find(x=>x.id===id);qsearch='';exp.add(id);if(s)col.delete(s.course);startQEdit(id,qi);setTimeout(()=>{const el=document.getElementById('eq_q');if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.focus()}},30)}
+function goQ(id){const s=sets.find(x=>x.id===id);qsearch='';exp.add(id);saveExp();if(s&&col.has(s.course)){col.delete(s.course);saveCol()}home()}
+function goQEdit(id,qi){const s=sets.find(x=>x.id===id);qsearch='';exp.add(id);saveExp();if(s&&col.has(s.course)){col.delete(s.course);saveCol()}startQEdit(id,qi);setTimeout(()=>{const el=document.getElementById('eq_q');if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.focus()}},30)}
 function gRow(g){return `<div class="gi"><div><b>${esc(g.b)}</b>${g.a.length?`<span class="mut"> · ${esc(g.a.join(', '))}</span>`:''}<p class="mut" style="margin:.2em 0 0">${esc(g.i)}</p></div>${gpend===g.b?`<span class="gc"><span class="mut">Löschen?</span><button class="btn sm" data-b="${esc(g.b)}" onclick="delG(this.dataset.b)">Ja</button><button class="btn sec sm" onclick="gpend=null;glosView()">Nein</button></span>`:`<span class="gc"><button class="x" title="Begriff bearbeiten" aria-label="Begriff bearbeiten" data-b="${esc(g.b)}" onclick="gedit=this.dataset.b;gdraft=null;gerr='';glosView()">${IC.edit}</button><button class="x" title="Begriff löschen" aria-label="Begriff löschen" data-b="${esc(g.b)}" onclick="gpend=this.dataset.b;glosView()">${IC.x}</button></span>`}</div>`}
 function gForm(g){const d=gdraft||{b:g.b,i:g.i,a:g.a.join(', ')};return `<div class="gi ge"><div style="width:100%"><label class="mut" for="eb">Begriff</label><input id="eb" value="${esc(d.b)}"><label class="mut" for="ei">Erklärung</label><textarea id="ei" style="min-height:90px">${esc(d.i)}</textarea><label class="mut" for="ea">Alias (durch Komma getrennt)</label><input id="ea" value="${esc(d.a)}"><p class="err">${esc(gerr)}</p><div class="row act"><button class="btn sec sm" onclick="gedit=null;gdraft=null;gerr='';glosView()">Abbrechen</button><button class="btn sm" data-b="${esc(g.b)}" onclick="saveG(this.dataset.b)">Speichern</button></div></div></div>`}
 function glList(){const t=gq.trim().toLowerCase();const l=[...gloss].sort((a,b)=>a.b.localeCompare(b.b,'de')).filter(g=>!t||(g.b+' '+g.a.join(' ')+' '+g.i).toLowerCase().includes(t));
@@ -498,6 +513,7 @@ function mergeSets(incoming){
     });
     sel.add(ex.id);
   });
+  saveSel();
 }
 function doImp(){
   try{if(impMode==='glossar'){addGloss(parseGloss(document.getElementById('t').value));msg='';glos();return}const n=parseSets(document.getElementById('t').value);if(!n.length)throw new Error('Keine Fragen gefunden. Ein Glossar importierst du unter „Glossar importieren“.');mergeSets(n);save();msg='';home()}
@@ -749,6 +765,8 @@ async function fetchCloudState(){
 function applyCloudState(d){
   if(!d||typeof d!=='object')return;
   const prevSel=new Set(sel),hadSets=sets.length>0;
+  let hadRawSel=false;
+  try{hadRawSel=localStorage.getItem('pt:sel')!==null}catch(e){}
   if(Array.isArray(d.sets))sets=d.sets;
   if(Array.isArray(d.gloss))gloss=d.gloss;
   if(d.courses&&typeof d.courses==='object')courses=d.courses;
@@ -764,8 +782,13 @@ function applyCloudState(d){
     localStorage.setItem('pt:ts',String(localTs));
   }catch(e){}
   sel=new Set();
-  sets.forEach(s=>{if(!hadSets||prevSel.has(s.id))sel.add(s.id)});
-  if(!sel.size)sets.forEach(s=>sel.add(s.id));
+  if(!hadSets&&!hadRawSel){
+    sets.forEach(s=>sel.add(s.id));
+  }else{
+    sets.forEach(s=>{if(prevSel.has(s.id))sel.add(s.id)});
+  }
+  exp=new Set([...exp].filter(id=>sets.some(s=>s.id===id)));
+  saveSel();saveExp();
 }
 
 async function pushCloudNow(retry){
@@ -927,7 +950,7 @@ document.addEventListener('keydown',ev=>{
   }
 });
 
-load();sets.forEach(s=>sel.add(s.id));home();if(gh.token)pullCloud(false);
+load();home();if(gh.token)pullCloud(false);
 </script>
 </body>
 </html>
