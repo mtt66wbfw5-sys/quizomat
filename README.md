@@ -13,13 +13,14 @@ Interaktiver Prüfungs- und Vorlesungstrainer zum Üben, Auswerten und Verwalten
   - **Multiple Choice** (`multi`) – mehrere richtige Antworten möglich
   - **Wahr / Falsch** (`tf`) – Aussagen bewerten
 - **Übungsmodus (Adaptives Lernsystem):**
+  - Alle verfügbaren Fragen der ausgewählten Kapitel werden im Quiz gestellt; der Durchgang läuft kontinuierlich, bis man über „Zurück zur Übersicht“ zurückkehrt.
   - Fragen und Antwortoptionen werden bei jedem Durchgang automatisch gemischt.
   - Jede Frage merkt sich die Serie richtiger Antworten in Folge (`streak`) sowie Fehlversuche (`wrong`).
   - **Gemeistert ab 3× richtig in Folge (`✓ Gemeistert`):** Gemeisterte Fragen werden beim Üben automatisch ausgeblendet, damit der Fokus auf noch offenen Fragen liegt.
   - **Intelligente Gewichtung:** Zuletzt falsch beantwortete und noch unbekannte Fragen werden bei der Quiz-Zusammenstellung bevorzugt gezogen.
-  - Der Lernstand lässt sich jederzeit pro Frage per Klick umschalten sowie pro Kapitel oder global zurücksetzen.
+  - Der Lernstand lässt sich jederzeit pro Frage per Klick umschalten sowie pro Kapitel, pro Kurs oder global zurücksetzen.
 - **Prüfungsmodus & Notenschemata:**
-  - **Einstellbarer Countdown-Timer:** Prüfungszeit in Minuten frei wählbar; mit visueller Warnung (ab 5 Min. gelb, ab 1 Min. rot) und automatischer Abgabe bei Zeitablauf.
+  - **Fragenanzahl & Countdown-Timer pro Kurs:** Anzahl der Prüfungsfragen und Prüfungszeit in Minuten lassen sich pro Kurs individuell einstellen; mit visueller Warnung (ab 5 Min. gelb, ab 1 Min. rot) und automatischer Abgabe bei Zeitablauf.
   - **Prüfungsnahe Fragenauswahl:** Zieht proportional aus allen ausgewählten Kapiteln (inklusive bereits gemeisterter Fragen) ohne sofortiges Feedback während der Bearbeitung.
   - **Fragen-Navigator:** Freies Springen zwischen allen Prüfungsfragen, Statusanzeige (beantwortet / offen) und **„⚑ Später prüfen“**-Lesezeichen (Taste `L`).
   - **Kursabhängige Benotung (Noten 1 bis 5):** Pro Kurs kann zwischen drei Notenschemata gewählt werden (*Sehr gut, Gut, Befriedigend, Genügend, Nicht genügend*):
@@ -30,7 +31,7 @@ Interaktiver Prüfungs- und Vorlesungstrainer zum Üben, Auswerten und Verwalten
 - **Integriertes Glossar:**
   - Fachbegriffe (inkl. Alias-Schreibweisen) werden beim Prüfen einer Antwort automatisch im Fragetext, den Optionen und der Erklärung erkannt und direkt neben der Frage erläutert.
 - **Direktes Bearbeiten, Markieren & Verwalten:**
-  - Kurse (inkl. Notenschema), Kapitel/Themen, einzelne Fragen (inkl. Fragetyp, Antwortoptionen, Begründungen und Erklärung) sowie Glossareinträge lassen sich direkt im Browser bearbeiten oder mit Sicherheitsabfrage löschen.
+  - Kurse (inkl. Notenschema, Prüfungszeit & Fragenanzahl für Prüfungen), Kapitel/Themen, einzelne Fragen (inkl. Fragetyp, Antwortoptionen, Begründungen und Erklärung) sowie Glossareinträge lassen sich direkt im Browser bearbeiten oder mit Sicherheitsabfrage löschen.
   - Fragen können während des Quiz/der Prüfung oder in der Auswertung mit einem Fähnchen (Taste `M`) zum späteren Überarbeiten markiert werden.
 - **Import & Export (inkl. Duplikatschutz & Lernstand):**
   - Fragen und Glossare können per JSON-Text, Dateiauswahl oder Drag & Drop importiert werden.
@@ -40,7 +41,7 @@ Interaktiver Prüfungs- und Vorlesungstrainer zum Üben, Auswerten und Verwalten
   - Über das Wolken-Symbol in der oberen Navigationsleiste kann ein GitHub Personal Access Token (`repo`-Berechtigung) hinterlegt werden.
   - Quizomat legt automatisch ein privates Repository (`quizomat-sync`) an und synchronisiert Fragen, Kurseinstellungen, Lernstand und Glossar im Hintergrund zwischen Mac, iPad und iPhone.
 - **Optimiert für Mac, iPad & iPhone:**
-  - **Mac / Desktop:** Zweispaltiges Layout mit untereinanderstehenden Antworten und vollständiger Tastatursteuerung (`1`–`9` zur Antwortauswahl, `Enter` / `Leertaste` zum Prüfen & Weiterblättern, `←` / `→` und `L` im Prüfungsmodus, `M` zum Markieren, `Esc` zum Abbrechen).
+  - **Mac / Desktop:** Zweispaltiges Layout mit untereinanderstehenden Antworten und vollständiger Tastatursteuerung (`1`–`9` zur Antwortauswahl, `Enter` / `Leertaste` zum Prüfen & Weiterblättern, `←` / `→` und `L` im Prüfungsmodus, `M` zum Markieren, `Esc` für „Zurück zur Übersicht“).
   - **iPad / Tablet:** Übersichtliches 2×2-Kachel-Layout für kurze Antwortoptionen, vergrößerte Touch-Ziele und eine fixierte untere Aktionsleiste für bequemes Tippen im Hoch- und Querformat.
   - **iPhone / Mobil:** Einhand-optimierte untere Navigations- und Aktionsleiste, Safe-Area-Unterstützung und als Vollbild-Web-App über *„Teilen → Zum Home-Bildschirm“* installierbar.
   - Automatischer **Hell-/Dunkelmodus** passend zur Systemeinstellung.
@@ -48,6 +49,8 @@ Interaktiver Prüfungs- und Vorlesungstrainer zum Üben, Auswerten und Verwalten
 ---
 
 ## 📄 JSON-Format für Fragen
+
+Importiert werden kann entweder ein einzelnes Themen-Set (`{ ... }`) oder eine Liste mehrerer Sets (`[ { ... }, { ... } ]`). Der Export erzeugt automatisch das Listenformat.
 
 ```json
 {
@@ -79,6 +82,11 @@ Interaktiver Prüfungs- und Vorlesungstrainer zum Üben, Auswerten und Verwalten
 }
 ```
 
+> **Hinweise:**
+> - `richtig`: 0-basierte Indizes der richtigen Optionen als Array (z. B. `[1]` oder `[0, 2]`) bzw. bei `tf` ein boolescher Wert (`true` / `false`).
+> - `begruendungen`: Optionales Array mit Begründungen zu jeder einzelnen Antwortoption.
+> - **Lernstand beim Export:** Beim Exportieren werden optional auch `streak` (Serie richtiger Antworten), `wrong` (zuletzt falsch) und `flagged` (Markierung) mitgespeichert und beim Re-Import nahtlos übernommen.
+
 ## 📖 JSON-Format für das Glossar
 
 ```json
@@ -97,4 +105,4 @@ Interaktiver Prüfungs- und Vorlesungstrainer zum Üben, Auswerten und Verwalten
 
 ## 🔒 Datenschutz & Speicherung
 
-Alle Fragen, Kurse, Glossareinträge und Lernstände werden ausschließlich lokal im `localStorage` des jeweiligen Browsers gespeichert (`pt:sets`, `pt:courses`, `pt:gloss`, `pt:col`, `pt:opts`). Es werden keine Daten an externe Server übertragen.
+Alle Fragen, Kurse, Glossareinträge, UI-Zustände und Lernstände werden ausschließlich lokal im `localStorage` des jeweiligen Browsers gespeichert (`pt:sets`, `pt:courses`, `pt:gloss`, `pt:col`, `pt:sel`, `pt:exp`, `pt:opts`). Es werden keine Daten an externe Server übertragen (außer bei freiwillig aktiviertem privaten GitHub-Cloud-Sync).
