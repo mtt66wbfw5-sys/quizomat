@@ -150,6 +150,15 @@ const getNegMode=c=>(c&&opts.cneg&&NEG_MODES.includes(opts.cneg[c]))?opts.cneg[c
 const modeShort=m=>({all:'Gesamtfrage',opt:'Einzelantworten (inkl. Nicht-Ankreuzen)',pos:'Einzelantworten (nur richtige)',part:'Teilpunkte (1 Pkt./Frage)'}[m]||'Gesamtfrage');
 const negShort=n=>({none:'Keine Minuspunkte',clamp:'Minuspunkte (≥0/Frage)',full:'Minuspunkte (Gesamtabzug)'}[n]||'Keine Minuspunkte');
 const courseHasMulti=c=>sets.some(s=>s.course===c&&s.qs.some(q=>q.type==='multi'));
+function syncSetCfg(s){
+  if(!s||!s.course)return;
+  const c=s.course;
+  s.cfg={fragenAnzahl:getExamCount(c),zeitMinuten:getExamMins(c),positivAb:getPass(c),mcWertung:getScoreMode(c),minuspunkte:getNegMode(c)};
+}
+function syncCourseCfg(c){
+  sets.forEach(s=>{if(!c||s.course===c)syncSetCfg(s)});
+  try{localStorage.setItem('pt:sets',JSON.stringify(sets))}catch(e){}
+}
 function applyTheme(){
   const t=THEMES.includes(opts.theme)?opts.theme:'auto',de=document.documentElement;
   if(!de||!de.setAttribute)return;
@@ -174,9 +183,9 @@ function activeTime(){const cs=selCourses();return cs.length===1?getExamMins(cs[
 function activeCount(){const cs=selCourses();return cs.length===1?getExamCount(cs[0]):getExamCount('')}
 function activeScoreMode(){const cs=selCourses();return cs.length===1?getScoreMode(cs[0]):getScoreMode('')}
 function activeNegMode(){const cs=selCourses();return cs.length===1?getNegMode(cs[0]):getNegMode('')}
-function setActivePass(v,crs){const p=[50,60,70].includes(+v)?+v:50;if(!opts.cpass||typeof opts.cpass!=='object')opts.cpass={};if(crs){opts.cpass[crs]=p}else{opts.pass=p;selCourses().forEach(c=>{opts.cpass[c]=p})}saveO()}
-function setActiveScoreMode(v,crs){const m=SCORE_MODES.includes(v)?v:'all';if(!opts.cmode||typeof opts.cmode!=='object')opts.cmode={};if(crs){opts.cmode[crs]=m}else{opts.scoreMode=m;selCourses().forEach(c=>{opts.cmode[c]=m})}saveO()}
-function setActiveNegMode(v,crs){const n=NEG_MODES.includes(v)?v:'none';if(!opts.cneg||typeof opts.cneg!=='object')opts.cneg={};if(crs){opts.cneg[crs]=n}else{opts.negMode=n;selCourses().forEach(c=>{opts.cneg[c]=n})}saveO()}
+function setActivePass(v,crs){const p=[50,60,70].includes(+v)?+v:50;if(!opts.cpass||typeof opts.cpass!=='object')opts.cpass={};if(crs){opts.cpass[crs]=p;syncCourseCfg(crs)}else{opts.pass=p;selCourses().forEach(c=>{opts.cpass[c]=p;syncCourseCfg(c)})}saveO(true)}
+function setActiveScoreMode(v,crs){const m=SCORE_MODES.includes(v)?v:'all';if(!opts.cmode||typeof opts.cmode!=='object')opts.cmode={};if(crs){opts.cmode[crs]=m;syncCourseCfg(crs)}else{opts.scoreMode=m;selCourses().forEach(c=>{opts.cmode[c]=m;syncCourseCfg(c)})}saveO(true)}
+function setActiveNegMode(v,crs){const n=NEG_MODES.includes(v)?v:'none';if(!opts.cneg||typeof opts.cneg!=='object')opts.cneg={};if(crs){opts.cneg[crs]=n;syncCourseCfg(crs)}else{opts.negMode=n;selCourses().forEach(c=>{opts.cneg[c]=n;syncCourseCfg(c)})}saveO(true)}
 function scoreExamQ(q,p,smode,nmode){
   const multi=q.type==='multi',open=!p||p.size===0,N=q.opts.length,R=Math.max(1,q.opts.filter(o=>o.ok).length);
   const max=!multi?1:smode==='opt'?N:smode==='pos'?R:1;
@@ -235,7 +244,7 @@ function touchLocal(overwrite){
   try{localStorage.setItem('pt:ts',String(localTs))}catch(e){}
   if(gh.token){clearTimeout(syncTimer);syncTimer=setTimeout(()=>pushCloudNow(),600)}
 }
-function saveO(){try{localStorage.setItem('pt:opts',JSON.stringify(opts))}catch(e){}touchLocal()}
+function saveO(ow){try{localStorage.setItem('pt:opts',JSON.stringify(opts))}catch(e){}touchLocal(ow!==false)}
 function saveC(){try{localStorage.setItem('pt:courses',JSON.stringify(courses))}catch(e){}touchLocal()}
 function saveCol(){try{localStorage.setItem('pt:col',JSON.stringify([...col]))}catch(e){}touchLocal()}
 function saveSel(){try{localStorage.setItem('pt:sel',JSON.stringify([...sel]))}catch(e){}}
@@ -369,7 +378,8 @@ function saveCEdit(gi){
   opts.cqcount[nw]=cqdraft;
   opts.cmode[nw]=cmdraft;
   opts.cneg[nw]=cndraft;
-  saveO();
+  syncCourseCfg(nw);
+  saveO(true);
   cedit=null;cdraft='';cerr='';rerenderC();
 }
 
@@ -1008,6 +1018,45 @@ async function fetchCloudState(){
   return{sha:r.data.sha||'',data:parsed};
 }
 
+function mergeCloudOpts(ro,preferRemote){
+  if(!ro||typeof ro!=='object')return;
+  const mm=(loc,rem)=>{
+    const a=(loc&&typeof loc==='object')?loc:{},b=(rem&&typeof rem==='object')?rem:{};
+    return preferRemote?{...a,...b}:{...b,...a};
+  };
+  const pick=(lv,rv)=>preferRemote?(rv!==undefined?rv:lv):(lv!==undefined?lv:rv);
+  opts={
+    ...opts,
+    ...(preferRemote?ro:{}),
+    n:Math.max(1,+pick(opts.n,ro.n)||20),
+    examMins:Math.max(1,+pick(opts.examMins,ro.examMins)||30),
+    pass:[50,60,70].includes(+pick(opts.pass,ro.pass))?+pick(opts.pass,ro.pass):50,
+    scoreMode:SCORE_MODES.includes(pick(opts.scoreMode,ro.scoreMode))?pick(opts.scoreMode,ro.scoreMode):'all',
+    negMode:NEG_MODES.includes(pick(opts.negMode,ro.negMode))?pick(opts.negMode,ro.negMode):'none',
+    cpass:mm(opts.cpass,ro.cpass),
+    ctime:mm(opts.ctime,ro.ctime),
+    cqcount:mm(opts.cqcount,ro.cqcount),
+    cmode:mm(opts.cmode,ro.cmode),
+    cneg:mm(opts.cneg,ro.cneg),
+    shuffle:pick(opts.shuffle,ro.shuffle)!==false,
+    hideMastered:pick(opts.hideMastered,ro.hideMastered)!==false,
+    mastery:Math.max(1,Math.min(10,+pick(opts.mastery,ro.mastery)||3)),
+    theme:THEMES.includes(pick(opts.theme,ro.theme))?pick(opts.theme,ro.theme):'auto'
+  };
+  sets.forEach(s=>{
+    if(!s||!s.cfg||!s.course)return;
+    const c=s.course,cf=s.cfg;
+    if(opts.cqcount[c]===undefined&&+cf.fragenAnzahl>0)opts.cqcount[c]=Math.max(1,+cf.fragenAnzahl);
+    if(opts.ctime[c]===undefined&&+cf.zeitMinuten>0)opts.ctime[c]=Math.max(1,+cf.zeitMinuten);
+    if(opts.cpass[c]===undefined&&[50,60,70].includes(+cf.positivAb))opts.cpass[c]=+cf.positivAb;
+    if(opts.cmode[c]===undefined&&SCORE_MODES.includes(cf.mcWertung))opts.cmode[c]=cf.mcWertung;
+    if(opts.cneg[c]===undefined&&NEG_MODES.includes(cf.minuspunkte))opts.cneg[c]=cf.minuspunkte;
+  });
+  syncCourseCfg();
+  applyTheme();
+  try{localStorage.setItem('pt:opts',JSON.stringify(opts))}catch(e){}
+}
+
 function applyCloudState(d){
   if(!d||typeof d!=='object')return;
   const prevSel=new Set(sel),hadSets=sets.length>0;
@@ -1015,10 +1064,9 @@ function applyCloudState(d){
   try{hadRawSel=localStorage.getItem('pt:sel')!==null}catch(e){}
   if(Array.isArray(d.sets))sets=d.sets;
   if(Array.isArray(d.gloss))gloss=d.gloss;
-  if(d.courses&&typeof d.courses==='object')courses=d.courses;
+  if(d.courses&&typeof d.courses==='object')courses={...courses,...d.courses};
   if(Array.isArray(d.col))col=new Set(d.col);
-  if(d.opts&&typeof d.opts==='object')opts={...opts,...d.opts,n:Math.max(1,+d.opts.n||20),examMins:Math.max(1,+d.opts.examMins||30),pass:[50,60,70].includes(+d.opts.pass)?+d.opts.pass:50,scoreMode:SCORE_MODES.includes(d.opts.scoreMode)?d.opts.scoreMode:'all',negMode:NEG_MODES.includes(d.opts.negMode)?d.opts.negMode:'none',cpass:(d.opts.cpass&&typeof d.opts.cpass==='object')?d.opts.cpass:{},ctime:(d.opts.ctime&&typeof d.opts.ctime==='object')?d.opts.ctime:{},cqcount:(d.opts.cqcount&&typeof d.opts.cqcount==='object')?d.opts.cqcount:{},cmode:(d.opts.cmode&&typeof d.opts.cmode==='object')?d.opts.cmode:{},cneg:(d.opts.cneg&&typeof d.opts.cneg==='object')?d.opts.cneg:{},shuffle:d.opts.shuffle!==false,hideMastered:d.opts.hideMastered!==false,mastery:Math.max(1,Math.min(10,+d.opts.mastery||3)),theme:THEMES.includes(d.opts.theme)?d.opts.theme:'auto'};
-  applyTheme();
+  mergeCloudOpts(d.opts||{},true);
   localTs=d.updatedAt||Date.now();
   try{
     localStorage.setItem('pt:sets',JSON.stringify(sets));
@@ -1050,6 +1098,7 @@ async function pushCloudNow(retry){
       gh.sha=cur.sha;
     }
     if(!localTs){localTs=Date.now();try{localStorage.setItem('pt:ts',String(localTs))}catch(e){}}
+    syncCourseCfg();
     const payload={updatedAt:localTs,sets,gloss,courses,col:[...col],opts};
     const res=await ghReq('PUT',`/repos/${gh.user}/${SYNC_REPO}/contents/${SYNC_FILE}`,{
       message:'Sync Quizomat',
@@ -1060,6 +1109,7 @@ async function pushCloudNow(retry){
       const cur=await fetchCloudState();
       gh.sha=cur.sha;
       if(!forceOverwrite&&cur.data){
+        if(cur.data.opts)mergeCloudOpts(cur.data.opts,false);
         if(Array.isArray(cur.data.sets))mergeSets(cur.data.sets);
         if(Array.isArray(cur.data.gloss))addGloss(cur.data.gloss.map(g=>({begriff:g.b,info:g.i,alias:g.a})),true);
         try{localStorage.setItem('pt:sets',JSON.stringify(sets));localStorage.setItem('pt:gloss',JSON.stringify(gloss))}catch(e){}
@@ -1084,10 +1134,12 @@ async function pullCloud(isConnect){
     const d=rem.data,remTs=(d&&d.updatedAt)||0;
     if(isConnect){
       if(d&&(sets.length||gloss.length)){
+        if(d.courses&&typeof d.courses==='object')courses={...d.courses,...courses};
         if(Array.isArray(d.sets))mergeSets(d.sets);
+        if(d.opts)mergeCloudOpts(d.opts,remTs>=localTs);
         if(Array.isArray(d.gloss))addGloss(d.gloss.map(g=>({begriff:g.b,info:g.i,alias:g.a})),true);
         localTs=Date.now();
-        try{localStorage.setItem('pt:sets',JSON.stringify(sets));localStorage.setItem('pt:gloss',JSON.stringify(gloss));localStorage.setItem('pt:ts',String(localTs))}catch(e){}
+        try{localStorage.setItem('pt:sets',JSON.stringify(sets));localStorage.setItem('pt:gloss',JSON.stringify(gloss));localStorage.setItem('pt:courses',JSON.stringify(courses));localStorage.setItem('pt:ts',String(localTs))}catch(e){}
         await pushCloudNow(true);
       }else if(d){
         applyCloudState(d);
@@ -1102,6 +1154,7 @@ async function pullCloud(isConnect){
       await pushCloudNow(true);
       return;
     }else{
+      if(d&&d.opts)mergeCloudOpts(d.opts,true);
       gh.lastSync=Date.now();saveGH();syncState='ok';
     }
     updSyncUI();
