@@ -34,16 +34,17 @@ Interaktiver Prüfungs- und Vorlesungstrainer zum Üben, Auswerten und Verwalten
     - **Positiv ab 60 %** (1: ≥ 90 % · 2: ≥ 80 % · 3: ≥ 70 % · 4: ≥ 60 % · 5: < 60 %)
     - **Positiv ab 70 %** (1: ≥ 92,5 % · 2: ≥ 85 % · 3: ≥ 77,5 % · 4: ≥ 70 % · 5: < 70 %)
   - **Detaillierte Klausureinsicht & Auswertung:** Aufschlüsselung der erreichten Punkte nach Kapiteln, Live-Umschaltung der Wertungs- und Notenschemata sowie aufklappbare Übersicht aller Fragen inklusive Punkteaufschlüsselung pro Antwortoption, Einzelbegründungen, Gesamt-Begründung und erkannter Glossarbegriffe.
-- **Integriertes Glossar:**
-  - Fachbegriffe (inkl. Alias-Schreibweisen) werden beim Prüfen einer Antwort sowie in der Ergebnis-/Klausureinsicht automatisch im Fragetext, den Optionen, den Einzelbegründungen und der Gesamterklärung erkannt und direkt erläutert.
+- **Integriertes Glossar pro Kurs:**
+  - Fachbegriffe (inkl. Alias-Schreibweisen) werden analog zu den Fragen **aufklappbar pro Kurs** verwaltet, durchsucht, importiert und exportiert.
+  - Beim Prüfen einer Antwort sowie in der Ergebnis-/Klausureinsicht werden passende Begriffe aus dem Glossar des jeweiligen Kurses automatisch im Fragetext, den Optionen, den Einzelbegründungen und der Gesamterklärung erkannt und direkt erläutert.
 - **Direktes Erstellen, Bearbeiten, Markieren & Verwalten:**
-  - Neue Fragen (`+ Neue Frage hinzufügen`) und neue Glossarbegriffe (`+ Begriff hinzufügen`) lassen sich direkt im Browser anlegen.
-  - Kurse (inkl. Notenschema, MC-Wertung, Minuspunkte, Prüfungszeit & Fragenanzahl für Prüfungen), Kapitel/Themen, einzelne Fragen (inkl. Fragetyp, Antwortoptionen, Begründungen und Erklärung) sowie Glossareinträge lassen sich direkt im Browser bearbeiten oder mit Sicherheitsabfrage löschen.
+  - Neue Fragen (`+ Neue Frage hinzufügen`) und neue Glossarbegriffe (`+ Begriff hinzufügen` – global oder direkt am jeweiligen Kurs) lassen sich direkt im Browser anlegen.
+  - Kurse (inkl. Notenschema, MC-Wertung, Minuspunkte, Prüfungszeit & Fragenanzahl für Prüfungen), Kapitel/Themen, einzelne Fragen (inkl. Fragetyp, Antwortoptionen, Begründungen und Erklärung) sowie Kurs-Glossare und einzelne Glossareinträge lassen sich direkt im Browser bearbeiten oder mit Sicherheitsabfrage löschen.
   - Fragen können während des Quiz/der Prüfung oder in der Auswertung mit einem Fähnchen (Taste `M`) zum späteren Überarbeiten markiert werden.
 - **Import & Export (inkl. Duplikatschutz, Lernstand & Kurseinstellungen):**
-  - Fragen und Glossare können per JSON-Text, Dateiauswahl oder Drag & Drop importiert werden.
-  - Bereits vorhandene Kurse, Kapitel und Fragen werden beim Import automatisch zusammengeführt (keine doppelten Fragen), wobei der höhere Lernstand erhalten bleibt.
-  - Export aller Fragen, einzelner Kurse oder des Glossars als `.json`-Datei (inkl. aktuellem Lernstand `streak` / `wrong` / `flagged` sowie den Kurseinstellungen `einstellungen`).
+  - Fragen und Kurs-Glossare können per JSON-Text, Dateiauswahl oder Drag & Drop importiert werden.
+  - Bereits vorhandene Kurse, Kapitel, Fragen und Glossarbegriffe werden beim Import kursbezogen zusammengeführt (keine doppelten Fragen/Begriffe pro Kurs), wobei der höhere Lernstand erhalten bleibt.
+  - Export aller Fragen, einzelner Kurse (inkl. Kurs-Glossar), aller Glossare oder einzelner Kurs-Glossare als `.json`-Datei (inkl. aktuellem Lernstand `streak` / `wrong` / `flagged` sowie den Kurseinstellungen `einstellungen`).
 - **Automatischer Cloud-Sync (GitHub):**
   - Direkt in den **Einstellungen** kann ein GitHub Personal Access Token (`repo`-Berechtigung) hinterlegt werden.
   - Quizomat legt automatisch ein privates Repository (`quizomat-sync`) an und synchronisiert Fragen, Kurseinstellungen, Lernstand und Glossar im Hintergrund zwischen Mac, iPad und iPhone.
@@ -112,8 +113,11 @@ Importiert werden kann entweder ein einzelnes Themen-Set (`{ ... }`) oder eine L
 
 ## 📖 JSON-Format für das Glossar
 
+Importiert werden kann entweder ein einzelnes Kurs-Glossar (`{ ... }`) oder eine Liste mehrerer Kurs-Glossare (`[ { ... }, { ... } ]`).
+
 ```json
 {
+  "kurs": "Name des Kurses",
   "glossar": [
     {
       "begriff": "Fachbegriff",
@@ -128,4 +132,4 @@ Importiert werden kann entweder ein einzelnes Themen-Set (`{ ... }`) oder eine L
 
 ## 🔒 Datenschutz & Speicherung
 
-Alle Fragen, Kurse, Glossareinträge, UI-Zustände und Lernstände werden ausschließlich lokal im `localStorage` des jeweiligen Browsers gespeichert (`pt:sets`, `pt:courses`, `pt:gloss`, `pt:col`, `pt:sel`, `pt:exp`, `pt:opts`). Es werden keine Daten an externe Server übertragen (außer bei freiwillig aktiviertem privaten GitHub-Cloud-Sync).
+Alle Fragen, Kurse, Glossareinträge, UI-Zustände und Lernstände werden ausschließlich lokal im `localStorage` des jeweiligen Browsers gespeichert (`pt:sets`, `pt:courses`, `pt:gloss`, `pt:col`, `pt:gcol`, `pt:sel`, `pt:exp`, `pt:opts`). Es werden keine Daten an externe Server übertragen (außer bei freiwillig aktiviertem privaten GitHub-Cloud-Sync).
