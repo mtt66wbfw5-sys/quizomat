@@ -13,12 +13,14 @@ Interaktiver Prüfungs- und Vorlesungstrainer zum Üben, Auswerten und Verwalten
   - **Multiple Choice** (`multi`) – mehrere richtige Antworten möglich
   - **Wahr / Falsch** (`tf`) – Aussagen bewerten
 - **Übungsmodus (Adaptives Lernsystem):**
-  - Alle verfügbaren Fragen der ausgewählten Kapitel werden im Quiz gestellt; der Durchgang läuft kontinuierlich, bis man über „Zurück zur Übersicht“ zurückkehrt.
+  - Die maximale Anzahl der Fragen pro Übung (Quiz) lässt sich in den **Einstellungen** frei festlegen (Standard: 20 Fragen).
   - Fragen und Antwortoptionen werden bei jedem Durchgang automatisch gemischt.
   - Jede Frage merkt sich die Serie richtiger Antworten in Folge (`streak`) sowie Fehlversuche (`wrong`).
   - **Gemeistert ab 3× richtig in Folge (`✓ Gemeistert`):** Gemeisterte Fragen werden beim Üben automatisch ausgeblendet, damit der Fokus auf noch offenen Fragen liegt.
   - **Intelligente Gewichtung:** Zuletzt falsch beantwortete und noch unbekannte Fragen werden bei der Quiz-Zusammenstellung bevorzugt gezogen.
   - Der Lernstand lässt sich jederzeit pro Frage per Klick umschalten sowie pro Kapitel, pro Kurs oder global zurücksetzen.
+- **Einstellungsseite & Kursübersicht:**
+  - Eigener Reiter **Einstellungen** zum Festlegen der Fragenanzahl pro Übung (Quiz) sowie einer kompakten Übersicht aller vorhandenen Kurse (ohne Kapitel und Einzelfragen) inklusive direkter Bearbeitung aller Kurseinstellungen, Export, Lernstand-Reset und Löschen.
 - **Prüfungsmodus & Notenschemata:**
   - **Fragenanzahl & Countdown-Timer pro Kurs:** Anzahl der Prüfungsfragen und Prüfungszeit in Minuten lassen sich pro Kurs individuell einstellen; mit visueller Warnung (ab 5 Min. gelb, ab 1 Min. rot) und automatischer Abgabe bei Zeitablauf.
   - **Prüfungsnahe Fragenauswahl:** Zieht proportional aus allen ausgewählten Kapiteln (inklusive bereits gemeisterter Fragen) ohne sofortiges Feedback während der Bearbeitung.
