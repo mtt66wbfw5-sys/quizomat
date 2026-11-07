@@ -23,15 +23,18 @@ Interaktiver Prüfungs- und Vorlesungstrainer zum Üben, Auswerten und Verwalten
   - **Fragenanzahl & Countdown-Timer pro Kurs:** Anzahl der Prüfungsfragen und Prüfungszeit in Minuten lassen sich pro Kurs individuell einstellen; mit visueller Warnung (ab 5 Min. gelb, ab 1 Min. rot) und automatischer Abgabe bei Zeitablauf.
   - **Prüfungsnahe Fragenauswahl:** Zieht proportional aus allen ausgewählten Kapiteln (inklusive bereits gemeisterter Fragen) ohne sofortiges Feedback während der Bearbeitung.
   - **Fragen-Navigator:** Freies Springen zwischen allen Prüfungsfragen, Statusanzeige (beantwortet / offen) und **„⚑ Später prüfen“**-Lesezeichen (Taste `L`).
+  - **Flexible Multiple-Choice-Wertung & Minuspunkte pro Kurs:**
+    - **MC-Wertungsmodi:** *Gesamtfrage (Alles-oder-nichts)*, *Einzelantworten (inkl. richtig Nicht-Angekreuzter)*, *Einzelantworten (nur richtige Kreuze)* oder *Teilpunkte (normiert auf 1 Punkt pro Frage)*.
+    - **Minuspunkte-Modi:** *Keine Minuspunkte*, *Minuspunkte bis minimal 0 Punkte pro Frage* (kein Abzug von anderen Fragen) oder *Gesamtabzug auch unter 0 Punkte pro Frage* (unbeantwortete Fragen = 0 Punkte).
   - **Kursabhängige Benotung (Noten 1 bis 5):** Pro Kurs kann zwischen drei Notenschemata gewählt werden (*Sehr gut, Gut, Befriedigend, Genügend, Nicht genügend*):
     - **Positiv ab 50 %** (1: ≥ 87,5 % · 2: ≥ 75 % · 3: ≥ 62,5 % · 4: ≥ 50 % · 5: < 50 %)
     - **Positiv ab 60 %** (1: ≥ 90 % · 2: ≥ 80 % · 3: ≥ 70 % · 4: ≥ 60 % · 5: < 60 %)
     - **Positiv ab 70 %** (1: ≥ 92,5 % · 2: ≥ 85 % · 3: ≥ 77,5 % · 4: ≥ 70 % · 5: < 70 %)
-  - **Detaillierte Klausureinsicht & Auswertung:** Aufschlüsselung nach Kapiteln sowie aufklappbare Übersicht aller beantworteten Fragen (standardmäßig sind falsch oder unbeantwortet gebliebene Fragen direkt geöffnet) inklusive Einzelbegründungen und Gesamt-Begründung.
+  - **Detaillierte Klausureinsicht & Auswertung:** Aufschlüsselung der erreichten Punkte nach Kapiteln, Live-Umschaltung der Wertungs- und Notenschemata sowie aufklappbare Übersicht aller Fragen inklusive Punkteaufschlüsselung pro Antwortoption, Einzelbegründungen und Gesamt-Begründung.
 - **Integriertes Glossar:**
   - Fachbegriffe (inkl. Alias-Schreibweisen) werden beim Prüfen einer Antwort automatisch im Fragetext, den Optionen und der Erklärung erkannt und direkt neben der Frage erläutert.
 - **Direktes Bearbeiten, Markieren & Verwalten:**
-  - Kurse (inkl. Notenschema, Prüfungszeit & Fragenanzahl für Prüfungen), Kapitel/Themen, einzelne Fragen (inkl. Fragetyp, Antwortoptionen, Begründungen und Erklärung) sowie Glossareinträge lassen sich direkt im Browser bearbeiten oder mit Sicherheitsabfrage löschen.
+  - Kurse (inkl. Notenschema, MC-Wertung, Minuspunkte, Prüfungszeit & Fragenanzahl für Prüfungen), Kapitel/Themen, einzelne Fragen (inkl. Fragetyp, Antwortoptionen, Begründungen und Erklärung) sowie Glossareinträge lassen sich direkt im Browser bearbeiten oder mit Sicherheitsabfrage löschen.
   - Fragen können während des Quiz/der Prüfung oder in der Auswertung mit einem Fähnchen (Taste `M`) zum späteren Überarbeiten markiert werden.
 - **Import & Export (inkl. Duplikatschutz & Lernstand):**
   - Fragen und Glossare können per JSON-Text, Dateiauswahl oder Drag & Drop importiert werden.
@@ -62,21 +65,36 @@ Importiert werden kann entweder ein einzelnes Themen-Set (`{ ... }`) oder eine L
       "frage": "Welche Aussage trifft zu?",
       "optionen": ["Option A", "Option B", "Option C", "Option D"],
       "richtig": [1],
-      "erklaerung": "Erklärung zur richtigen Antwort.",
-      "begruendungen": ["Warum A falsch ist", "Warum B stimmt", "", ""]
+      "erklaerung": "Gesamterklärung zur Frage und warum Option B richtig ist.",
+      "begruendungen": [
+        "Warum Option A falsch ist",
+        "Warum Option B stimmt",
+        "Warum Option C falsch ist",
+        "Warum Option D falsch ist"
+      ]
     },
     {
       "typ": "multi",
       "frage": "Welche Aussagen sind richtig?",
-      "optionen": ["Aussage 1", "Aussage 2", "Aussage 3"],
+      "optionen": ["Aussage 1", "Aussage 2", "Aussage 3", "Aussage 4"],
       "richtig": [0, 2],
-      "erklaerung": "Aussage 1 und 3 treffen zu."
+      "erklaerung": "Gesamterklärung zur Frage (Aussage 1 und 3 treffen zu).",
+      "begruendungen": [
+        "Warum Aussage 1 richtig ist",
+        "Warum Aussage 2 falsch ist",
+        "Warum Aussage 3 richtig ist",
+        "Warum Aussage 4 falsch ist"
+      ]
     },
     {
       "typ": "tf",
       "frage": "Diese Aussage ist wahr.",
       "richtig": true,
-      "erklaerung": "Begründung zur Aussage."
+      "erklaerung": "Gesamterklärung, warum diese Aussage wahr ist.",
+      "begruendungen": [
+        "Warum Wahr hier zutrifft",
+        "Warum Falsch hier nicht zutrifft"
+      ]
     }
   ]
 }
@@ -84,7 +102,8 @@ Importiert werden kann entweder ein einzelnes Themen-Set (`{ ... }`) oder eine L
 
 > **Hinweise:**
 > - `richtig`: 0-basierte Indizes der richtigen Optionen als Array (z. B. `[1]` oder `[0, 2]`) bzw. bei `tf` ein boolescher Wert (`true` / `false`).
-> - `begruendungen`: Optionales Array mit Begründungen zu jeder einzelnen Antwortoption.
+> - `erklaerung`: Übergreifende Erklärung / Gesamtbegründung zur jeweiligen Frage (für alle drei Fragetypen `single`, `multi` und `tf`).
+> - `begruendungen`: Array mit einer kurzen Einzelbegründung zu jeder Antwortoption (bei `single` und `multi` passend zu `optionen`, bei `tf` mit 2 Einträgen für `["Wahr", "Falsch"]`).
 > - **Lernstand beim Export:** Beim Exportieren werden optional auch `streak` (Serie richtiger Antworten), `wrong` (zuletzt falsch) und `flagged` (Markierung) mitgespeichert und beim Re-Import nahtlos übernommen.
 
 ## 📖 JSON-Format für das Glossar

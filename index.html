@@ -112,8 +112,8 @@ pre{white-space:pre-wrap;font-size:.85rem;background:var(--card);border:1px soli
 <div id="app"></div>
 <script>
 const $app=document.getElementById('app');
-let exp=new Set(),pq=null,col=new Set(),pend=null,rpend=null,cpend=null,crpend=null,gloss=[],courses={},cnames=[],gen={name:'',f:['single','multi','tf']},sets=[],sel=new Set(),opts={n:20,shuffle:true,hideMastered:true,mastery:3,examMins:30,pass:50,cpass:{},ctime:{},cqcount:{}},Q=[],idx=0,picked=new Set(),checked=false,log=[],msg='';
-let cedit=null,cdraft='',cpdraft=50,ctdraft=30,cqdraft=20,cerr='',sedit=null,sdraft=null,serr='',qedit=null,qdraft=null,qerr='',curView='q';
+let exp=new Set(),pq=null,col=new Set(),pend=null,rpend=null,cpend=null,crpend=null,gloss=[],courses={},cnames=[],gen={name:'',f:['single','multi','tf']},sets=[],sel=new Set(),opts={n:20,shuffle:true,hideMastered:true,mastery:3,examMins:30,pass:50,scoreMode:'all',negMode:'none',cpass:{},ctime:{},cqcount:{},cmode:{},cneg:{}},Q=[],idx=0,picked=new Set(),checked=false,log=[],msg='';
+let cedit=null,cdraft='',cpdraft=50,ctdraft=30,cqdraft=20,cmdraft='all',cndraft='none',cerr='',sedit=null,sdraft=null,serr='',qedit=null,qdraft=null,qerr='',curView='q';
 let examMode=false,examPicks=[],examMarks=new Set(),examEnd=0,examStart=0,examElapsed=0,examTimer=null,examSubPend=false,examTimeUp=false,examCourse='',examDurMins=30;
 let gh={token:'',user:'',sha:'',lastSync:0},localTs=0,syncState='idle',syncErr='',syncTimer=null,forceOverwrite=false;
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -137,14 +137,43 @@ const toTop=()=>{window.scrollTo(0,0);document.documentElement.scrollTop=0;docum
 const stopExamTimer=()=>{if(examTimer){clearInterval(examTimer);examTimer=null}};
 const fmtTime=s=>`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
 const fmtPct=n=>String(Math.round(n*10)/10).replace('.',',')+' %';
+const fmtPts=n=>String(Math.round(n*100)/100).replace('.',',').replace('-','−');
+const SCORE_MODES=['all','opt','pos','part'],NEG_MODES=['none','clamp','full'];
 const getPass=c=>(c&&opts.cpass&&[50,60,70].includes(+opts.cpass[c]))?+opts.cpass[c]:([50,60,70].includes(+opts.pass)?+opts.pass:50);
 const getExamMins=c=>(c&&opts.ctime&&+opts.ctime[c]>0)?Math.max(1,+opts.ctime[c]):(Math.max(1,+opts.examMins||30));
 const getExamCount=c=>(c&&opts.cqcount&&+opts.cqcount[c]>0)?Math.max(1,+opts.cqcount[c]):(Math.max(1,+opts.n||20));
+const getScoreMode=c=>(c&&opts.cmode&&SCORE_MODES.includes(opts.cmode[c]))?opts.cmode[c]:(SCORE_MODES.includes(opts.scoreMode)?opts.scoreMode:'all');
+const getNegMode=c=>(c&&opts.cneg&&NEG_MODES.includes(opts.cneg[c]))?opts.cneg[c]:(NEG_MODES.includes(opts.negMode)?opts.negMode:'none');
+const modeShort=m=>({all:'Gesamtfrage',opt:'Einzelantworten (inkl. Nicht-Ankreuzen)',pos:'Einzelantworten (nur richtige)',part:'Teilpunkte (1 Pkt./Frage)'}[m]||'Gesamtfrage');
+const negShort=n=>({none:'Keine Minuspunkte',clamp:'Minuspunkte (≥0/Frage)',full:'Minuspunkte (Gesamtabzug)'}[n]||'Keine Minuspunkte');
 function selCourses(){const cs=new Set();sets.forEach(s=>{if(sel.has(s.id))cs.add(s.course)});return[...cs]}
 function activePass(){const cs=selCourses();return cs.length===1?getPass(cs[0]):getPass('')}
 function activeTime(){const cs=selCourses();return cs.length===1?getExamMins(cs[0]):getExamMins('')}
 function activeCount(){const cs=selCourses();return cs.length===1?getExamCount(cs[0]):getExamCount('')}
+function activeScoreMode(){const cs=selCourses();return cs.length===1?getScoreMode(cs[0]):getScoreMode('')}
+function activeNegMode(){const cs=selCourses();return cs.length===1?getNegMode(cs[0]):getNegMode('')}
 function setActivePass(v,crs){const p=[50,60,70].includes(+v)?+v:50;if(!opts.cpass||typeof opts.cpass!=='object')opts.cpass={};if(crs){opts.cpass[crs]=p}else{opts.pass=p;selCourses().forEach(c=>{opts.cpass[c]=p})}saveO()}
+function setActiveScoreMode(v,crs){const m=SCORE_MODES.includes(v)?v:'all';if(!opts.cmode||typeof opts.cmode!=='object')opts.cmode={};if(crs){opts.cmode[crs]=m}else{opts.scoreMode=m;selCourses().forEach(c=>{opts.cmode[c]=m})}saveO()}
+function setActiveNegMode(v,crs){const n=NEG_MODES.includes(v)?v:'none';if(!opts.cneg||typeof opts.cneg!=='object')opts.cneg={};if(crs){opts.cneg[crs]=n}else{opts.negMode=n;selCourses().forEach(c=>{opts.cneg[c]=n})}saveO()}
+function scoreExamQ(q,p,smode,nmode){
+  const multi=q.type==='multi',open=!p||p.size===0,N=q.opts.length,R=Math.max(1,q.opts.filter(o=>o.ok).length);
+  const max=!multi?1:smode==='opt'?N:smode==='pos'?R:1;
+  if(open)return{pts:0,max,ok:false,part:false,open:true};
+  const fullOk=q.opts.every((o,k)=>o.ok===p.has(k));
+  if(!multi||smode==='all'){
+    const pts=fullOk?1:(nmode==='full'?-1:0);
+    return{pts,max:1,ok:fullOk,part:false,open:false};
+  }
+  let tp=0,tn=0,fp=0,fn=0;
+  q.opts.forEach((o,k)=>{const pk=p.has(k);if(o.ok&&pk)tp++;else if(!o.ok&&!pk)tn++;else if(!o.ok&&pk)fp++;else fn++});
+  let raw=0;
+  if(smode==='opt')raw=nmode==='none'?(tp+tn):(tp+tn)-(fp+fn);
+  else if(smode==='pos')raw=nmode==='none'?tp:tp-fp;
+  else raw=(nmode==='none'?(tp+tn):(tp+tn)-(fp+fn))/N;
+  const pts=nmode==='clamp'?Math.max(0,raw):raw;
+  const isOk=Math.abs(pts-max)<1e-9&&fp===0&&fn===0;
+  return{pts,max,ok:isOk,part:!isOk&&pts>0,open:false};
+}
 function calcGrade(pct,pass){
   const p=[50,60,70].includes(+pass)?+pass:50,st=(100-p)/4;
   if(pct>=p+3*st)return{g:1,t:'Sehr gut',ok:true,p,st};
@@ -171,7 +200,7 @@ function load(){
     sel=new Set(sets.map(s=>s.id));
   }
   exp=new Set([...exp].filter(id=>sets.some(s=>s.id===id)));
-  try{const o=JSON.parse(localStorage.getItem('pt:opts')||'null');if(o&&typeof o==='object')opts={...opts,...o,n:Math.max(1,+o.n||20),examMins:Math.max(1,+o.examMins||30),pass:[50,60,70].includes(+o.pass)?+o.pass:50,cpass:(o.cpass&&typeof o.cpass==='object')?o.cpass:{},ctime:(o.ctime&&typeof o.ctime==='object')?o.ctime:{},cqcount:(o.cqcount&&typeof o.cqcount==='object')?o.cqcount:{},shuffle:true,hideMastered:true,mastery:3}}catch(e){}
+  try{const o=JSON.parse(localStorage.getItem('pt:opts')||'null');if(o&&typeof o==='object')opts={...opts,...o,n:Math.max(1,+o.n||20),examMins:Math.max(1,+o.examMins||30),pass:[50,60,70].includes(+o.pass)?+o.pass:50,scoreMode:SCORE_MODES.includes(o.scoreMode)?o.scoreMode:'all',negMode:NEG_MODES.includes(o.negMode)?o.negMode:'none',cpass:(o.cpass&&typeof o.cpass==='object')?o.cpass:{},ctime:(o.ctime&&typeof o.ctime==='object')?o.ctime:{},cqcount:(o.cqcount&&typeof o.cqcount==='object')?o.cqcount:{},cmode:(o.cmode&&typeof o.cmode==='object')?o.cmode:{},cneg:(o.cneg&&typeof o.cneg==='object')?o.cneg:{},shuffle:true,hideMastered:true,mastery:3}}catch(e){}
   try{localTs=+localStorage.getItem('pt:ts')||0}catch(e){localTs=0}
   try{const g=JSON.parse(localStorage.getItem('pt:gh')||'null');if(g&&typeof g==='object')gh={...gh,...g}}catch(e){}
 }
@@ -205,12 +234,12 @@ const hasAnyProgress=()=>sets.some(s=>s.qs.some(q=>(q.streak||0)>0||q.wrong));
 const PROMPT=`Erstelle aus den angehängten Unterlagen [ANZAHL] Prüfungsfragen als JSON. Mische Single Choice (typ "single"), Multiple Choice mit mehreren richtigen Antworten (typ "multi") und Wahr/Falsch (typ "tf"). Falsche Antworten sollen plausibel sein und typische Verwechslungen aus dem Stoff abbilden. Gib nur einen JSON-Codeblock in genau diesem Format aus:
 
 {"kurs":"Name des Kurses","titel":"Thema / Vorlesung","fragen":[
- {"typ":"single","frage":"…","optionen":["A","B","C","D"],"richtig":[1],"erklaerung":"Warum die richtige Antwort stimmt.","begruendungen":["Warum A falsch ist","Warum B richtig ist","…","…"]},
- {"typ":"multi","frage":"…","optionen":["…","…","…","…"],"richtig":[0,2],"erklaerung":"…"},
- {"typ":"tf","frage":"Aussage …","richtig":true,"erklaerung":"…"}
+ {"typ":"single","frage":"…","optionen":["A","B","C","D"],"richtig":[1],"erklaerung":"Warum die richtige Antwort stimmt.","begruendungen":["Warum A falsch ist","Warum B richtig ist","Warum C falsch ist","Warum D falsch ist"]},
+ {"typ":"multi","frage":"…","optionen":["A","B","C","D"],"richtig":[0,2],"erklaerung":"Gesamterklärung zur Frage.","begruendungen":["Warum A richtig ist","Warum B falsch ist","Warum C richtig ist","Warum D falsch ist"]},
+ {"typ":"tf","frage":"Aussage …","richtig":true,"erklaerung":"Warum die Aussage wahr bzw. falsch ist.","begruendungen":["Warum Wahr zutrifft bzw. nicht zutrifft","Warum Falsch nicht zutrifft bzw. zutrifft"]}
 ]}
 
-"richtig" enthält die Indizes (ab 0) der richtigen Optionen. "begruendungen" ist optional und enthält pro Option eine kurze Begründung.`;
+"richtig" enthält die Indizes (ab 0) der richtigen Optionen (bzw. true/false bei "tf"). Jede Frage enthält eine allgemeine "erklaerung" sowie in "begruendungen" für jede einzelne Antwortoption eine kurze Begründung.`;
 
 function parseSets(txt){
   let d;try{d=JSON.parse(txt.trim().replace(/^```(?:json)?|```$/g,'').trim())}catch(e){throw new Error('Kein gültiges JSON: '+e.message)}
@@ -224,7 +253,8 @@ function parseSets(txt){
       const st=Math.max(0,parseInt(f.streak,10)||0),wr=!!f.wrong,fl=!!(f.flagged||f.markiert);
       if(f.typ==='tf'){
         const t=f.richtig===true||(Array.isArray(f.richtig)&&f.richtig[0]===0);
-        return{q:f.frage,type:'single',exp:f.erklaerung||'',opts:[{t:'Wahr',ok:t,why:''},{t:'Falsch',ok:!t,why:''}],fixed:true,streak:st,wrong:wr,flagged:fl};
+        const bg=Array.isArray(f.begruendungen)?f.begruendungen:[];
+        return{q:f.frage,type:'single',exp:f.erklaerung||'',opts:[{t:'Wahr',ok:t,why:String(bg[0]||'')},{t:'Falsch',ok:!t,why:String(bg[1]||'')}],fixed:true,streak:st,wrong:wr,flagged:fl};
       }
       if(!Array.isArray(f.optionen)||f.optionen.length<2)throw new Error(w+'mindestens 2 „optionen“ nötig.');
       const raw=[].concat(f.richtig??[]);
@@ -286,15 +316,17 @@ function resetCourseProg(gi){
   crpend=null;rpend=null;wp=null;home();
 }
 
-function startCEdit(gi){cedit=gi;cdraft=cnames[gi]||'';cpdraft=getPass(cdraft);ctdraft=getExamMins(cdraft);cqdraft=getExamCount(cdraft);cerr='';cpend=null;crpend=null;sedit=null;qedit=null;rpend=null;pend=null;home()}
+function startCEdit(gi){cedit=gi;cdraft=cnames[gi]||'';cpdraft=getPass(cdraft);ctdraft=getExamMins(cdraft);cqdraft=getExamCount(cdraft);cmdraft=getScoreMode(cdraft);cndraft=getNegMode(cdraft);cerr='';cpend=null;crpend=null;sedit=null;qedit=null;rpend=null;pend=null;home()}
 function cancelCEdit(){cedit=null;cdraft='';cerr='';home()}
 function saveCEdit(gi){
-  const old=cnames[gi],el=document.getElementById('ecn'),pEl=document.getElementById('ecp'),tEl=document.getElementById('ect'),qEl=document.getElementById('ecq'),nw=(el?el.value:cdraft).trim(),np=pEl?+pEl.value:cpdraft,nt=tEl?Math.max(1,+tEl.value||30):ctdraft,nq=qEl?Math.max(1,+qEl.value||20):cqdraft;
-  cdraft=el?el.value:cdraft;cpdraft=[50,60,70].includes(np)?np:50;ctdraft=nt;cqdraft=nq;
+  const old=cnames[gi],el=document.getElementById('ecn'),pEl=document.getElementById('ecp'),tEl=document.getElementById('ect'),qEl=document.getElementById('ecq'),mEl=document.getElementById('ecm'),nEl=document.getElementById('ecnm'),nw=(el?el.value:cdraft).trim(),np=pEl?+pEl.value:cpdraft,nt=tEl?Math.max(1,+tEl.value||30):ctdraft,nq=qEl?Math.max(1,+qEl.value||20):cqdraft,nm=mEl?mEl.value:cmdraft,nn=nEl?nEl.value:cndraft;
+  cdraft=el?el.value:cdraft;cpdraft=[50,60,70].includes(np)?np:50;ctdraft=nt;cqdraft=nq;cmdraft=SCORE_MODES.includes(nm)?nm:'all';cndraft=NEG_MODES.includes(nn)?nn:'none';
   if(!nw){cerr='Kursname darf nicht leer sein.';home();return}
   if(!opts.cpass||typeof opts.cpass!=='object')opts.cpass={};
   if(!opts.ctime||typeof opts.ctime!=='object')opts.ctime={};
   if(!opts.cqcount||typeof opts.cqcount!=='object')opts.cqcount={};
+  if(!opts.cmode||typeof opts.cmode!=='object')opts.cmode={};
+  if(!opts.cneg||typeof opts.cneg!=='object')opts.cneg={};
   if(nw!==old){
     sets.forEach(s=>{if(s.course===old)s.course=nw});
     if(courses[old]){courses[nw]=courses[old];delete courses[old];saveC()}
@@ -302,11 +334,15 @@ function saveCEdit(gi){
     delete opts.cpass[old];
     delete opts.ctime[old];
     delete opts.cqcount[old];
+    delete opts.cmode[old];
+    delete opts.cneg[old];
     save(true);
   }
   opts.cpass[nw]=cpdraft;
   opts.ctime[nw]=ctdraft;
   opts.cqcount[nw]=cqdraft;
+  opts.cmode[nw]=cmdraft;
+  opts.cneg[nw]=cndraft;
   saveO();
   cedit=null;cdraft='';cerr='';home();
 }
@@ -334,6 +370,7 @@ function startQEdit(sid,qi){
     q:q.q,
     exp:q.exp||'',
     tfOk:q.fixed?!!(q.opts[0]&&q.opts[0].ok):true,
+    tfWhy:q.fixed?[(q.opts[0]&&q.opts[0].why)||'',(q.opts[1]&&q.opts[1].why)||'']:['',''],
     opts:q.fixed?[{t:'',ok:true,why:''},{t:'',ok:false,why:''}]:q.opts.map(o=>({t:o.t,ok:!!o.ok,why:o.why||''}))
   };
   qerr='';cedit=null;sedit=null;home();
@@ -348,6 +385,8 @@ function syncQDraft(){
   if(qdraft.type==='tf'){
     const r=document.querySelector('input[name="eq_tf"]:checked');
     if(r)qdraft.tfOk=r.value==='true';
+    const w0=document.getElementById('eq_tfw0'),w1=document.getElementById('eq_tfw1');
+    if(w0||w1)qdraft.tfWhy=[w0?w0.value:(qdraft.tfWhy&&qdraft.tfWhy[0])||'',w1?w1.value:(qdraft.tfWhy&&qdraft.tfWhy[1])||''];
   }else{
     const oks=[...document.querySelectorAll('.eq_ok')],ots=[...document.querySelectorAll('.eq_ot')],ows=[...document.querySelectorAll('.eq_ow')];
     if(ots.length){
@@ -358,6 +397,7 @@ function syncQDraft(){
 function changeQType(nt){
   syncQDraft();
   qdraft.type=nt;
+  if(nt==='tf'&&!qdraft.tfWhy)qdraft.tfWhy=['',''];
   if(nt!=='tf'&&(!qdraft.opts||qdraft.opts.length<2))qdraft.opts=[{t:'',ok:true,why:''},{t:'',ok:false,why:''}];
   if(nt==='single'&&qdraft.opts.filter(o=>o.ok).length>1){
     let first=true;qdraft.opts.forEach(o=>{if(o.ok){if(first)first=false;else o.ok=false}});
@@ -372,8 +412,9 @@ function saveQEdit(sid,qi){
   const orig=s.qs[qi],qTxt=qdraft.q.trim(),expTxt=qdraft.exp.trim();
   if(!qTxt){qerr='Der Fragetext darf nicht leer sein.';home();return}
   if(qdraft.type==='tf'){
+    const tw=qdraft.tfWhy||['',''];
     s.qs[qi]={q:qTxt,type:'single',fixed:true,exp:expTxt,streak:orig.streak||0,wrong:!!orig.wrong,flagged:false,
-      opts:[{t:'Wahr',ok:!!qdraft.tfOk,why:''},{t:'Falsch',ok:!qdraft.tfOk,why:''}]};
+      opts:[{t:'Wahr',ok:!!qdraft.tfOk,why:(tw[0]||'').trim()},{t:'Falsch',ok:!qdraft.tfOk,why:(tw[1]||'').trim()}]};
   }else{
     if(qdraft.opts.length<2){qerr='Mindestens 2 Antwortoptionen sind nötig.';home();return}
     if(qdraft.opts.some(o=>!o.t.trim())){qerr='Alle Antwortoptionen müssen einen Text enthalten.';home();return}
@@ -387,8 +428,8 @@ function saveQEdit(sid,qi){
 }
 
 function qForm(sid,qi){
-  const d=qdraft,isTf=d.type==='tf',isSingle=d.type==='single';
-  return `<div class="qi"><div class="ge"><label class="mut" for="eq_type">Fragetyp</label><select id="eq_type" onchange="changeQType(this.value)"><option value="single" ${d.type==='single'?'selected':''}>Single Choice</option><option value="multi" ${d.type==='multi'?'selected':''}>Multiple Choice</option><option value="tf" ${isTf?'selected':''}>Wahr / Falsch</option></select><label class="mut" for="eq_q">Frage</label><textarea id="eq_q" style="min-height:64px">${esc(d.q)}</textarea>${isTf?`<label class="mut">Richtige Antwort</label><div class="row" style="margin:4px 0 10px"><label class="row" style="cursor:pointer"><input type="radio" name="eq_tf" value="true" ${d.tfOk?'checked':''}> Wahr</label><label class="row" style="cursor:pointer"><input type="radio" name="eq_tf" value="false" ${!d.tfOk?'checked':''}> Falsch</label></div>`:`<label class="mut" style="margin-bottom:4px">Antwortoptionen (Häkchen = richtig, optional Begründung)</label>${d.opts.map((o,k)=>`<div class="orow"><input class="eq_ok" type="${isSingle?'radio':'checkbox'}" name="eq_ok_grp" title="Als richtige Antwort markieren" ${o.ok?'checked':''}><input class="eq_ot" placeholder="Antwort ${k+1}" value="${esc(o.t)}"><input class="eq_ow" placeholder="Begründung (optional)" value="${esc(o.why)}"><button class="x" type="button" title="Option entfernen" aria-label="Option entfernen" ${d.opts.length<=2?'disabled':''} onclick="delQOpt(${k})">${IC.x}</button></div>`).join('')}<button class="btn sec sm" type="button" style="margin:2px 0 10px" onclick="addQOpt()">+ Option hinzufügen</button>`}<label class="mut" for="eq_exp">Erklärung</label><textarea id="eq_exp" style="min-height:64px">${esc(d.exp)}</textarea><p class="err">${esc(qerr)}</p><div class="row act"><button class="btn sec sm" type="button" onclick="cancelQEdit()">Abbrechen</button><button class="btn sm" type="button" onclick="saveQEdit('${sid}',${qi})">Speichern</button></div></div></div>`;
+  const d=qdraft,isTf=d.type==='tf',isSingle=d.type==='single',tw=d.tfWhy||['',''];
+  return `<div class="qi"><div class="ge"><label class="mut" for="eq_type">Fragetyp</label><select id="eq_type" onchange="changeQType(this.value)"><option value="single" ${d.type==='single'?'selected':''}>Single Choice</option><option value="multi" ${d.type==='multi'?'selected':''}>Multiple Choice</option><option value="tf" ${isTf?'selected':''}>Wahr / Falsch</option></select><label class="mut" for="eq_q">Frage</label><textarea id="eq_q" style="min-height:64px">${esc(d.q)}</textarea>${isTf?`<label class="mut" style="margin-bottom:4px">Richtige Antwort &amp; optionale Begründungen</label><div class="orow" style="grid-template-columns:auto auto 1fr"><input type="radio" name="eq_tf" value="true" ${d.tfOk?'checked':''}><span style="min-width:52px;font-weight:700">Wahr</span><input id="eq_tfw0" placeholder="Begründung zu Wahr (optional)" value="${esc(tw[0]||'')}"></div><div class="orow" style="grid-template-columns:auto auto 1fr;margin-bottom:10px"><input type="radio" name="eq_tf" value="false" ${!d.tfOk?'checked':''}><span style="min-width:52px;font-weight:700">Falsch</span><input id="eq_tfw1" placeholder="Begründung zu Falsch (optional)" value="${esc(tw[1]||'')}"></div>`:`<label class="mut" style="margin-bottom:4px">Antwortoptionen (Häkchen = richtig, optional Begründung)</label>${d.opts.map((o,k)=>`<div class="orow"><input class="eq_ok" type="${isSingle?'radio':'checkbox'}" name="eq_ok_grp" title="Als richtige Antwort markieren" ${o.ok?'checked':''}><input class="eq_ot" placeholder="Antwort ${k+1}" value="${esc(o.t)}"><input class="eq_ow" placeholder="Begründung (optional)" value="${esc(o.why)}"><button class="x" type="button" title="Option entfernen" aria-label="Option entfernen" ${d.opts.length<=2?'disabled':''} onclick="delQOpt(${k})">${IC.x}</button></div>`).join('')}<button class="btn sec sm" type="button" style="margin:2px 0 10px" onclick="addQOpt()">+ Option hinzufügen</button>`}<label class="mut" for="eq_exp">Erklärung</label><textarea id="eq_exp" style="min-height:64px">${esc(d.exp)}</textarea><p class="err">${esc(qerr)}</p><div class="row act"><button class="btn sec sm" type="button" onclick="cancelQEdit()">Abbrechen</button><button class="btn sm" type="button" onclick="saveQEdit('${sid}',${qi})">Speichern</button></div></div></div>`;
 }
 
 function home(){stopExamTimer();const chg=curView!=='q';curView='q';$app.className=qsearch.trim()?'searching':'';
@@ -401,8 +442,8 @@ function home(){stopExamTimer();const chg=curView!=='q';curView='q';$app.classNa
   $app.innerHTML=`${nav('q')}<div class="row" style="justify-content:space-between;align-items:center"><h1>${IC.cap}<span>Quizomat</span></h1>${sets.length?`<div class="row dstart"><button class="btn sec" ${allSelCount?'':'disabled'} onclick="startExam()">Prüfung starten${eCnt?` (${eCnt})`:''}</button><button class="btn" ${total?'':'disabled'} onclick="start()">Quiz starten${total?` (${total})`:''}</button></div>`:''}</div><p class="mut">Fragen aus deinen Vorlesungsunterlagen üben und auswerten.</p>
   ${topBar()}${sets.length?optsHtml(total,allSelCount)+searchHtml()+flaggedHtml():''}${dl}
   ${sets.length?Object.entries(groups).map(([c,l],gi)=>{
-    const mC=l.reduce((a,s)=>a+masteredInSet(s),0),allC=l.reduce((a,s)=>a+s.qs.length,0),hasCP=l.some(s=>s.qs.some(q=>(q.streak||0)>0||q.wrong)),cp=getPass(c),cm=getExamMins(c),cq=getExamCount(c),cCol=mC===allC&&allC?'--ok':l.some(s=>sel.has(s.id))?'--ac':'--ink';
-    return `<div class="card ccard" style="margin:14px 0 8px;padding:12px 16px;border-left:4px solid var(${cCol})"><div class="crs"><input type="checkbox" aria-label="Alle Kapitel auswählen" ${allSel(l)?'checked':''} onchange="togC(${gi},this.checked)"><button class="chb" style="padding:2px 0" aria-expanded="${!col.has(c)}" onclick="fold(${gi})"><span>${col.has(c)?'▸':'▾'}</span><span><span class="mut" style="display:block;font-size:.82rem;margin-bottom:1px">${l.length} Kapitel · ${allC} Fragen${mC?` · ${mC} ✓ gemeistert`:''} · Prüfung: ${isym(IC.book,'Fragen')} ${cq} · ⏱ ${cm} Min. · ${isym(IC.award,'Notenschema')} ${cp} %</span><b>${esc(c)}</b></span></button><span class="gc"><button class="x" title="Kurs exportieren" aria-label="Kurs exportieren" onclick="exportC(this,${gi})">${IC.exp}</button>${crpend===gi?`<span class="mut">Zurücksetzen?</span><button class="btn sm" onclick="resetCourseProg(${gi})">Ja</button><button class="btn sec sm" onclick="crpend=null;home()">Nein</button>`:hasCP?`<button class="x" title="Lernstand dieses Kurses zurücksetzen" aria-label="Lernstand dieses Kurses zurücksetzen" onclick="crpend=${gi};cpend=null;rpend=null;pend=null;home()">${IC.res}</button>`:''}<button class="x" title="Kurs, Zeit & Notenschema bearbeiten" aria-label="Kurs bearbeiten" onclick="startCEdit(${gi})">${IC.edit}</button>${cpend===gi?`<span class="mut">Löschen?</span><button class="btn sm" onclick="delC2(${gi})">Ja</button><button class="btn sec sm" onclick="delC(${gi})">Nein</button>`:`<button class="x" title="Kurs löschen" aria-label="Kurs löschen" onclick="delC(${gi})">${IC.x}</button>`}</span></div>${cedit===gi?`<div class="ge" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)"><label class="mut" for="ecn">Kursname bearbeiten</label><input id="ecn" value="${esc(cdraft)}"><label class="mut" for="ecq">Anzahl der Fragen (Prüfung)</label><input id="ecq" type="number" min="1" max="200" value="${cqdraft}"><label class="mut" for="ect">Prüfungszeit (Minuten)</label><input id="ect" type="number" min="1" max="300" value="${ctdraft}"><label class="mut" for="ecp">Notenschema (Positiv-Grenze für Prüfungen)</label><select id="ecp"><option value="50" ${cpdraft===50?'selected':''}>50 % – Positiv ab 50 % (1: ≥87,5 % · 2: ≥75 % · 3: ≥62,5 % · 4: ≥50 %)</option><option value="60" ${cpdraft===60?'selected':''}>60 % – Positiv ab 60 % (1: ≥90 % · 2: ≥80 % · 3: ≥70 % · 4: ≥60 %)</option><option value="70" ${cpdraft===70?'selected':''}>70 % – Positiv ab 70 % (1: ≥92,5 % · 2: ≥85 % · 3: ≥77,5 % · 4: ≥70 %)</option></select><p class="err">${esc(cerr)}</p><div class="row act"><button class="btn sec sm" onclick="cancelCEdit()">Abbrechen</button><button class="btn sm" onclick="saveCEdit(${gi})">Speichern</button></div></div>`:''}</div>${col.has(c)?'':`<div class="grp" style="margin:0 0 16px 12px">${l.map((s,si)=>{
+    const mC=l.reduce((a,s)=>a+masteredInSet(s),0),allC=l.reduce((a,s)=>a+s.qs.length,0),hasCP=l.some(s=>s.qs.some(q=>(q.streak||0)>0||q.wrong)),cp=getPass(c),cm=getExamMins(c),cq=getExamCount(c),csm=getScoreMode(c),cnm=getNegMode(c),cCol=mC===allC&&allC?'--ok':l.some(s=>sel.has(s.id))?'--ac':'--ink';
+    return `<div class="card ccard" style="margin:14px 0 8px;padding:12px 16px;border-left:4px solid var(${cCol})"><div class="crs"><input type="checkbox" aria-label="Alle Kapitel auswählen" ${allSel(l)?'checked':''} onchange="togC(${gi},this.checked)"><button class="chb" style="padding:2px 0" aria-expanded="${!col.has(c)}" onclick="fold(${gi})"><span>${col.has(c)?'▸':'▾'}</span><span><span class="mut" style="display:block;font-size:.82rem;margin-bottom:1px">${l.length} Kapitel · ${allC} Fragen${mC?` · ${mC} ✓ gemeistert`:''} · Prüfung: ${isym(IC.book,'Fragen')} ${cq} · ⏱ ${cm} Min. · ${isym(IC.award,'Notenschema')} ${cp} % · ${modeShort(csm)}${cnm!=='none'?` · ${negShort(cnm)}`:''}</span><b>${esc(c)}</b></span></button><span class="gc"><button class="x" title="Kurs exportieren" aria-label="Kurs exportieren" onclick="exportC(this,${gi})">${IC.exp}</button>${crpend===gi?`<span class="mut">Zurücksetzen?</span><button class="btn sm" onclick="resetCourseProg(${gi})">Ja</button><button class="btn sec sm" onclick="crpend=null;home()">Nein</button>`:hasCP?`<button class="x" title="Lernstand dieses Kurses zurücksetzen" aria-label="Lernstand dieses Kurses zurücksetzen" onclick="crpend=${gi};cpend=null;rpend=null;pend=null;home()">${IC.res}</button>`:''}<button class="x" title="Kurs, Zeit, Wertung & Notenschema bearbeiten" aria-label="Kurs bearbeiten" onclick="startCEdit(${gi})">${IC.edit}</button>${cpend===gi?`<span class="mut">Löschen?</span><button class="btn sm" onclick="delC2(${gi})">Ja</button><button class="btn sec sm" onclick="delC(${gi})">Nein</button>`:`<button class="x" title="Kurs löschen" aria-label="Kurs löschen" onclick="delC(${gi})">${IC.x}</button>`}</span></div>${cedit===gi?`<div class="ge" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)"><label class="mut" for="ecn">Kursname bearbeiten</label><input id="ecn" value="${esc(cdraft)}"><label class="mut" for="ecq">Anzahl der Fragen (Prüfung)</label><input id="ecq" type="number" min="1" max="200" value="${cqdraft}"><label class="mut" for="ect">Prüfungszeit (Minuten)</label><input id="ect" type="number" min="1" max="300" value="${ctdraft}"><label class="mut" for="ecp">Notenschema (Positiv-Grenze für Prüfungen)</label><select id="ecp"><option value="50" ${cpdraft===50?'selected':''}>50 % – Positiv ab 50 % (1: ≥87,5 % · 2: ≥75 % · 3: ≥62,5 % · 4: ≥50 %)</option><option value="60" ${cpdraft===60?'selected':''}>60 % – Positiv ab 60 % (1: ≥90 % · 2: ≥80 % · 3: ≥70 % · 4: ≥60 %)</option><option value="70" ${cpdraft===70?'selected':''}>70 % – Positiv ab 70 % (1: ≥92,5 % · 2: ≥85 % · 3: ≥77,5 % · 4: ≥70 %)</option></select><label class="mut" for="ecm">Multiple-Choice-Wertung (Prüfung)</label><select id="ecm"><option value="all" ${cmdraft==='all'?'selected':''}>Gesamtfrage – 1 Punkt nur wenn komplett richtig (Alles-oder-nichts)</option><option value="opt" ${cmdraft==='opt'?'selected':''}>Einzelantworten (inkl. Nicht-Ankreuzen) – +1 Punkt je richtiger Option (auch richtig weggelassene)</option><option value="pos" ${cmdraft==='pos'?'selected':''}>Einzelantworten (nur richtige) – +1 Punkt je richtig angekreuzter Option</option><option value="part" ${cmdraft==='part'?'selected':''}>Teilpunkte (normiert) – 1 Punkt pro Frage, anteilig über die Optionen</option></select><label class="mut" for="ecnm">Minuspunkte bei Fehlern (Prüfung)</label><select id="ecnm"><option value="none" ${cndraft==='none'?'selected':''}>Keine Minuspunkte (Fehler = 0 Punkte)</option><option value="clamp" ${cndraft==='clamp'?'selected':''}>Minuspunkte pro Fehler, aber mind. 0 Punkte pro Frage (kein Abzug von anderen Fragen)</option><option value="full" ${cndraft==='full'?'selected':''}>Minuspunkte pro Fehler, auch unter 0 Punkte pro Frage (Gesamtabzug; Offen = 0 Punkte)</option></select><p class="err">${esc(cerr)}</p><div class="row act"><button class="btn sec sm" onclick="cancelCEdit()">Abbrechen</button><button class="btn sm" onclick="saveCEdit(${gi})">Speichern</button></div></div>`:''}</div>${col.has(c)?'':`<div class="grp" style="margin:0 0 16px 12px">${l.map((s,si)=>{
       const mS=masteredInSet(s),hasP=s.qs.some(q=>(q.streak||0)>0||q.wrong),sCol=mS===s.qs.length&&s.qs.length?'--ok':sel.has(s.id)?'--ac':'--ink';
       return `<div class="set" style="border-left:4px solid var(${sCol})"><input type="checkbox" aria-label="${esc(s.title)} auswählen" ${sel.has(s.id)?'checked':''} onchange="tog('${s.id}')"><button class="sb" style="padding:2px 0" aria-expanded="${exp.has(s.id)}" onclick="openS('${s.id}')"><span>${exp.has(s.id)?'▾':'▸'}</span><span><span class="mut" style="display:block;font-size:.82rem;margin-bottom:1px">Kapitel ${si+1} · ${s.qs.length} Fragen${mS?` · ${mS} ✓ gemeistert`:''}</span><b>${esc(s.title)}</b></span></button><span class="gc">${rpend===s.id?`<span class="mut">Zurücksetzen?</span><button class="btn sm" onclick="resetProg('${s.id}')">Ja</button><button class="btn sec sm" onclick="rpend=null;home()">Nein</button>`:hasP?`<button class="x" title="Lernstand dieses Kapitels zurücksetzen" aria-label="Lernstand zurücksetzen" onclick="rpend='${s.id}';pend=null;cpend=null;crpend=null;home()">${IC.res}</button>`:''}<button class="x" title="Kapitel bearbeiten" aria-label="Kapitel bearbeiten" onclick="startSEdit('${s.id}')">${IC.edit}</button>${pend===s.id?`<span class="mut">Löschen?</span><button class="btn sm" onclick="del2('${s.id}')">Ja</button><button class="btn sec sm" onclick="del('${s.id}')">Nein</button>`:`<button class="x" title="Set löschen" aria-label="Set löschen" onclick="del('${s.id}')">${IC.x}</button>`}</span>${sedit===s.id?`<div class="ge" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--bd)"><label class="mut" for="esc_c">Kurs</label><input id="esc_c" list="cl" value="${esc(sdraft.course)}"><label class="mut" for="esc_t">Thema / Kapitel</label><input id="esc_t" value="${esc(sdraft.title)}"><p class="err">${esc(serr)}</p><div class="row act"><button class="btn sec sm" onclick="cancelSEdit()">Abbrechen</button><button class="btn sm" onclick="saveSEdit('${s.id}')">Speichern</button></div></div>`:''}</div>${exp.has(s.id)?`<div class="ql">${s.qs.map((q,i)=>qedit===s.id+':'+i?qForm(s.id,i):`<div class="qi"><span>${esc(q.q)}</span><span class="gc">${qBadge(s.id,i,q)}<button class="x${q.flagged?' warn':''}" title="${q.flagged?'Markierung aufheben':'Zum Bearbeiten markieren'}" aria-label="Markieren" onclick="togFlag('${s.id}',${i})">${IC.flag}</button><button class="x" title="Frage bearbeiten" aria-label="Frage bearbeiten" onclick="startQEdit('${s.id}',${i})">${IC.edit}</button>${pq===s.id+':'+i?`<button class="btn sm" onclick="delQ('${s.id}',${i})">Löschen</button><button class="btn sec sm" onclick="pq=null;home()">Nein</button>`:`<button class="x" title="Frage löschen" aria-label="Frage löschen" onclick="pq='${s.id}:${i}';home()">${IC.x}</button>`}</span></div>`).join('')}</div>`:''}`}).join('')}</div>`}`}).join('')+`<div class="mstart"><div class="row"><button class="btn sec" ${allSelCount?'':'disabled'} onclick="startExam()">Prüfung${eCnt?` (${eCnt})`:''}</button><button class="btn" ${total?'':'disabled'} onclick="start()">Quiz${total?` (${total})`:''}</button></div></div>`
   :`<div class="card" style="margin-top:18px"><p><b>Noch keine Fragen vorhanden.</b></p><p class="mut">Lass dir in Claude aus deinen Unterlagen ein Fragenset als JSON erstellen und füge es hier ein.</p></div>`}
@@ -414,8 +455,8 @@ function topBar(){
   return `<div class="row act" style="margin:12px 0 6px"><button class="btn sec ico" title="Fragen importieren" aria-label="Fragen importieren" onclick="imp('fragen')">${IC.imp}</button>${sets.length?`<button class="btn sec ico" title="Alle Fragen exportieren" aria-label="Alle Fragen exportieren" onclick="exportQ(this)">${IC.exp}</button><span class="gc" style="gap:8px">${hasP?(wp==='r'?`<span class="mut">Zurücksetzen?</span><button class="btn sm" onclick="resetProg()">Ja</button><button class="btn sec sm" onclick="wp=null;home()">Nein</button>`:`<button class="btn sec ico" title="Lernstand zurücksetzen" aria-label="Lernstand zurücksetzen" onclick="wp='r';home()">${IC.res}</button>`):''}${wp==='q'?`<span class="mut">Löschen?</span><button class="btn sm" onclick="wipe('q')">Ja</button><button class="btn sec sm" onclick="wp=null;home()">Nein</button>`:`<button class="btn sec ico" title="Alle Fragen löschen" aria-label="Alle Fragen löschen" onclick="wp='q';home()">${IC.del}</button>`}</span>`:''}</div>`;
 }
 function optsHtml(total,allSelCount){
-  const mastCount=allSelCount-[...sel].reduce((a,id)=>{const s=sets.find(x=>x.id===id);return a+(s?s.qs.filter(q=>!isMastered(q)).length:0)},0),ap=activePass(),at=activeTime(),aq=activeCount(),cs=selCourses();
-  return `<p class="mut" style="margin:8px 0 4px">${total?`<b>${total}</b> ${total===1?'Frage':'Fragen'} zum Üben verfügbar`+(mastCount?` (${mastCount} gemeisterte ausgeblendet · für Prüfung alle ${allSelCount} verfügbar)`:''):allSelCount&&mastCount===allSelCount?`Alle ${allSelCount} ausgewählten Fragen sind gemeistert – setze den Lernstand zurück oder starte eine Prüfung.`:'Wähle mindestens ein Kapitel aus.'}${cs.length===1?` · Kurs „${esc(cs[0])}“ (Prüfung: ${isym(IC.book,'Fragen')} ${aq} · ⏱ ${at} Min. · ${isym(IC.award,'Notenschema')} ${ap} %)`:''}</p>`;
+  const mastCount=allSelCount-[...sel].reduce((a,id)=>{const s=sets.find(x=>x.id===id);return a+(s?s.qs.filter(q=>!isMastered(q)).length:0)},0),ap=activePass(),at=activeTime(),aq=activeCount(),asm=activeScoreMode(),anm=activeNegMode(),cs=selCourses();
+  return `<p class="mut" style="margin:8px 0 4px">${total?`<b>${total}</b> ${total===1?'Frage':'Fragen'} zum Üben verfügbar`+(mastCount?` (${mastCount} gemeisterte ausgeblendet · für Prüfung alle ${allSelCount} verfügbar)`:''):allSelCount&&mastCount===allSelCount?`Alle ${allSelCount} ausgewählten Fragen sind gemeistert – setze den Lernstand zurück oder starte eine Prüfung.`:'Wähle mindestens ein Kapitel aus.'}${cs.length===1?` · Kurs „${esc(cs[0])}“ (Prüfung: ${isym(IC.book,'Fragen')} ${aq} · ⏱ ${at} Min. · ${isym(IC.award,'Notenschema')} ${ap} % · ${modeShort(asm)}${anm!=='none'?` · ${negShort(anm)}`:''})`:''}</p>`;
 }
 function wipe(k){if(k==='q'){sets=[];sel=new Set();exp=new Set();saveSel();saveExp();save(true);wp=null;home()}else{gloss=[];saveGloss(true);wp=null;glosView()}}
 const allSel=l=>l.every(s=>sel.has(s.id));
@@ -426,7 +467,7 @@ function delQ(id,i){const s=sets.find(x=>x.id===id);if(!s)return;s.qs.splice(i,1
 const exportQ=b=>exportData(b,'fragen'),exportG=b=>exportData(b,'glossar'),exportC=(b,gi)=>exportData(b,'kurs',cnames[gi]);
 function exportData(b,kind,crs){const h0=b.innerHTML;
   const list=kind==='kurs'?sets.filter(s=>s.course===crs):sets;
-  const out=kind==='glossar'?{glossar:gloss.map(g=>({begriff:g.b,info:g.i,...(g.a.length?{alias:g.a}:{})}))}:list.map(s=>({kurs:s.course,titel:s.title,fragen:s.qs.map(q=>({...(q.fixed?{typ:'tf',frage:q.q,richtig:q.opts[0].ok,erklaerung:q.exp}:{typ:q.type,frage:q.q,optionen:q.opts.map(o=>o.t),richtig:q.opts.map((o,i)=>o.ok?i:-1).filter(i=>i>=0),erklaerung:q.exp,...(q.opts.some(o=>o.why)?{begruendungen:q.opts.map(o=>o.why||'')}:{})}),...(q.streak?{streak:q.streak}:{}),...(q.wrong?{wrong:true}:{}),...(q.flagged?{flagged:true}:{})}))}));
+  const out=kind==='glossar'?{glossar:gloss.map(g=>({begriff:g.b,info:g.i,...(g.a.length?{alias:g.a}:{})}))}:list.map(s=>({kurs:s.course,titel:s.title,fragen:s.qs.map(q=>({...(q.fixed?{typ:'tf',frage:q.q,richtig:q.opts[0].ok,erklaerung:q.exp}:{typ:q.type,frage:q.q,optionen:q.opts.map(o=>o.t),richtig:q.opts.map((o,i)=>o.ok?i:-1).filter(i=>i>=0),erklaerung:q.exp}),...(q.opts.some(o=>o.why)?{begruendungen:q.opts.map(o=>o.why||'')}:{}),...(q.streak?{streak:q.streak}:{}),...(q.wrong?{wrong:true}:{}),...(q.flagged?{flagged:true}:{})}))}));
   const slug=crs?'-'+(crs.toLowerCase().replace(/[^a-z0-9äöüß]+/g,'-').replace(/^-|-$/g,'')||'kurs'):'';
   try{const u=URL.createObjectURL(new Blob([JSON.stringify(out,null,1)],{type:'application/json'}));
     const a=document.createElement('a');a.href=u;a.download='quizomat-'+kind+slug+'-'+new Date().toISOString().slice(0,10)+'.json';
@@ -442,7 +483,7 @@ function delC2(gi){
   if(c!==undefined){
     sets.filter(s=>s.course===c).forEach(s=>{sel.delete(s.id);exp.delete(s.id)});
     sets=sets.filter(s=>s.course!==c);
-    delete courses[c];col.delete(c);if(opts.cpass)delete opts.cpass[c];if(opts.ctime)delete opts.ctime[c];if(opts.cqcount)delete opts.cqcount[c];
+    delete courses[c];col.delete(c);if(opts.cpass)delete opts.cpass[c];if(opts.ctime)delete opts.ctime[c];if(opts.cqcount)delete opts.cqcount[c];if(opts.cmode)delete opts.cmode[c];if(opts.cneg)delete opts.cneg[c];
     saveSel();saveExp();saveCol();saveC();saveO();save(true);
   }
   cpend=null;crpend=null;rpend=null;pend=null;home();
@@ -646,10 +687,11 @@ function finishExam(timeUp){
 function quiz(){curView='z';
   const q=Q[idx],src=q._ref||q,multi=q.type==='multi',tiles=q.opts.every(o=>o.t.length<=55);
   if(examMode){
-    const curP=examPicks[idx]||new Set(),ansCnt=examPicks.filter(p=>p.size>0).length,rem=Math.max(0,Math.ceil((examEnd-Date.now())/1000));
+    const curP=examPicks[idx]||new Set(),ansCnt=examPicks.filter(p=>p.size>0).length,rem=Math.max(0,Math.ceil((examEnd-Date.now())/1000)),sm=getScoreMode(examCourse),nm=getNegMode(examCourse);
+    const eHint=multi?(sm==='opt'?`Mehrere Antworten können richtig sein (${q.opts.length} Pkt. – jede Option zählt inkl. Nicht-Ankreuzen${nm==='clamp'?' · −1 Pkt. je Fehler, min. 0':nm==='full'?' · −1 Pkt. je Fehler':''}).`:sm==='pos'?`Mehrere Antworten können richtig sein (+1 Pkt. je richtiger Antwort${nm==='clamp'?' · −1 Pkt. je falscher Wahl, min. 0':nm==='full'?' · −1 Pkt. je falscher Wahl':''}).`:sm==='part'?`Mehrere Antworten können richtig sein (1 Pkt. anteilig über alle Optionen${nm==='clamp'?' · mit Abzug, min. 0':nm==='full'?' · mit Abzug':''}).`:`Mehrere Antworten können richtig sein (1 Pkt. für die gesamte Frage${nm==='full'?' · −1 Pkt. bei Fehler':''}).`):(nm==='full'?'1 Punkt bei richtiger Antwort · −1 Punkt bei falscher Antwort (Offen = 0 Punkte).':'');
     $app.className='wide';$app.innerHTML=`<div class='cols'><div class='qhead'><div class="row" style="justify-content:space-between"><span class="mut">Prüfung · Frage ${idx+1} von ${Q.length}${q._title?` · ${esc(q._title)}`:''}</span><span class="gc"><span id="etimer" class="badge${rem<=60?' bad':rem<=300?' warn':''}" style="cursor:default;font-variant-numeric:tabular-nums" title="Verbleibende Prüfungszeit">⏱ ${fmtTime(rem)}</span><button class="badge${examMarks.has(idx)?' warn':''}" title="Frage in dieser Prüfung zur Kontrolle vormerken (Taste L)" onclick="togExamMark()">⚑ ${examMarks.has(idx)?'Vorgemerkt':'Später prüfen'}</button><button class="badge${src.flagged?' warn':''}" title="Frage zum späteren Bearbeiten markieren (Taste M)" onclick="togQuizFlag()">${IC.flag}</button><button class="btn sec sm" onclick="home()">Zurück zur Übersicht</button></span></div>
     <div class="bar"><i style="width:${ansCnt/Q.length*100}%"></i></div>
-    <p class="q">${esc(q.q)}</p>${multi?'<p class="mut">Mehrere Antworten können richtig sein.</p>':''}</div><div class='qmain'><div class='opts${tiles?' tiles':''}'>
+    <p class="q">${esc(q.q)}</p>${eHint?`<p class="mut">${eHint}</p>`:''}</div><div class='qmain'><div class='opts${tiles?' tiles':''}'>
     ${q.opts.map((o,i)=>{
       const selOpt=curP.has(i),c='opt'+(multi?' multi':'')+(selOpt?' sel':''),mk=selOpt?(multi?'✓':'●'):'';
       return `<button class="${c}" onclick="pick(${i})" aria-pressed="${selOpt}"><span class="m">${mk}</span><span>${esc(o.t)}</span></button>`}).join('')}
@@ -696,7 +738,7 @@ function examSide(){
     return `<button class="${cl}" onclick="goExamQ(${i})" title="Frage ${i+1}${examMarks.has(i)?' (vorgemerkt)':examPicks[i]&&examPicks[i].size?' (beantwortet)':' (offen)'}">${i+1}</button>`;
   }).join('')}</div>
   <p class="mut" style="font-size:.82rem;margin:4px 0 10px">Klicke auf eine Nummer, um direkt zur Frage zu springen.</p>
-  ${examSubPend?`<div class="card" style="border-color:var(--warn);padding:10px 12px;margin-top:8px"><p style="margin:0 0 8px"><b>Noch ${openCnt} ${openCnt===1?'Frage':'Fragen'} unbeantwortet.</b><br><span class="mut">Nicht beantwortete Fragen werden als falsch gewertet.</span></p><div class="row"><button class="btn sm" onclick="finishExam(false)">Jetzt abgeben</button><button class="btn sec sm" onclick="examSubPend=false;quiz()">Weiterarbeiten</button></div></div>`:`<button class="btn${openCnt?' sec':''}" style="width:100%" onclick="tryFinishExam()">Prüfung abgeben (${ansCnt}/${Q.length})</button>`}</div>`;
+  ${examSubPend?`<div class="card" style="border-color:var(--warn);padding:10px 12px;margin-top:8px"><p style="margin:0 0 8px"><b>Noch ${openCnt} ${openCnt===1?'Frage':'Fragen'} unbeantwortet.</b><br><span class="mut">Nicht beantwortete Fragen geben 0 Punkte.</span></p><div class="row"><button class="btn sm" onclick="finishExam(false)">Jetzt abgeben</button><button class="btn sec sm" onclick="examSubPend=false;quiz()">Weiterarbeiten</button></div></div>`:`<button class="btn${openCnt?' sec':''}" style="width:100%" onclick="tryFinishExam()">Prüfung abgeben (${ansCnt}/${Q.length})</button>`}</div>`;
 }
 
 let rexp=new Set();
@@ -707,16 +749,21 @@ function togResFlag(i){
   src.flagged=!src.flagged;q.flagged=src.flagged;
   save(true);result();
 }
-function resQList(title){
+function resQList(title,smode,nmode){
   return `<div class="row" style="justify-content:space-between;margin:1.4em 0 .6em"><h2 style="margin:0">${title} (${Q.length})</h2><button class="btn sec sm" onclick="togAllRexp()">${rexp.size===Q.length?'Alle zuklappen':'Alle aufklappen'}</button></div>
   ${Q.map((q,i)=>{
-    const p=examPicks[i]||new Set(),ok=log[i],src=q._ref||q,open=rexp.has(i),multi=q.type==='multi',acCol=ok?'--ok':p.size?'--bad':'--warn';
-    return `<div class="card" style="margin:12px 0;padding:12px 16px;border-left:4px solid var(${acCol})"><div style="display:flex;gap:10px;align-items:flex-start;justify-content:space-between"><button class="sb" style="padding:2px 0" aria-expanded="${open}" onclick="togRexp(${i})"><span>${open?'▾':'▸'}</span><span><span class="mut" style="display:block;font-size:.82rem;margin-bottom:2px">Frage ${i+1}${q._title?` · ${esc(q._title)}`:''}</span><b>${esc(q.q)}</b></span></button><span class="gc"><span class="badge ${ok?'ok':p.size?'bad':'warn'}" style="cursor:default">${ok?'✓ Richtig':p.size?'✕ Falsch':'Offen'}</span><button class="x${src.flagged?' warn':''}" title="${src.flagged?'Markierung aufheben':'Zum Bearbeiten markieren'}" aria-label="Markieren" onclick="togResFlag(${i})">${IC.flag}</button></span></div>${open?`<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--bd)">${!p.size?`<p class="mut" style="margin:0 0 8px;color:var(--warn)"><b>Keine Antwort ausgewählt.</b></p>`:''}${q.opts.map((o,k)=>{
+    const p=examPicks[i]||new Set(),ok=log[i],src=q._ref||q,open=rexp.has(i),multi=q.type==='multi',sc=examMode?scoreExamQ(q,p,smode,nmode):null;
+    const acCol=examMode?(sc.ok?'--ok':(sc.part||sc.open)?'--warn':'--bad'):(ok?'--ok':p.size?'--bad':'--warn');
+    const bCls=examMode?(sc.ok?'ok':(sc.part||sc.open)?'warn':'bad'):(ok?'ok':p.size?'bad':'warn');
+    const bTxt=examMode?`${sc.ok?'✓ Richtig':sc.part?'Teilweise':sc.open?'Offen':'✕ Falsch'} · ${fmtPts(sc.pts)} / ${fmtPts(sc.max)} Pkt.`:(ok?'✓ Richtig':p.size?'✕ Falsch':'Offen');
+    return `<div class="card" style="margin:12px 0;padding:12px 16px;border-left:4px solid var(${acCol})"><div style="display:flex;gap:10px;align-items:flex-start;justify-content:space-between"><button class="sb" style="padding:2px 0" aria-expanded="${open}" onclick="togRexp(${i})"><span>${open?'▾':'▸'}</span><span><span class="mut" style="display:block;font-size:.82rem;margin-bottom:2px">Frage ${i+1}${q._title?` · ${esc(q._title)}`:''}</span><b>${esc(q.q)}</b></span></button><span class="gc"><span class="badge ${bCls}" style="cursor:default">${bTxt}</span><button class="x${src.flagged?' warn':''}" title="${src.flagged?'Markierung aufheben':'Zum Bearbeiten markieren'}" aria-label="Markieren" onclick="togResFlag(${i})">${IC.flag}</button></span></div>${open?`<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--bd)">${!p.size?`<p class="mut" style="margin:0 0 8px;color:var(--warn)"><b>Keine Antwort ausgewählt (0 Punkte).</b></p>`:''}${q.opts.map((o,k)=>{
       const pk=p.has(k);let c='opt'+(multi?' multi':''),mk='',note='';
-      if(o.ok&&pk){c+=' ok';mk='✓';note='Deine Antwort (richtig)'}
-      else if(o.ok){c+=' ok miss';mk='✓';note='Richtige Antwort'}
-      else if(pk){c+=' bad';mk='✕';note='Deine Antwort (falsch)'}
-      return `<div class="${c}" style="cursor:default${!o.ok&&!pk?';opacity:.72':''}"><span class="m">${mk}</span><span>${esc(o.t)}${note||o.why?`<span class="why">${note?`<b>${note}</b>${o.why?' · ':''}`:''}${esc(o.why||'')}</span>`:''}</span></div>`;
+      const optStep=examMode&&multi&&!sc.open&&smode!=='all'?(smode==='part'?fmtPts(1/q.opts.length):'1'):'';
+      if(o.ok&&pk){c+=' ok';mk='✓';note=optStep?`Deine Antwort (richtig · +${optStep} Pkt.)`:'Deine Antwort (richtig)'}
+      else if(o.ok){c+=' ok miss';mk='✓';note=optStep?`Richtige Antwort (nicht gewählt · ${smode==='pos'||nmode==='none'?'0':'−'+optStep} Pkt.)`:'Richtige Antwort'}
+      else if(pk){c+=' bad';mk='✕';note=optStep?`Deine Antwort (falsch · ${nmode==='none'?'0':'−'+optStep} Pkt.)`:'Deine Antwort (falsch)'}
+      else if(optStep&&(smode==='opt'||smode==='part')){mk='✓';note=`Richtig nicht gewählt (+${optStep} Pkt.)`}
+      return `<div class="${c}" style="cursor:default${!o.ok&&!pk&&!(optStep&&(smode==='opt'||smode==='part'))?';opacity:.72':''}"><span class="m">${mk}</span><span>${esc(o.t)}${note||o.why?`<span class="why">${note?`<b>${note}</b>${o.why?' · ':''}`:''}${esc(o.why||'')}</span>`:''}</span></div>`;
     }).join('')}${q.exp?`<div class="exp" style="margin:8px 0 2px"><b style="color:var(--ac);display:block;margin-bottom:2px">Begründung</b>${esc(q.exp)}</div>`:''}</div>`:''}</div>`;
   }).join('')}`;
 }
@@ -725,9 +772,13 @@ function result(){stopExamTimer();const chg=curView!=='r';curView='r';$app.class
   if(chg)rexp=new Set(Q.map((_,i)=>i).filter(i=>!log[i]));
   const ok=log.filter(Boolean).length,exactPct=Q.length?ok/Q.length*100:0,pct=Math.round(exactPct),wrong=Q.filter((_,i)=>!log[i]),newlyM=Q.filter(q=>q._newlyMastered).length;
   if(examMode){
-    const passPct=getPass(examCourse),gr=calcGrade(exactPct,passPct),st=gr.st;
+    const passPct=getPass(examCourse),smode=getScoreMode(examCourse),nmode=getNegMode(examCourse);
+    const scores=Q.map((q,i)=>scoreExamQ(q,examPicks[i]||new Set(),smode,nmode));
+    const rawPts=scores.reduce((a,s)=>a+s.pts,0),maxPts=scores.reduce((a,s)=>a+s.max,0),totPts=Math.max(0,rawPts);
+    const exPct=maxPts>0?totPts/maxPts*100:0,partCnt=scores.filter(s=>s.part).length;
+    const gr=calcGrade(exPct,passPct),st=gr.st;
     const resCol=gr.ok?(gr.g<=2?'--ok':gr.g===3?'--ac':'--warn'):'--bad';
-    const chMap={};Q.forEach((q,i)=>{const k=q._title||'Allgemein';if(!chMap[k])chMap[k]={ok:0,tot:0};chMap[k].tot++;if(log[i])chMap[k].ok++});
+    const chMap={};Q.forEach((q,i)=>{const k=q._title||'Allgemein';if(!chMap[k])chMap[k]={pts:0,max:0};chMap[k].pts+=scores[i].pts;chMap[k].max+=scores[i].max});
     const chEntries=Object.entries(chMap);
     $app.innerHTML=`${nav('q')}<h1 style="color:var(${resCol})">${IC.award}<span>Prüfungsergebnis</span></h1>
     <div class="card" style="border-left:5px solid var(${resCol});background:color-mix(in srgb,var(${resCol}) 6%,var(--card))">
@@ -736,7 +787,9 @@ function result(){stopExamTimer();const chg=curView!=='r';curView='r';$app.class
           <div style="font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(${resCol});margin-bottom:3px">${gr.ok?'Prüfung bestanden':'Nicht bestanden'}</div>
           <div class="score" style="color:var(${resCol})">Note ${gr.g} · ${gr.t}</div>
           <div class="row" style="gap:12px;margin-top:8px;font-size:.93rem;flex-wrap:wrap">
-            <span><b>${ok} / ${Q.length}</b> richtig (${fmtPct(exactPct)})</span>
+            <span><b>${fmtPts(totPts)} / ${fmtPts(maxPts)} Punkte</b>${rawPts<0?` (Rohwert: ${fmtPts(rawPts)})`:''} (${fmtPct(exPct)})</span>
+            <span class="mut">·</span>
+            <span><b>${ok} / ${Q.length}</b> Fragen komplett richtig${partCnt?` (${partCnt} teilweise)`:''}</span>
             <span class="mut">·</span>
             <span>⏱ Zeit: <b>${fmtTime(examElapsed)}</b> / ${fmtTime(examDurMins*60)} Min.</span>
             ${examTimeUp?'<span class="badge warn">⏱ Zeit abgelaufen</span>':''}
@@ -745,12 +798,21 @@ function result(){stopExamTimer();const chg=curView!=='r';curView='r';$app.class
         </div>
         <span class="badge ${gr.ok?'ok':'bad'}" style="cursor:default;font-size:.95rem;padding:6px 14px;box-shadow:0 1px 2px rgba(0,0,0,.04)">${gr.ok?'✓ Positiv (Bestanden)':'✕ Negativ (Nicht bestanden)'}</span>
       </div>
-      <div style="margin-top:12px;padding-top:10px;border-top:1px solid color-mix(in srgb,var(${resCol}) 20%,var(--bd))"><div class="row" style="justify-content:space-between"><label class="mut">Notenschema${examCourse?` (${esc(examCourse)})`:''}: <select class="inl" onchange="setActivePass(this.value,examCourse);result()"><option value="50" ${passPct===50?'selected':''}>Positiv ab 50 %</option><option value="60" ${passPct===60?'selected':''}>Positiv ab 60 %</option><option value="70" ${passPct===70?'selected':''}>Positiv ab 70 %</option></select></label><span class="mut" style="font-size:.84rem"><b>1:</b> ≥${fmtPct(passPct+3*st)} · <b>2:</b> ≥${fmtPct(passPct+2*st)} · <b>3:</b> ≥${fmtPct(passPct+st)} · <b>4:</b> ≥${fmtPct(passPct)} · <b>5:</b> &lt;${fmtPct(passPct)}</span></div></div>
+      <div style="margin-top:12px;padding-top:10px;border-top:1px solid color-mix(in srgb,var(${resCol}) 20%,var(--bd))">
+        <div class="row" style="gap:12px;margin-bottom:8px">
+          <label class="mut">MC-Wertung: <select class="inl" onchange="setActiveScoreMode(this.value,examCourse);result()"><option value="all" ${smode==='all'?'selected':''}>Gesamtfrage (Alles-oder-nichts)</option><option value="opt" ${smode==='opt'?'selected':''}>Einzelantworten (inkl. Nicht-Ankreuzen)</option><option value="pos" ${smode==='pos'?'selected':''}>Einzelantworten (nur richtige)</option><option value="part" ${smode==='part'?'selected':''}>Teilpunkte (1 Pkt./Frage)</option></select></label>
+          <label class="mut">Minuspunkte: <select class="inl" onchange="setActiveNegMode(this.value,examCourse);result()"><option value="none" ${nmode==='none'?'selected':''}>Keine Minuspunkte</option><option value="clamp" ${nmode==='clamp'?'selected':''}>Min. 0 Pkt. pro Frage</option><option value="full" ${nmode==='full'?'selected':''}>Gesamtabzug (auch &lt; 0)</option></select></label>
+        </div>
+        <div class="row" style="justify-content:space-between">
+          <label class="mut">Notenschema${examCourse?` (${esc(examCourse)})`:''}: <select class="inl" onchange="setActivePass(this.value,examCourse);result()"><option value="50" ${passPct===50?'selected':''}>Positiv ab 50 %</option><option value="60" ${passPct===60?'selected':''}>Positiv ab 60 %</option><option value="70" ${passPct===70?'selected':''}>Positiv ab 70 %</option></select></label>
+          <span class="mut" style="font-size:.84rem"><b>1:</b> ≥${fmtPct(passPct+3*st)} · <b>2:</b> ≥${fmtPct(passPct+2*st)} · <b>3:</b> ≥${fmtPct(passPct+st)} · <b>4:</b> ≥${fmtPct(passPct)} · <b>5:</b> &lt;${fmtPct(passPct)}</span>
+        </div>
+      </div>
     </div>
-    ${chEntries.length>1?`<div class="card" style="margin-top:12px"><b>Auswertung nach Kapiteln</b><div style="margin-top:6px">${chEntries.map(([t,v])=>{const cp=Math.round(v.ok/v.tot*100);return `<div class="qi" style="padding:6px 0"><span>${esc(t)}</span><span class="badge ${cp>=passPct?'ok':'bad'}" style="cursor:default">${v.ok} / ${v.tot} (${cp} %)</span></div>`}).join('')}</div></div>`:''}
+    ${chEntries.length>1?`<div class="card" style="margin-top:12px"><b>Auswertung nach Kapiteln</b><div style="margin-top:6px">${chEntries.map(([t,v])=>{const cp=v.max>0?Math.round(Math.max(0,v.pts)/v.max*100):0;return `<div class="qi" style="padding:6px 0"><span>${esc(t)}</span><span class="badge ${cp>=passPct?'ok':'bad'}" style="cursor:default">${fmtPts(Math.max(0,v.pts))} / ${fmtPts(v.max)} Pkt. (${cp} %)</span></div>`}).join('')}</div></div>`:''}
     <div class="row act" style="margin-top:14px"><button class="btn" onclick="startExam()">Neue Prüfung starten</button>${wrong.length?`<button class="btn sec" onclick="start(wrongPool())">Falsche Fragen üben (${wrong.length})</button>`:''}<button class="btn sec" onclick="home()">Zur Übersicht</button></div>
     ${flaggedHtml()}
-    ${resQList('Klausureinsicht')}`;
+    ${resQList('Klausureinsicht',smode,nmode)}`;
     if(chg)toTop();
     return;
   }
@@ -830,7 +892,7 @@ function applyCloudState(d){
   if(Array.isArray(d.gloss))gloss=d.gloss;
   if(d.courses&&typeof d.courses==='object')courses=d.courses;
   if(Array.isArray(d.col))col=new Set(d.col);
-  if(d.opts&&typeof d.opts==='object')opts={...opts,...d.opts,n:Math.max(1,+d.opts.n||20),examMins:Math.max(1,+d.opts.examMins||30),pass:[50,60,70].includes(+d.opts.pass)?+d.opts.pass:50,cpass:(d.opts.cpass&&typeof d.opts.cpass==='object')?d.opts.cpass:{},ctime:(d.opts.ctime&&typeof d.opts.ctime==='object')?d.opts.ctime:{},cqcount:(d.opts.cqcount&&typeof d.opts.cqcount==='object')?d.opts.cqcount:{},shuffle:true,hideMastered:true,mastery:3};
+  if(d.opts&&typeof d.opts==='object')opts={...opts,...d.opts,n:Math.max(1,+d.opts.n||20),examMins:Math.max(1,+d.opts.examMins||30),pass:[50,60,70].includes(+d.opts.pass)?+d.opts.pass:50,scoreMode:SCORE_MODES.includes(d.opts.scoreMode)?d.opts.scoreMode:'all',negMode:NEG_MODES.includes(d.opts.negMode)?d.opts.negMode:'none',cpass:(d.opts.cpass&&typeof d.opts.cpass==='object')?d.opts.cpass:{},ctime:(d.opts.ctime&&typeof d.opts.ctime==='object')?d.opts.ctime:{},cqcount:(d.opts.cqcount&&typeof d.opts.cqcount==='object')?d.opts.cqcount:{},cmode:(d.opts.cmode&&typeof d.opts.cmode==='object')?d.opts.cmode:{},cneg:(d.opts.cneg&&typeof d.opts.cneg==='object')?d.opts.cneg:{},shuffle:true,hideMastered:true,mastery:3};
   localTs=d.updatedAt||Date.now();
   try{
     localStorage.setItem('pt:sets',JSON.stringify(sets));
