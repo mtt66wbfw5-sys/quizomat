@@ -162,6 +162,13 @@ function setHideMastered(v){opts.hideMastered=!!v;saveO();if(curView==='s')setti
 function setShuffle(v){opts.shuffle=!!v;saveO();if(curView==='s')settingsView()}
 function setTheme(v){opts.theme=THEMES.includes(v)?v:'auto';applyTheme();saveO();if(curView==='s')settingsView()}
 function selCourses(){const cs=new Set();sets.forEach(s=>{if(sel.has(s.id))cs.add(s.course)});return[...cs]}
+function enforceSingleCourse(pref){
+  const cs=selCourses();
+  if(cs.length<=1)return;
+  const keep=(pref&&cs.includes(pref))?pref:cs[0];
+  sets.forEach(s=>{if(s.course!==keep)sel.delete(s.id)});
+  saveSel();
+}
 function activePass(){const cs=selCourses();return cs.length===1?getPass(cs[0]):getPass('')}
 function activeTime(){const cs=selCourses();return cs.length===1?getExamMins(cs[0]):getExamMins('')}
 function activeCount(){const cs=selCourses();return cs.length===1?getExamCount(cs[0]):getExamCount('')}
@@ -214,6 +221,7 @@ function load(){
   }catch(e){
     sel=new Set(sets.map(s=>s.id));
   }
+  enforceSingleCourse();
   exp=new Set([...exp].filter(id=>sets.some(s=>s.id===id)));
   try{const o=JSON.parse(localStorage.getItem('pt:opts')||'null');if(o&&typeof o==='object')opts={...opts,...o,n:Math.max(1,+o.n||20),examMins:Math.max(1,+o.examMins||30),pass:[50,60,70].includes(+o.pass)?+o.pass:50,scoreMode:SCORE_MODES.includes(o.scoreMode)?o.scoreMode:'all',negMode:NEG_MODES.includes(o.negMode)?o.negMode:'none',cpass:(o.cpass&&typeof o.cpass==='object')?o.cpass:{},ctime:(o.ctime&&typeof o.ctime==='object')?o.ctime:{},cqcount:(o.cqcount&&typeof o.cqcount==='object')?o.cqcount:{},cmode:(o.cmode&&typeof o.cmode==='object')?o.cmode:{},cneg:(o.cneg&&typeof o.cneg==='object')?o.cneg:{},shuffle:o.shuffle!==false,hideMastered:o.hideMastered!==false,mastery:Math.max(1,Math.min(10,+o.mastery||3)),theme:THEMES.includes(o.theme)?o.theme:'auto'}}catch(e){}
   applyTheme();
@@ -376,7 +384,7 @@ function saveSEdit(sid){
   const c=(cEl?cEl.value:sdraft.course).trim(),t=(tEl?tEl.value:sdraft.title).trim();
   sdraft={course:cEl?cEl.value:c,title:tEl?tEl.value:t};
   if(!c||!t){serr='Kurs und Thema dürfen nicht leer sein.';home();return}
-  s.course=c;s.title=t;sedit=null;sdraft=null;serr='';save();home();
+  s.course=c;s.title=t;enforceSingleCourse(sel.has(sid)?c:undefined);sedit=null;sdraft=null;serr='';save();home();
 }
 
 function startQEdit(sid,qi){
@@ -466,27 +474,15 @@ function courseCardHtml(c,l,gi,isSetView){
   return `<div class="card ccard" style="margin:14px 0 8px;padding:12px 16px;border-left:4px solid var(${cCol})"><div class="crs">${isSetView?`<div class="chb" style="padding:2px 0;cursor:default"><span>${sub}</span></div>`:`<input type="checkbox" aria-label="Alle Kapitel auswählen" ${allSel(l)?'checked':''} onchange="togC(${gi},this.checked)"><button class="chb" style="padding:2px 0" aria-expanded="${!col.has(c)}" onclick="fold(${gi})"><span>${col.has(c)?'▸':'▾'}</span><span>${sub}</span></button>`}<span class="gc"><button class="x" title="Kurs exportieren" aria-label="Kurs exportieren" onclick="exportC(this,${gi})">${IC.exp}</button>${crpend===gi?`<span class="mut">Zurücksetzen?</span><button class="btn sm" onclick="resetCourseProg(${gi})">Ja</button><button class="btn sec sm" onclick="crpend=null;rerenderC()">Nein</button>`:hasCP?`<button class="x" title="Lernstand dieses Kurses zurücksetzen" aria-label="Lernstand dieses Kurses zurücksetzen" onclick="crpend=${gi};cpend=null;rpend=null;pend=null;rerenderC()">${IC.res}</button>`:''}<button class="x" title="Kurs, Zeit, Wertung & Notenschema bearbeiten" aria-label="Kurs bearbeiten" onclick="startCEdit(${gi})">${IC.edit}</button>${cpend===gi?`<span class="mut">Löschen?</span><button class="btn sm" onclick="delC2(${gi})">Ja</button><button class="btn sec sm" onclick="delC(${gi})">Nein</button>`:`<button class="x" title="Kurs löschen" aria-label="Kurs löschen" onclick="delC(${gi})">${IC.x}</button>`}</span></div>${cedit===gi?`<div class="ge" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)"><label class="mut" for="ecn">Kursname bearbeiten</label><input id="ecn" value="${esc(cdraft)}"><label class="mut" for="ecq">Anzahl der Fragen (Prüfung)</label><input id="ecq" type="number" min="1" max="200" value="${cqdraft}"><label class="mut" for="ect">Prüfungszeit (Minuten)</label><input id="ect" type="number" min="1" max="300" value="${ctdraft}"><label class="mut" for="ecp">Notenschema (Positiv-Grenze für Prüfungen)</label><select id="ecp"><option value="50" ${cpdraft===50?'selected':''}>50 % – Positiv ab 50 % (1: ≥87,5 % · 2: ≥75 % · 3: ≥62,5 % · 4: ≥50 %)</option><option value="60" ${cpdraft===60?'selected':''}>60 % – Positiv ab 60 % (1: ≥90 % · 2: ≥80 % · 3: ≥70 % · 4: ≥60 %)</option><option value="70" ${cpdraft===70?'selected':''}>70 % – Positiv ab 70 % (1: ≥92,5 % · 2: ≥85 % · 3: ≥77,5 % · 4: ≥70 %)</option></select>${hasMC?`<label class="mut" for="ecm">Multiple-Choice-Wertung (Prüfung)</label><select id="ecm"><option value="all" ${cmdraft==='all'?'selected':''}>Gesamtfrage – 1 Punkt nur wenn komplett richtig (Alles-oder-nichts)</option><option value="opt" ${cmdraft==='opt'?'selected':''}>Einzelantworten (inkl. Nicht-Ankreuzen) – +1 Punkt je richtiger Option (auch richtig weggelassene)</option><option value="pos" ${cmdraft==='pos'?'selected':''}>Einzelantworten (nur richtige) – +1 Punkt je richtig angekreuzter Option</option><option value="part" ${cmdraft==='part'?'selected':''}>Teilpunkte (normiert) – 1 Punkt pro Frage, anteilig über die Optionen</option></select>`:''}<label class="mut" for="ecnm">Minuspunkte bei Fehlern (Prüfung)</label><select id="ecnm"><option value="none" ${cndraft==='none'?'selected':''}>Keine Minuspunkte (Fehler = 0 Punkte)</option>${hasMC||cndraft==='clamp'?`<option value="clamp" ${cndraft==='clamp'?'selected':''}>Minuspunkte pro Fehler, aber mind. 0 Punkte pro Frage (kein Abzug von anderen Fragen)</option>`:''}<option value="full" ${cndraft==='full'?'selected':''}>Minuspunkte pro Fehler, auch unter 0 Punkte pro Frage (Gesamtabzug; Offen = 0 Punkte)</option></select><p class="err">${esc(cerr)}</p><div class="row act"><button class="btn sec sm" onclick="cancelCEdit()">Abbrechen</button><button class="btn sm" onclick="saveCEdit(${gi})">Speichern</button></div></div>`:''}</div>`;
 }
 
-function wrongSelPool(){
-  const out=[];
-  [...sel].forEach(id=>{const s=sets.find(x=>x.id===id);if(s)s.qs.forEach(q=>{if(q.wrong)out.push({...q,_ref:q,_course:s.course,_title:s.title})})});
-  return out;
-}
-function startWrongSel(){const w=wrongSelPool();if(w.length)start(w)}
-function togAllSets(){
-  const all=sets.length>0&&sets.every(s=>sel.has(s.id));
-  if(all)sel.clear();else sets.forEach(s=>sel.add(s.id));
-  saveSel();home();
-}
-
-function home(){stopExamTimer();const chg=curView!=='q';curView='q';$app.className=qsearch.trim()?'searching':'';
+function home(){stopExamTimer();enforceSingleCourse();const chg=curView!=='q';curView='q';$app.className=qsearch.trim()?'searching':'';
   const groups={};sets.forEach(s=>(groups[s.course]=groups[s.course]||[]).push(s));cnames=Object.keys(groups);
   const total=[...sel].reduce((a,id)=>{const s=sets.find(x=>x.id===id);return a+(s?pool1(s).length:0)},0);
   const allSelCount=[...sel].reduce((a,id)=>{const s=sets.find(x=>x.id===id);return a+(s?s.qs.length:0)},0);
-  const cs=selCourses(),mainC=cs.length===1?cs[0]:(cnames[0]||''),examMax=getExamCount(mainC);
-  const eCnt=Math.min(examMax,allSelCount),qCnt=Math.min(getQuizCount(),total),wCnt=wrongSelPool().length;
+  const cs=selCourses(),mainC=cs[0]||(cnames[0]||''),examMax=getExamCount(mainC);
+  const eCnt=Math.min(examMax,allSelCount),qCnt=Math.min(getQuizCount(),total);
   const dl=`<datalist id="cl">${cnames.map(c=>`<option value="${esc(c)}">`).join('')}</datalist>`;
-  $app.innerHTML=`${nav('q')}<div class="row" style="justify-content:space-between;align-items:center"><h1>${IC.cap}<span>Quizomat</span></h1>${sets.length?`<div class="row dstart">${wCnt?`<button class="btn sec" title="Nur zuletzt falsch beantwortete Fragen der ausgewählten Kapitel üben" onclick="startWrongSel()">Falsche üben (${wCnt})</button>`:''}<button class="btn sec" ${allSelCount?'':'disabled'} onclick="startExam()">Prüfung starten${eCnt?` (${eCnt})`:''}</button><button class="btn" ${total?'':'disabled'} onclick="start()">Quiz starten${qCnt?` (${qCnt})`:''}</button></div>`:''}</div><p class="mut">Fragen aus deinen Vorlesungsunterlagen üben und auswerten.</p>
-  ${topBar()}${sets.length?optsHtml(total,allSelCount,wCnt)+searchHtml()+flaggedHtml():''}${dl}
+  $app.innerHTML=`${nav('q')}<div class="row" style="justify-content:space-between;align-items:center"><h1>${IC.cap}<span>Quizomat</span></h1>${sets.length?`<div class="row dstart"><button class="btn sec" ${allSelCount?'':'disabled'} onclick="startExam()">Prüfung starten${eCnt?` (${eCnt})`:''}</button><button class="btn" ${total?'':'disabled'} onclick="start()">Quiz starten${qCnt?` (${qCnt})`:''}</button></div>`:''}</div><p class="mut">Fragen aus deinen Vorlesungsunterlagen üben und auswerten.</p>
+  ${topBar()}${sets.length?optsHtml(total,allSelCount)+searchHtml()+flaggedHtml():''}${dl}
   ${sets.length?Object.entries(groups).map(([c,l],gi)=>courseCardHtml(c,l,gi,false)+(col.has(c)?'':`<div class="grp" style="margin:0 0 16px 12px">${l.map((s,si)=>{
       const mS=masteredInSet(s),hasP=s.qs.some(q=>(q.streak||0)>0||q.wrong),sCol=mS===s.qs.length&&s.qs.length?'--ok':sel.has(s.id)?'--ac':'--ink';
       return `<div class="set" style="border-left:4px solid var(${sCol})"><input type="checkbox" aria-label="${esc(s.title)} auswählen" ${sel.has(s.id)?'checked':''} onchange="tog('${s.id}')"><button class="sb" style="padding:2px 0" aria-expanded="${exp.has(s.id)}" onclick="openS('${s.id}')"><span>${exp.has(s.id)?'▾':'▸'}</span><span><span class="mut" style="display:block;font-size:.82rem;margin-bottom:1px">Kapitel ${si+1} · ${s.qs.length} Fragen${mS?` · ${mS} ✓ gemeistert`:''}</span><b>${esc(s.title)}</b></span></button><span class="gc"><button class="x" title="Neue Frage hinzufügen" aria-label="Neue Frage hinzufügen" onclick="startQNew('${s.id}')">${IC.plus}</button>${rpend===s.id?`<span class="mut">Zurücksetzen?</span><button class="btn sm" onclick="resetProg('${s.id}')">Ja</button><button class="btn sec sm" onclick="rpend=null;home()">Nein</button>`:hasP?`<button class="x" title="Lernstand dieses Kapitels zurücksetzen" aria-label="Lernstand zurücksetzen" onclick="rpend='${s.id}';pend=null;cpend=null;crpend=null;home()">${IC.res}</button>`:''}<button class="x" title="Kapitel bearbeiten" aria-label="Kapitel bearbeiten" onclick="startSEdit('${s.id}')">${IC.edit}</button>${pend===s.id?`<span class="mut">Löschen?</span><button class="btn sm" onclick="del2('${s.id}')">Ja</button><button class="btn sec sm" onclick="del('${s.id}')">Nein</button>`:`<button class="x" title="Set löschen" aria-label="Set löschen" onclick="del('${s.id}')">${IC.x}</button>`}</span>${sedit===s.id?`<div class="ge" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--bd)"><label class="mut" for="esc_c">Kurs</label><input id="esc_c" list="cl" value="${esc(sdraft.course)}"><label class="mut" for="esc_t">Thema / Kapitel</label><input id="esc_t" value="${esc(sdraft.title)}"><p class="err">${esc(serr)}</p><div class="row act"><button class="btn sec sm" onclick="cancelSEdit()">Abbrechen</button><button class="btn sm" onclick="saveSEdit('${s.id}')">Speichern</button></div></div>`:''}</div>${exp.has(s.id)?`<div class="ql">${s.qs.map((q,i)=>qedit===s.id+':'+i?qForm(s.id,i):`<div class="qi"><span>${esc(q.q)}</span><span class="gc">${qBadge(s.id,i,q)}<button class="x${q.flagged?' warn':''}" title="${q.flagged?'Markierung aufheben':'Zum Bearbeiten markieren'}" aria-label="Markieren" onclick="togFlag('${s.id}',${i})">${IC.flag}</button><button class="x" title="Frage bearbeiten" aria-label="Frage bearbeiten" onclick="startQEdit('${s.id}',${i})">${IC.edit}</button>${pq===s.id+':'+i?`<button class="btn sm" onclick="delQ('${s.id}',${i})">Löschen</button><button class="btn sec sm" onclick="pq=null;home()">Nein</button>`:`<button class="x" title="Frage löschen" aria-label="Frage löschen" onclick="pq='${s.id}:${i}';home()">${IC.x}</button>`}</span></div>`).join('')}${qedit===s.id+':new'?qForm(s.id,-1):`<div class="qi" style="padding:10px 0 6px"><button class="btn sec sm" type="button" onclick="startQNew('${s.id}')">+ Neue Frage hinzufügen</button></div>`}</div>`:''}`}).join('')}</div>`)).join('')+`<div class="mstart"><div class="row"><button class="btn sec" ${allSelCount?'':'disabled'} onclick="startExam()">Prüfung${eCnt?` (${eCnt})`:''}</button><button class="btn" ${total?'':'disabled'} onclick="start()">Quiz${qCnt?` (${qCnt})`:''}</button></div></div>`
@@ -495,17 +491,17 @@ function home(){stopExamTimer();const chg=curView!=='q';curView='q';$app.classNa
 }
 let wp=null;
 function topBar(){
-  const hasP=hasAnyProgress(),allS=sets.length>0&&sets.every(s=>sel.has(s.id));
-  return `<div class="row act" style="margin:12px 0 6px"><button class="btn sec ico" title="Fragen importieren" aria-label="Fragen importieren" onclick="imp('fragen')">${IC.imp}</button>${sets.length?`<button class="btn sec ico" title="Alle Fragen exportieren" aria-label="Alle Fragen exportieren" onclick="exportQ(this)">${IC.exp}</button>${sets.length>1?`<button class="btn sec sm" style="min-height:40px" onclick="togAllSets()">${allS?'Auswahl aufheben':'Alle auswählen'}</button>`:''}<span class="gc" style="gap:8px">${hasP?(wp==='r'?`<span class="mut">Zurücksetzen?</span><button class="btn sm" onclick="resetProg()">Ja</button><button class="btn sec sm" onclick="wp=null;home()">Nein</button>`:`<button class="btn sec ico" title="Lernstand zurücksetzen" aria-label="Lernstand zurücksetzen" onclick="wp='r';home()">${IC.res}</button>`):''}${wp==='q'?`<span class="mut">Löschen?</span><button class="btn sm" onclick="wipe('q')">Ja</button><button class="btn sec sm" onclick="wp=null;home()">Nein</button>`:`<button class="btn sec ico" title="Alle Fragen löschen" aria-label="Alle Fragen löschen" onclick="wp='q';home()">${IC.del}</button>`}</span>`:''}</div>`;
+  const hasP=hasAnyProgress();
+  return `<div class="row act" style="margin:12px 0 6px"><button class="btn sec ico" title="Fragen importieren" aria-label="Fragen importieren" onclick="imp('fragen')">${IC.imp}</button>${sets.length?`<button class="btn sec ico" title="Alle Fragen exportieren" aria-label="Alle Fragen exportieren" onclick="exportQ(this)">${IC.exp}</button><span class="gc" style="gap:8px">${hasP?(wp==='r'?`<span class="mut">Zurücksetzen?</span><button class="btn sm" onclick="resetProg()">Ja</button><button class="btn sec sm" onclick="wp=null;home()">Nein</button>`:`<button class="btn sec ico" title="Lernstand zurücksetzen" aria-label="Lernstand zurücksetzen" onclick="wp='r';home()">${IC.res}</button>`):''}${wp==='q'?`<span class="mut">Löschen?</span><button class="btn sm" onclick="wipe('q')">Ja</button><button class="btn sec sm" onclick="wp=null;home()">Nein</button>`:`<button class="btn sec ico" title="Alle Fragen löschen" aria-label="Alle Fragen löschen" onclick="wp='q';home()">${IC.del}</button>`}</span>`:''}</div>`;
 }
-function optsHtml(total,allSelCount,wCnt){
+function optsHtml(total,allSelCount){
   const mastCount=allSelCount-[...sel].reduce((a,id)=>{const s=sets.find(x=>x.id===id);return a+(s?s.qs.filter(q=>!isMastered(q)).length:0)},0),ap=activePass(),at=activeTime(),aq=activeCount(),asm=activeScoreMode(),anm=activeNegMode(),cs=selCourses(),hasMC=cs.length===1&&courseHasMulti(cs[0]),qCnt=Math.min(getQuizCount(),total);
-  return `<p class="mut" style="margin:8px 0 4px">${total?`<b>${total}</b> ${total===1?'Frage':'Fragen'} zum Üben verfügbar (Quiz: <b>${qCnt}</b>`+(mastCount?` · ${mastCount} gemeisterte ${opts.hideMastered?'ausgeblendet':'enthalten'} · für Prüfung alle ${allSelCount} verfügbar`:'')+`)`:allSelCount&&mastCount===allSelCount?`Alle ${allSelCount} ausgewählten Fragen sind gemeistert – setze den Lernstand zurück oder starte eine Prüfung.`:'Wähle mindestens ein Kapitel aus.'}${cs.length===1?` · Kurs „${esc(cs[0])}“ (Prüfung: ${isym(IC.cap,'Fragen')} ${aq} · ⏱ ${at} Min. · ${isym(IC.award,'Notenschema')} ${ap} %${hasMC?` · ${modeShort(asm)}`:''}${anm!=='none'?` · ${negShort(anm)}`:''})`:''}${wCnt?` <button class="badge bad" style="margin-left:4px;vertical-align:middle" title="Nur die zuletzt falsch beantworteten Fragen der ausgewählten Kapitel üben" onclick="startWrongSel()">↻ ${wCnt} falsche ${wCnt===1?'Frage':'Fragen'} üben</button>`:''}</p>`;
+  return `<p class="mut" style="margin:8px 0 4px">${total?`<b>${total}</b> ${total===1?'Frage':'Fragen'} zum Üben verfügbar (Quiz: <b>${qCnt}</b>`+(mastCount?` · ${mastCount} gemeisterte ${opts.hideMastered?'ausgeblendet':'enthalten'} · für Prüfung alle ${allSelCount} verfügbar`:'')+`)`:allSelCount&&mastCount===allSelCount?`Alle ${allSelCount} ausgewählten Fragen sind gemeistert – setze den Lernstand zurück oder starte eine Prüfung.`:'Wähle mindestens ein Kapitel eines Kurses aus.'}${cs.length===1?` · Kurs „${esc(cs[0])}“ (Prüfung: ${isym(IC.cap,'Fragen')} ${aq} · ⏱ ${at} Min. · ${isym(IC.award,'Notenschema')} ${ap} %${hasMC?` · ${modeShort(asm)}`:''}${anm!=='none'?` · ${negShort(anm)}`:''})`:''}</p>`;
 }
 function wipe(k){if(k==='q'){sets=[];sel=new Set();exp=new Set();saveSel();saveExp();save(true);wp=null;home()}else{gloss=[];saveGloss(true);wp=null;glosView()}}
 const allSel=l=>l.every(s=>sel.has(s.id));
 function fold(gi){const c=cnames[gi];col.has(c)?col.delete(c):col.add(c);saveCol();home()}
-function togC(gi,on){sets.filter(s=>s.course===cnames[gi]).forEach(s=>on?sel.add(s.id):sel.delete(s.id));saveSel();home()}
+function togC(gi,on){const c=cnames[gi];if(on)sets.forEach(s=>{if(s.course!==c)sel.delete(s.id)});sets.filter(s=>s.course===c).forEach(s=>on?sel.add(s.id):sel.delete(s.id));saveSel();home()}
 function openS(id){exp.has(id)?exp.delete(id):exp.add(id);saveExp();pq=null;qedit=null;home()}
 function delQ(id,i){const s=sets.find(x=>x.id===id);if(!s)return;s.qs.splice(i,1);if(!s.qs.length){sets=sets.filter(x=>x.id!==id);sel.delete(id);exp.delete(id);saveSel();saveExp()}pq=null;save(true);home()}
 const exportQ=b=>exportData(b,'fragen'),exportG=b=>exportData(b,'glossar'),exportC=(b,gi)=>exportData(b,'kurs',cnames[gi]);
@@ -518,7 +514,7 @@ function exportData(b,kind,crs){const h0=b.innerHTML;
     document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);b.textContent='✓'}
   catch(e){b.textContent='!'}
   setTimeout(()=>{b.innerHTML=h0},2000)}
-function tog(id){sel.has(id)?sel.delete(id):sel.add(id);saveSel();home()}
+function tog(id){const s=sets.find(x=>x.id===id);if(!s)return;if(sel.has(id)){sel.delete(id)}else{sets.forEach(x=>{if(x.course!==s.course)sel.delete(x.id)});sel.add(id)}saveSel();home()}
 function del(id){pend=pend===id?null:id;rpend=null;cpend=null;crpend=null;home()}
 function del2(id){sets=sets.filter(x=>x.id!==id);sel.delete(id);exp.delete(id);saveSel();saveExp();pend=null;rpend=null;cpend=null;crpend=null;save(true);home()}
 function delC(gi){cpend=cpend===gi?null:gi;pend=null;rpend=null;crpend=null;rerenderC()}
@@ -673,10 +669,11 @@ function fromFile(i){const f=i.files&&i.files[0];if(f)readAndImp(f);i.value=''}
 function dropFile(ev){ev.preventDefault();const f=ev.dataTransfer&&ev.dataTransfer.files&&ev.dataTransfer.files[0];if(f)readAndImp(f)}
 const norm=s=>String(s??'').trim().replace(/\s+/g,' ').toLowerCase();
 function mergeSets(incoming){
-  let cfgChanged=false;
+  let cfgChanged=false,lastCourse='';
   incoming.forEach(ns=>{
     let ex=sets.find(s=>norm(s.course)===norm(ns.course)&&norm(s.title)===norm(ns.title));
     if(!ex){ex={id:ns.id,course:ns.course.trim(),title:ns.title.trim(),qs:[]};sets.push(ex)}
+    if(ex.course)lastCourse=ex.course;
     if(ns.cfg&&ex.course){
       const c=ex.course,cf=ns.cfg;
       if(!opts.cqcount||typeof opts.cqcount!=='object')opts.cqcount={};
@@ -703,6 +700,7 @@ function mergeSets(incoming){
     });
     sel.add(ex.id);
   });
+  enforceSingleCourse(lastCourse);
   if(cfgChanged)saveO();
   saveSel();
 }
@@ -740,6 +738,7 @@ function start(pool){
   let qs;
   if(pool)qs=shuf(pool);
   else{
+    enforceSingleCourse();
     const cands=[];
     [...sel].forEach(id=>{const s=sets.find(x=>x.id===id);if(s)pool1(s).forEach(q=>cands.push({...q,_ref:q._ref||q,_course:s.course,_title:s.title}))});
     qs=weightedPick(shuf(cands),Math.min(getQuizCount(),cands.length));
@@ -749,11 +748,10 @@ function start(pool){
 }
 function startExam(){
   stopExamTimer();
+  enforceSingleCourse();
   const selSets=[...sel].map(id=>sets.find(x=>x.id===id)).filter(s=>s&&s.qs.length);
   if(!selSets.length)return;
-  const cCountsAll={};selSets.forEach(s=>{cCountsAll[s.course]=(cCountsAll[s.course]||0)+s.qs.length});
-  const mainCourse=Object.keys(cCountsAll).sort((a,b)=>cCountsAll[b]-cCountsAll[a])[0]||'';
-  examCourse=mainCourse;
+  examCourse=selSets[0].course||'';
   examDurMins=getExamMins(examCourse);
   const totalAll=selSets.reduce((a,s)=>a+s.qs.length,0),target=Math.min(getExamCount(examCourse),totalAll);
   const pools=selSets.map(s=>{const exact=s.qs.length/totalAll*target;return{s,qs:shuf(s.qs),take:Math.floor(exact),rem:exact-Math.floor(exact)}});
@@ -1036,6 +1034,7 @@ function applyCloudState(d){
   }else{
     sets.forEach(s=>{if(prevSel.has(s.id))sel.add(s.id)});
   }
+  enforceSingleCourse();
   exp=new Set([...exp].filter(id=>sets.some(s=>s.id===id)));
   saveSel();saveExp();
 }

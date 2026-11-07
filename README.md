@@ -17,7 +17,7 @@ Interaktiver Prüfungs- und Vorlesungstrainer zum Üben, Auswerten und Verwalten
   - Fragen und Antwortoptionen werden bei jedem Durchgang automatisch gemischt (optional in den Einstellungen umschaltbar).
   - Jede Frage merkt sich die Serie richtiger Antworten in Folge (`streak`) sowie Fehlversuche (`wrong`).
   - **Gemeistert-Schwelle frei wählbar (`✓ Gemeistert`):** Ab wie vielen richtigen Antworten in Folge (1× bis 5×, Standard: 3×) eine Frage als gemeistert gilt und ob gemeisterte Fragen im Quiz ausgeblendet werden, ist in den Einstellungen einstellbar.
-  - **Intelligente Gewichtung & Gezieltes Fehler-Training:** Zuletzt falsch beantwortete und noch unbekannte Fragen werden bei der Quiz-Zusammenstellung bevorzugt gezogen; zusätzlich lassen sich alle zuletzt falsch beantworteten Fragen der ausgewählten Kapitel direkt per Schnellstart („Falsche üben“) trainieren.
+  - **Intelligente Gewichtung & Kurs-Fokus:** Zuletzt falsch beantwortete und noch unbekannte Fragen werden bei der Quiz-Zusammenstellung bevorzugt gezogen; für Quiz und Prüfung sind immer nur Kapitel eines einzelnen Kurses gleichzeitig auswählbar (kein Vermischen mehrerer Kurse).
   - Der Lernstand lässt sich jederzeit pro Frage per Klick umschalten sowie pro Kapitel, pro Kurs oder global zurücksetzen.
 - **Einstellungsseite & Kursübersicht:**
   - Eigener Reiter **Einstellungen** zum Festlegen von Quiz-Fragenanzahl, Gemeistert-Schwelle, Ausblenden gemeisterter Fragen, Antwort-Mischung, Erscheinungsbild (*System / Hell / Dunkel*) und **Cloud-Sync**.
