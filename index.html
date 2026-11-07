@@ -912,7 +912,7 @@ function start(pool){
     qs=weightedPick(shuf(cands),Math.min(getQuizCount(),cands.length));
   }
   Q=qs.map(q=>{const ref=q._ref||q;return{...ref,_ref:ref,_course:q._course||'',_title:q._title||'',_newlyMastered:false,opts:(opts.shuffle&&!ref.fixed)?shuf(ref.opts):ref.opts.slice()}});
-  idx=0;log=[];picked=new Set();examPicks=Q.map(()=>new Set());checked=false;gopen=-1;quiz();toTop();
+  idx=0;log=[];picked=new Set();examPicks=Q.map(()=>new Set());checked=false;gopen=0;quiz();toTop();
 }
 function startExam(){
   stopExamTimer();
@@ -1016,12 +1016,12 @@ function pick(i){
 function check(){
   const q=Q[idx],src=q._ref||q,wasM=isMastered(src),ok=q.opts.every((o,i)=>o.ok===picked.has(i));
   examPicks[idx]=new Set(picked);
-  checked=true;gopen=-1;log[idx]=ok;
+  checked=true;gopen=0;log[idx]=ok;
   if(ok){src.streak=(src.streak||0)+1;src.wrong=false;q._newlyMastered=!wasM&&isMastered(src)}
   else{src.streak=0;src.wrong=true;q._newlyMastered=false}
   save();quiz();
 }
-function next(){picked=new Set();checked=false;gopen=-1;idx++;idx<Q.length?quiz():result();toTop()}
+function next(){picked=new Set();checked=false;gopen=0;idx++;idx<Q.length?quiz():result();toTop()}
 
 function examSide(){
   const ansCnt=examPicks.filter(p=>p.size>0).length,openCnt=Q.length-ansCnt;
@@ -1034,9 +1034,9 @@ function examSide(){
   ${examSubPend?`<div class="card" style="border-color:var(--warn);padding:10px 12px;margin-top:8px"><p style="margin:0 0 8px"><b>Noch ${openCnt} ${openCnt===1?'Frage':'Fragen'} unbeantwortet.</b><br><span class="mut">Nicht beantwortete Fragen geben 0 Punkte.</span></p><div class="row"><button class="btn sm" onclick="finishExam(false)">Jetzt abgeben</button><button class="btn sec sm" onclick="examSubPend=false;quiz()">Weiterarbeiten</button></div></div>`:`<button class="btn${openCnt?' sec':''}" style="width:100%" onclick="tryFinishExam()">Prüfung abgeben (${ansCnt}/${Q.length})</button>`}</div>`;
 }
 
-let rexp=new Set(),gopen=-1,rgopen={};
+let rexp=new Set(),gopen=0,rgopen={};
 function togQGloss(k){gopen=gopen===k?-1:k;quiz()}
-function togRGloss(qi,gi){rgopen[qi]=rgopen[qi]===gi?-1:gi;result()}
+function togRGloss(qi,gi){const cur=rgopen[qi]??0;rgopen[qi]=cur===gi?-1:gi;result()}
 function togRexp(i){rexp.has(i)?rexp.delete(i):rexp.add(i);result()}
 function togAllRexp(){if(rexp.size===Q.length)rexp.clear();else Q.forEach((_,i)=>rexp.add(i));result()}
 function togResFlag(i){
@@ -1059,7 +1059,7 @@ function resQList(title,smode,nmode){
       else if(pk){c+=' bad';mk='✕';note=optStep?`Deine Antwort (falsch · ${nmode==='none'?'0':'−'+optStep} Pkt.)`:'Deine Antwort (falsch)'}
       else if(optStep&&(smode==='opt'||smode==='part')){mk='✓';note=`Richtig nicht gewählt (+${optStep} Pkt.)`}
       return `<div class="${c}" style="cursor:default${!o.ok&&!pk&&!(optStep&&(smode==='opt'||smode==='part'))?';opacity:.72':''}"><span class="m">${mk}</span><span>${esc(o.t)}${note||o.why?`<span class="why">${note?`<b>${note}</b>${o.why?' · ':''}`:''}${esc(o.why||'')}</span>`:''}</span></div>`;
-    }).join('')}${q.exp?`<div class="exp" style="margin:8px 0 2px"><b style="color:var(--ac);display:block;margin-bottom:2px">Begründung</b>${esc(q.exp)}</div>`:''}${(()=>{const gt=terms(q),ag=gt[rgopen[i]];return gt.length?`<div class="card" style="margin-top:8px;padding:10px 12px;background:var(--bg)"><div class="row" style="justify-content:space-between;gap:6px"><b style="font-size:.88rem">Glossar (${gt.length})</b><span class="mut" style="font-size:.78rem">${ag?'Antippen zum Schließen':'Begriff antippen'}</span></div><div class="gtabs">${gt.map((g,gi)=>`<button class="gtab${rgopen[i]===gi?' on':''}" style="background:var(${rgopen[i]===gi?'--ac':'--card'})" aria-expanded="${rgopen[i]===gi}" onclick="togRGloss(${i},${gi})">${isym(IC.book)}${esc(g.b)}</button>`).join('')}</div>${ag?`<div class="gbox" style="background:var(--card)"><b>${esc(ag.b)}</b> – ${esc(ag.i)}</div>`:''}</div>`:''})()}</div>`:''}</div>`;
+    }).join('')}${q.exp?`<div class="exp" style="margin:8px 0 2px"><b style="color:var(--ac);display:block;margin-bottom:2px">Begründung</b>${esc(q.exp)}</div>`:''}${(()=>{const gt=terms(q),curG=rgopen[i]??0,ag=gt[curG];return gt.length?`<div class="card" style="margin-top:8px;padding:10px 12px;background:var(--bg)"><div class="row" style="justify-content:space-between;gap:6px"><b style="font-size:.88rem">Glossar (${gt.length})</b><span class="mut" style="font-size:.78rem">${ag?'Antippen zum Wechseln / Schließen':'Begriff antippen'}</span></div><div class="gtabs">${gt.map((g,gi)=>`<button class="gtab${curG===gi?' on':''}" style="background:var(${curG===gi?'--ac':'--card'})" aria-expanded="${curG===gi}" onclick="togRGloss(${i},${gi})">${isym(IC.book)}${esc(g.b)}</button>`).join('')}</div>${ag?`<div class="gbox" style="background:var(--card)"><b>${esc(ag.b)}</b> – ${esc(ag.i)}</div>`:''}</div>`:''})()}</div>`:''}</div>`;
   }).join('')}`;
 }
 
@@ -1151,7 +1151,7 @@ function terms(q){
 function side(q){
   if(!checked)return `<div class='card ph'><p class='mut' style='margin:0'>Nach dem Prüfen der Antwort erscheinen hier die Begründung und passende Begriffe aus dem Glossar.</p></div>`;
   const src=q._ref||q,st=src.streak||0,m=isMastered(src),t=terms(q),ag=t[gopen];
-  return `<div class="exp" style="margin:0"><div class="row" style="justify-content:space-between;margin-bottom:4px"><b style="color:var(--ac)">Begründung</b><span class="badge ${m?'ok':src.wrong?'bad':''}" style="cursor:default">${m?`✓ Gemeistert (${st}/${opts.mastery})`:`Lernstand: ${st} / ${opts.mastery}`}</span></div>${esc(q.exp)}</div><div class='card'><div class="row" style="justify-content:space-between;gap:6px"><b>Weiterführende Informationen</b>${t.length?`<span class="mut" style="font-size:.8rem">${ag?'Antippen zum Schließen':'Begriff antippen'}</span>`:''}</div>${t.length?`<div class="gtabs">${t.map((g,i)=>`<button class="gtab${gopen===i?' on':''}" aria-expanded="${gopen===i}" onclick="togQGloss(${i})">${isym(IC.book)}${esc(g.b)}</button>`).join('')}</div>${ag?`<div class="gbox"><b>${esc(ag.b)}</b> – ${esc(ag.i)}</div>`:''}`:`<p class='mut'>Zu dieser Frage ist für diesen Kurs noch kein Begriff im Glossar hinterlegt.</p>`}</div>`}
+  return `<div class="exp" style="margin:0"><div class="row" style="justify-content:space-between;margin-bottom:4px"><b style="color:var(--ac)">Begründung</b><span class="badge ${m?'ok':src.wrong?'bad':''}" style="cursor:default">${m?`✓ Gemeistert (${st}/${opts.mastery})`:`Lernstand: ${st} / ${opts.mastery}`}</span></div>${esc(q.exp)}</div><div class='card'><div class="row" style="justify-content:space-between;gap:6px"><b>Weiterführende Informationen</b>${t.length?`<span class="mut" style="font-size:.8rem">${ag?'Antippen zum Wechseln / Schließen':'Begriff antippen'}</span>`:''}</div>${t.length?`<div class="gtabs">${t.map((g,i)=>`<button class="gtab${gopen===i?' on':''}" aria-expanded="${gopen===i}" onclick="togQGloss(${i})">${isym(IC.book)}${esc(g.b)}</button>`).join('')}</div>${ag?`<div class="gbox"><b>${esc(ag.b)}</b> – ${esc(ag.i)}</div>`:''}`:`<p class='mut'>Zu dieser Frage ist für diesen Kurs noch kein Begriff im Glossar hinterlegt.</p>`}</div>`}
 function addGloss(l,noSave){
   l.forEach(g=>{
     if(!g||!(g.begriff||g.b)||!(g.info||g.i))return;
