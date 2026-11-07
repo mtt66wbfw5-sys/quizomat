@@ -1130,20 +1130,39 @@ function result(){stopExamTimer();const chg=curView!=='r';curView='r';$app.class
   if(chg)toTop();
 }
 function has(t,w,short){let i=t.indexOf(w);while(i>=0){if(!short)return true;const a=t[i-1]||' ',b=t[i+w.length]||' ';if(!/[a-zäöüß0-9]/.test(a)&&!/[a-zäöüß0-9]/.test(b))return true;i=t.indexOf(w,i+1)}return false}
+function cntHit(t,w,short){let i=t.indexOf(w),c=0;while(i>=0){if(!short)c++;else{const a=t[i-1]||' ',b=t[i+w.length]||' ';if(!/[a-zäöüß0-9]/.test(a)&&!/[a-zäöüß0-9]/.test(b))c++}i=t.indexOf(w,i+1)}return c}
 function terms(q){
-  const tQ=String(q.q||'').toLowerCase(),tO=(q.opts||[]).map(o=>o.t||'').join(' ').toLowerCase(),tE=((q.opts||[]).map(o=>o.why||'').join(' ')+' '+(q.exp||'')).toLowerCase();
+  const opts=q.opts||[],tQ=String(q.q||'').toLowerCase();
+  const tOk=opts.filter(o=>o.ok).map(o=>o.t||'').join(' ').toLowerCase();
+  const tExpMain=String(q.exp||'').toLowerCase(),tExpHead=tExpMain.slice(0,140);
+  const tExp=(tExpMain+' '+opts.filter(o=>o.ok).map(o=>o.why||'').join(' ')).toLowerCase();
+  const tWrong=opts.filter(o=>!o.ok).map(o=>(o.t||'')+' '+(o.why||'')).join(' ').toLowerCase();
   const crs=q._course?norm(q._course):'';
   const pool=crs?gloss.filter(g=>norm(g.course)===crs):gloss;
+  const cQs=[];sets.forEach(s=>{if(!crs||norm(s.course)===crs)(s.qs||[]).forEach(x=>cQs.push(x))});
   const sc=[];
   pool.forEach((g,idx)=>{
     const ws=[g.b,...(g.a||[])].map(w=>w.toLowerCase()).filter(Boolean);
-    let s=0;
+    let sOk=0,sExp=0,sHead=0,sQ=0,sWr=0,occ=0;
     ws.forEach(w=>{
       const sh=w.length<=4;
-      if(has(tQ,w,sh))s=Math.max(s,has(tQ,w,true)?7:6);
-      else if(has(tO,w,sh))s=Math.max(s,has(tO,w,true)?5:4);
-      else if(has(tE,w,sh))s=Math.max(s,has(tE,w,true)?2:1);
+      if(has(tOk,w,sh))sOk=Math.max(sOk,has(tOk,w,true)?11:9);
+      if(has(tExp,w,sh)){
+        sExp=Math.max(sExp,has(tExp,w,true)?9:7);
+        if(has(tExpHead,w,sh))sHead=3;
+      }
+      if(has(tQ,w,sh))sQ=Math.max(sQ,has(tQ,w,true)?6:5);
+      if(has(tWrong,w,sh))sWr=Math.max(sWr,has(tWrong,w,true)?2:1);
+      occ+=cntHit(tOk+' '+tExp,w,sh);
     });
+    let s=sOk+sExp+sHead+sQ+(sOk&&sExp?5:0)+(sQ&&sExp?3:0)+(occ>=2?1.5:0);
+    if(!s&&sWr)s=sWr;
+    else if(s){
+      const bw=g.b.toLowerCase(),sh=bw.length<=4;
+      let df=1;
+      if(cQs.length>1){df=0;for(let i=0;i<cQs.length;i++){const x=cQs[i];if(has((x.q+' '+(x.exp||'')).toLowerCase(),bw,sh))df++}df=Math.max(1,df)}
+      s+=4/Math.sqrt(df);
+    }
     if(s>0)sc.push({g,s,idx});
   });
   return sc.sort((a,b)=>b.s-a.s||a.idx-b.idx).slice(0,8).map(x=>x.g);
