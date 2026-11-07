@@ -171,6 +171,7 @@ function setHideMastered(v){opts.hideMastered=!!v;saveO();if(curView==='s')setti
 function setShuffle(v){opts.shuffle=!!v;saveO();if(curView==='s')settingsView()}
 function setTheme(v){opts.theme=THEMES.includes(v)?v:'auto';applyTheme();saveO();if(curView==='s')settingsView()}
 function selCourses(){const cs=new Set();sets.forEach(s=>{if(sel.has(s.id))cs.add(s.course)});return[...cs]}
+function isGSel(c){return !!c&&selCourses().some(x=>norm(x)===norm(c))}
 function enforceSingleCourse(pref){
   const cs=selCourses();
   if(cs.length<=1)return;
@@ -737,23 +738,31 @@ function gForm(g,k){
   return `<div class="gi ge"><div style="width:100%">${isNew?'<b style="display:block;margin-bottom:6px;color:var(--ac)">Neuen Begriff hinzufügen</b>':''}<label class="mut" for="ec">Kurs</label><input id="ec" list="cl" value="${esc(d.c)}" placeholder="Name des Kurses"><label class="mut" for="eb">Begriff</label><input id="eb" value="${esc(d.b)}"><label class="mut" for="ei">Erklärung</label><textarea id="ei" style="min-height:90px">${esc(d.i)}</textarea><label class="mut" for="ea">Alias (durch Komma getrennt)</label><input id="ea" value="${esc(d.a)}"><p class="err">${esc(gerr)}</p><div class="row act"><button class="btn sec sm" type="button" onclick="gedit=null;gdraft=null;gerr='';glosView()">Abbrechen</button><button class="btn sm" type="button" onclick="saveG(${isNew?"'__new__'":k})">Speichern</button></div></div></div>`;
 }
 function gCourseCardHtml(c,l,gi){
-  const cCol=gcol.has(c)?'--ink':'--ac';
-  const sub=`<span class="mut" style="display:block;font-size:.82rem;margin-bottom:1px">${l.length} ${l.length===1?'Begriff':'Begriffe'}</span><b>${esc(c)}</b>`;
+  const on=isGSel(c),cCol=on?'--ac':'--ink';
+  const sub=`<span class="mut" style="display:block;font-size:.82rem;margin-bottom:1px">${l.length} ${l.length===1?'Begriff':'Begriffe'}${on?' · ✓ Aktiv':''}</span><b>${esc(c)}</b>`;
   return `<div class="card ccard" style="margin:14px 0 8px;padding:12px 16px;border-left:4px solid var(${cCol})"><div class="crs"><button class="chb" style="padding:2px 0" aria-expanded="${!gcol.has(c)}" onclick="gfold(${gi})"><span>${gcol.has(c)?'▸':'▾'}</span><span>${sub}</span></button><span class="gc"><button class="x" title="Neuen Begriff zu diesem Kurs hinzufügen" aria-label="Neuen Begriff hinzufügen" onclick="startGNew(${gi})">${IC.plus}</button><button class="x" title="Glossar dieses Kurses exportieren" aria-label="Kurs-Glossar exportieren" onclick="exportGC(this,${gi})">${IC.exp}</button><button class="x" title="Kursname bearbeiten" aria-label="Kursname bearbeiten" onclick="startGCEdit(${gi})">${IC.edit}</button>${gcpend===gi?`<span class="mut">Löschen?</span><button class="btn sm" onclick="delGC2(${gi})">Ja</button><button class="btn sec sm" onclick="delGC(${gi})">Nein</button>`:`<button class="x" title="Glossar dieses Kurses löschen" aria-label="Kurs-Glossar löschen" onclick="delGC(${gi})">${IC.x}</button>`}</span></div>${gcedit===gi?`<div class="ge" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)"><label class="mut" for="gecn">Kursname bearbeiten</label><input id="gecn" list="cl" value="${esc(gcdraft)}"><p class="err">${esc(gcerr)}</p><div class="row act"><button class="btn sec sm" onclick="cancelGCEdit()">Abbrechen</button><button class="btn sm" onclick="saveGCEdit(${gi})">Speichern</button></div></div>`:''}</div>`;
 }
 function gResHtml(){
   const t=gq.trim().toLowerCase();if(!t)return '';
   const r=gloss.map((g,k)=>({g,k})).filter(({g})=>(g.course+' '+g.b+' '+g.a.join(' ')+' '+g.i).toLowerCase().includes(t)).sort((a,b)=>a.g.b.localeCompare(b.g.b,'de'));
-  return `<p class="mut">${r.length} Treffer</p>`+(r.length?`<div class="card ggrid">${r.map(({g,k})=>gRow(g,k,true)).join('')}</div>`:'');
+  const byC={};r.forEach(x=>(byC[x.g.course]=byC[x.g.course]||[]).push(x));
+  const crsList=Object.keys(byC).sort((a,b)=>(isGSel(b)?1:0)-(isGSel(a)?1:0));
+  const info=r.length?(crsList.length===1?`<b>${r.length}</b> Treffer im Kurs „<b>${esc(crsList[0])}</b>“`:`<b>${r.length}</b> Treffer in <b>${crsList.length}</b> Kursen (${crsList.map(c=>`„<b>${esc(c)}</b>“`).join(', ')})`):`Keine Treffer (gesucht in ${gcnames.length===1?`Kurs „<b>${esc(gcnames[0])}</b>“`:`allen <b>${gcnames.length}</b> Kursen`})`;
+  return `<p class="mut">${info}</p>`+crsList.map(c=>{
+    const l=byC[c],on=isGSel(c),cCol=on?'--ac':'--ink';
+    return `<div class="card" style="margin:12px 0 8px;padding:12px 16px;border-left:4px solid var(${cCol})"><span class="mut" style="display:block;font-size:.82rem;margin-bottom:1px">Kurs · ${l.length} Treffer${on?' · ✓ Aktiv':''}</span><b style="font-size:1.1rem">${esc(c)}</b></div><div style="margin:0 0 16px 12px"><div class="card"><div class="ggrid">${l.map(({g,k})=>gRow(g,k,true)).join('')}</div></div></div>`;
+  }).join('');
 }
 function glosView(){
   stopExamTimer();curView='g';$app.className=gq.trim()?'searching':'';
   const ggroups={};gloss.forEach((g,k)=>(ggroups[g.course]=ggroups[g.course]||[]).push({g,k}));gcnames=Object.keys(ggroups);
+  const actC=selCourses()[0]||'',actCnt=actC?gloss.filter(g=>norm(g.course)===norm(actC)).length:0;
+  const sPh=gcnames.length===1?`Glossar im Kurs „${esc(gcnames[0])}“ durchsuchen …`:`Glossar in allen ${gcnames.length} Kursen durchsuchen${actC?` (aktiv: ${esc(actC)})`:''} …`;
   const dl=`<datalist id="cl">${allCourses().map(c=>`<option value="${esc(c)}">`).join('')}</datalist>`;
   const topNew=gedit==='__new__'&&(!gdraft||!gdraft.targetC||!ggroups[gdraft.targetC]);
   $app.innerHTML=`${nav('g')}<h1>${IC.book}<span>Glossar</span></h1><p class="mut">Fachbegriffe aus deinen Vorlesungsunterlagen pro Kurs verwalten und nachschlagen.</p>
   <div class="row act" style="margin:12px 0 6px"><button class="btn sec ico" title="Glossar importieren" aria-label="Glossar importieren" onclick="imp('glossar')">${IC.imp}</button><button class="btn sec sm" style="min-height:40px" onclick="startGNew()">+ Begriff hinzufügen</button>${gloss.length?`<button class="btn sec ico" title="Alle Glossare exportieren" aria-label="Glossar exportieren" onclick="exportG(this)">${IC.exp}</button><span class="gc" style="gap:8px">${wp==='g'?`<span class="mut">Löschen?</span><button class="btn sm" onclick="wipe('g')">Ja</button><button class="btn sec sm" onclick="wp=null;glosView()">Nein</button>`:`<button class="btn sec ico" title="Gesamtes Glossar löschen" aria-label="Gesamtes Glossar löschen" onclick="wp='g';glosView()">${IC.del}</button>`}</span>`:''}</div>
-  ${gloss.length?`<p class="mut" style="margin:8px 0 4px"><b>${gloss.length}</b> ${gloss.length===1?'Begriff':'Begriffe'} in <b>${gcnames.length}</b> ${gcnames.length===1?'Kurs':'Kursen'}. Passende Begriffe erscheinen nach dem Prüfen einer Antwort automatisch neben den Fragen des jeweiligen Kurses.</p><input id="gs" type="search" class="srch" placeholder="Glossar durchsuchen …" value="${esc(gq)}" oninput="gSearch(this.value)"><div id="gres">${gResHtml()}</div>`:''}${dl}
+  ${gloss.length?`<p class="mut" style="margin:8px 0 4px">${actC?`<b>${actCnt}</b> ${actCnt===1?'Begriff':'Begriffe'} für den ausgewählten Kurs „<b>${esc(actC)}</b>“ aktiv · `:''}Insgesamt <b>${gloss.length}</b> ${gloss.length===1?'Begriff':'Begriffe'} in <b>${gcnames.length}</b> ${gcnames.length===1?'Kurs':'Kursen'}.</p><input id="gs" type="search" class="srch" placeholder="${sPh}" value="${esc(gq)}" oninput="gSearch(this.value)"><div id="gres">${gResHtml()}</div>`:''}${dl}
   ${topNew?`<div class="card" style="margin-top:14px">${gForm({course:(gdraft&&gdraft.c)||'',b:'__new__',i:'',a:[]},'__new__')}</div>`:''}
   ${gloss.length?Object.entries(ggroups).map(([c,l],gi)=>{
     const sorted=l.slice().sort((a,b)=>a.g.b.localeCompare(b.g.b,'de'));
