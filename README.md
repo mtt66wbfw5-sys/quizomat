@@ -14,34 +14,36 @@ Interaktiver Prüfungs- und Vorlesungstrainer zum Üben, Auswerten und Verwalten
   - **Wahr / Falsch** (`tf`) – Aussagen bewerten
 - **Übungsmodus (Adaptives Lernsystem):**
   - Die maximale Anzahl der Fragen pro Übung (Quiz) lässt sich in den **Einstellungen** frei festlegen (Standard: 20 Fragen).
-  - Fragen und Antwortoptionen werden bei jedem Durchgang automatisch gemischt.
+  - Fragen und Antwortoptionen werden bei jedem Durchgang automatisch gemischt (optional in den Einstellungen umschaltbar).
   - Jede Frage merkt sich die Serie richtiger Antworten in Folge (`streak`) sowie Fehlversuche (`wrong`).
-  - **Gemeistert ab 3× richtig in Folge (`✓ Gemeistert`):** Gemeisterte Fragen werden beim Üben automatisch ausgeblendet, damit der Fokus auf noch offenen Fragen liegt.
-  - **Intelligente Gewichtung:** Zuletzt falsch beantwortete und noch unbekannte Fragen werden bei der Quiz-Zusammenstellung bevorzugt gezogen.
+  - **Gemeistert-Schwelle frei wählbar (`✓ Gemeistert`):** Ab wie vielen richtigen Antworten in Folge (1× bis 5×, Standard: 3×) eine Frage als gemeistert gilt und ob gemeisterte Fragen im Quiz ausgeblendet werden, ist in den Einstellungen einstellbar.
+  - **Intelligente Gewichtung & Gezieltes Fehler-Training:** Zuletzt falsch beantwortete und noch unbekannte Fragen werden bei der Quiz-Zusammenstellung bevorzugt gezogen; zusätzlich lassen sich alle zuletzt falsch beantworteten Fragen der ausgewählten Kapitel direkt per Schnellstart („Falsche üben“) trainieren.
   - Der Lernstand lässt sich jederzeit pro Frage per Klick umschalten sowie pro Kapitel, pro Kurs oder global zurücksetzen.
 - **Einstellungsseite & Kursübersicht:**
-  - Eigener Reiter **Einstellungen** zum Festlegen der Fragenanzahl pro Übung (Quiz) sowie einer kompakten Übersicht aller vorhandenen Kurse (ohne Kapitel und Einzelfragen) inklusive direkter Bearbeitung aller Kurseinstellungen, Export, Lernstand-Reset und Löschen.
+  - Eigener Reiter **Einstellungen** zum Festlegen von Quiz-Fragenanzahl, Gemeistert-Schwelle, Ausblenden gemeisterter Fragen, Antwort-Mischung und Erscheinungsbild (*Systemstandard / Hell / Dunkel*).
+  - Kompakte Übersicht aller vorhandenen Kurse (ohne Kapitel und Einzelfragen) mit Fortschrittsbalken sowie direkter Bearbeitung aller Kurseinstellungen, Export, Lernstand-Reset und Löschen.
 - **Prüfungsmodus & Notenschemata:**
-  - **Fragenanzahl & Countdown-Timer pro Kurs:** Anzahl der Prüfungsfragen und Prüfungszeit in Minuten lassen sich pro Kurs individuell einstellen; mit visueller Warnung (ab 5 Min. gelb, ab 1 Min. rot) und automatischer Abgabe bei Zeitablauf.
-  - **Prüfungsnahe Fragenauswahl:** Zieht proportional aus allen ausgewählten Kapiteln (inklusive bereits gemeisterter Fragen) ohne sofortiges Feedback während der Bearbeitung.
+  - **Fragenanzahl & Countdown-Timer pro Kurs:** Anzahl der Prüfungsfragen und Prüfungszeit in Minuten lassen sich pro Kurs individuell einstellen; mit visueller Warnung (ab 5 Min. gelb, ab 1 Min. rot), Schutzabfrage gegen versehentliches Abbrechen und automatischer Abgabe bei Zeitablauf.
+  - **Prüfungsnahe Fragenauswahl:** Zieht proportional aus allen ausgewählten Kapiteln (inklusive bereits gemeisterter Fragen) ohne sofortiges Feedback während der Bearbeitung; unbeantwortete Prüfungsfragen setzen den bestehenden Lernstand nicht zurück.
   - **Fragen-Navigator:** Freies Springen zwischen allen Prüfungsfragen, Statusanzeige (beantwortet / offen) und **„⚑ Später prüfen“**-Lesezeichen (Taste `L`).
-  - **Flexible Multiple-Choice-Wertung & Minuspunkte pro Kurs:**
+  - **Flexible Multiple-Choice-Wertung & Minuspunkte pro Kurs (MC-Optionen nur bei Kursen mit MC-Fragen sichtbar):**
     - **MC-Wertungsmodi:** *Gesamtfrage (Alles-oder-nichts)*, *Einzelantworten (inkl. richtig Nicht-Angekreuzter)*, *Einzelantworten (nur richtige Kreuze)* oder *Teilpunkte (normiert auf 1 Punkt pro Frage)*.
     - **Minuspunkte-Modi:** *Keine Minuspunkte*, *Minuspunkte bis minimal 0 Punkte pro Frage* (kein Abzug von anderen Fragen) oder *Gesamtabzug auch unter 0 Punkte pro Frage* (unbeantwortete Fragen = 0 Punkte).
   - **Kursabhängige Benotung (Noten 1 bis 5):** Pro Kurs kann zwischen drei Notenschemata gewählt werden (*Sehr gut, Gut, Befriedigend, Genügend, Nicht genügend*):
     - **Positiv ab 50 %** (1: ≥ 87,5 % · 2: ≥ 75 % · 3: ≥ 62,5 % · 4: ≥ 50 % · 5: < 50 %)
     - **Positiv ab 60 %** (1: ≥ 90 % · 2: ≥ 80 % · 3: ≥ 70 % · 4: ≥ 60 % · 5: < 60 %)
     - **Positiv ab 70 %** (1: ≥ 92,5 % · 2: ≥ 85 % · 3: ≥ 77,5 % · 4: ≥ 70 % · 5: < 70 %)
-  - **Detaillierte Klausureinsicht & Auswertung:** Aufschlüsselung der erreichten Punkte nach Kapiteln, Live-Umschaltung der Wertungs- und Notenschemata sowie aufklappbare Übersicht aller Fragen inklusive Punkteaufschlüsselung pro Antwortoption, Einzelbegründungen und Gesamt-Begründung.
+  - **Detaillierte Klausureinsicht & Auswertung:** Aufschlüsselung der erreichten Punkte nach Kapiteln, Live-Umschaltung der Wertungs- und Notenschemata sowie aufklappbare Übersicht aller Fragen inklusive Punkteaufschlüsselung pro Antwortoption, Einzelbegründungen, Gesamt-Begründung und erkannter Glossarbegriffe.
 - **Integriertes Glossar:**
-  - Fachbegriffe (inkl. Alias-Schreibweisen) werden beim Prüfen einer Antwort automatisch im Fragetext, den Optionen und der Erklärung erkannt und direkt neben der Frage erläutert.
-- **Direktes Bearbeiten, Markieren & Verwalten:**
+  - Fachbegriffe (inkl. Alias-Schreibweisen) werden beim Prüfen einer Antwort sowie in der Ergebnis-/Klausureinsicht automatisch im Fragetext, den Optionen, den Einzelbegründungen und der Gesamterklärung erkannt und direkt erläutert.
+- **Direktes Erstellen, Bearbeiten, Markieren & Verwalten:**
+  - Neue Fragen (`+ Neue Frage hinzufügen`) und neue Glossarbegriffe (`+ Begriff hinzufügen`) lassen sich direkt im Browser anlegen.
   - Kurse (inkl. Notenschema, MC-Wertung, Minuspunkte, Prüfungszeit & Fragenanzahl für Prüfungen), Kapitel/Themen, einzelne Fragen (inkl. Fragetyp, Antwortoptionen, Begründungen und Erklärung) sowie Glossareinträge lassen sich direkt im Browser bearbeiten oder mit Sicherheitsabfrage löschen.
   - Fragen können während des Quiz/der Prüfung oder in der Auswertung mit einem Fähnchen (Taste `M`) zum späteren Überarbeiten markiert werden.
-- **Import & Export (inkl. Duplikatschutz & Lernstand):**
+- **Import & Export (inkl. Duplikatschutz, Lernstand & Kurseinstellungen):**
   - Fragen und Glossare können per JSON-Text, Dateiauswahl oder Drag & Drop importiert werden.
   - Bereits vorhandene Kurse, Kapitel und Fragen werden beim Import automatisch zusammengeführt (keine doppelten Fragen), wobei der höhere Lernstand erhalten bleibt.
-  - Export aller Fragen, einzelner Kurse oder des Glossars als `.json`-Datei (inkl. aktuellem Lernstand `streak` / `wrong` / `flagged`).
+  - Export aller Fragen, einzelner Kurse oder des Glossars als `.json`-Datei (inkl. aktuellem Lernstand `streak` / `wrong` / `flagged` sowie den Kurseinstellungen `einstellungen`).
 - **Automatischer Cloud-Sync (GitHub):**
   - Über das Wolken-Symbol in der oberen Navigationsleiste kann ein GitHub Personal Access Token (`repo`-Berechtigung) hinterlegt werden.
   - Quizomat legt automatisch ein privates Repository (`quizomat-sync`) an und synchronisiert Fragen, Kurseinstellungen, Lernstand und Glossar im Hintergrund zwischen Mac, iPad und iPhone.
