@@ -84,12 +84,11 @@ pre{white-space:pre-wrap;font-size:.85rem;background:var(--card);border:1px soli
 .nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;gap:4px;background:var(--bg);border-bottom:1px solid var(--bd);margin:-6px 0 16px}
 .nav button{background:none;border:0;border-bottom:3px solid transparent;padding:12px 14px;font:inherit;font-weight:700;color:var(--mut);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}
 .nav button.on{color:var(--fg);border-bottom-color:var(--ac)}
-.nav .cnav{margin-left:auto;font-size:.88rem}
 .sdot{font-size:.8rem;font-weight:700}.sdot.ok{color:var(--ok)}.sdot.bad{color:var(--bad)}
 .srow{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:12px 0;border-top:1px solid var(--bd)}.srow:first-child{padding-top:0;border-top:0}.srow:last-child{padding-bottom:0}.srow>div{flex:1;min-width:0}.srow input,.srow select{flex:none}
 @media (pointer:coarse){.x{min-width:42px;min-height:42px}.ico{width:44px;height:44px}.badge{min-height:34px;padding:4px 12px}.crs input[type=checkbox],.set input[type=checkbox],.orow input[type=checkbox],.orow input[type=radio],.srow input[type=checkbox]{width:24px;height:24px}.chb,.sb{min-height:44px;align-items:center}.opt{padding:14px 16px;min-height:52px}.nav button{min-height:48px;padding:12px 16px}}
 @media (pointer:coarse) and (min-width:561px){#app{padding:20px 24px calc(96px + env(safe-area-inset-bottom,0px))}.dstart{display:none}.mstart,.qfoot{display:block;position:fixed;left:0;right:0;bottom:0;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:10px 24px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--bd);margin:0;z-index:5}.mstart .row,.qfoot .row{justify-content:center;max-width:560px;margin:0 auto;flex-wrap:nowrap}.mstart .btn,.qfoot .btn{flex:1;max-width:420px;padding:.75em 1.2em;font-size:1.02rem}}
-@media (max-width:560px){body{font-size:16px}#app{padding:14px 12px calc(134px + env(safe-area-inset-bottom,0px))}h1{font-size:1.5rem}h1 svg{width:24px;height:24px}.x{min-width:40px;min-height:40px}.ico{width:42px;height:42px}.nav{position:fixed;top:auto;bottom:0;left:0;right:0;height:calc(52px + env(safe-area-inset-bottom,0px));padding:0 8px env(safe-area-inset-bottom,0px);margin:0;background:var(--card);border-bottom:0;border-top:1px solid var(--bd);z-index:6}.nav button{flex:1;text-align:center;border-bottom:0;border-top:3px solid transparent;padding:10px 0;gap:4px}.nav svg{width:22px;height:22px}.nav .nlbl{display:none}.nav button.on{border-bottom-color:transparent;border-top-color:var(--ac)}.nav .cnav{margin-left:0;font-size:inherit}.dstart{display:none}.mstart{display:block;position:fixed;left:0;right:0;bottom:calc(52px + env(safe-area-inset-bottom,0px));background:var(--bg);padding:8px 14px;border-top:1px solid var(--bd);margin:0;z-index:5}.qfoot{display:block;position:fixed;left:0;right:0;bottom:0;background:var(--bg);padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--bd);margin:0;z-index:5}.mstart .row,.qfoot .row{flex-wrap:nowrap}.mstart .btn,.qfoot .btn{flex:1;width:100%}}
+@media (max-width:560px){body{font-size:16px}#app{padding:calc(42px + env(safe-area-inset-top,0px)) 14px calc(134px + env(safe-area-inset-bottom,0px))}h1{font-size:1.5rem;margin:.25em 0 .35em}h1 svg{width:24px;height:24px}.x{min-width:40px;min-height:40px}.ico{width:42px;height:42px}.nav{position:fixed;top:auto;bottom:0;left:0;right:0;height:calc(52px + env(safe-area-inset-bottom,0px));padding:0 8px env(safe-area-inset-bottom,0px);margin:0;background:var(--card);border-bottom:0;border-top:1px solid var(--bd);z-index:6}.nav button{flex:1;text-align:center;border-bottom:0;border-top:3px solid transparent;padding:10px 0;gap:4px}.nav svg{width:22px;height:22px}.nav .nlbl{display:none}.nav button.on{border-bottom-color:transparent;border-top-color:var(--ac)}.nav .cnav{margin-left:0;font-size:inherit}.dstart{display:none}.mstart{display:block;position:fixed;left:0;right:0;bottom:calc(52px + env(safe-area-inset-bottom,0px));background:var(--bg);padding:8px 14px;border-top:1px solid var(--bd);margin:0;z-index:5}.qfoot{display:block;position:fixed;left:0;right:0;bottom:0;background:var(--bg);padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--bd);margin:0;z-index:5}.mstart .row,.qfoot .row{flex-wrap:nowrap}.mstart .btn,.qfoot .btn{flex:1;width:100%}}
 @media (max-width:430px){#app{padding-left:max(14px,env(safe-area-inset-left));padding-right:max(14px,env(safe-area-inset-right))}.q{font-size:1.1rem}.opt{padding:12px;gap:10px}.set{gap:6px}.ql{margin-left:10px}.crs{gap:6px}.chb{font-size:1.05rem}}
 .gi{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;padding:10px 0;border-top:1px solid var(--bd)}.gi:first-child{border-top:0}.gi>div{min-width:0}.gc{display:flex;gap:4px;align-items:center;flex:none;margin-left:auto}.qhead .gc{flex-wrap:wrap;justify-content:flex-end}
 .searching .ccard,.searching .crs,.searching .grp,.searching .mstart,.searching .fbox{display:none}
@@ -463,9 +462,8 @@ function qForm(sid,qi){
 
 function courseCardHtml(c,l,gi,isSetView){
   const mC=l.reduce((a,s)=>a+masteredInSet(s),0),allC=l.reduce((a,s)=>a+s.qs.length,0),hasCP=l.some(s=>s.qs.some(q=>(q.streak||0)>0||q.wrong)),hasMC=l.some(s=>s.qs.some(q=>q.type==='multi')),cp=getPass(c),cm=getExamMins(c),cq=getExamCount(c),csm=getScoreMode(c),cnm=getNegMode(c),cCol=mC===allC&&allC?'--ok':l.some(s=>sel.has(s.id))?'--ac':'--ink';
-  const sub=`<span class="mut" style="display:block;font-size:.82rem;margin-bottom:1px">${l.length} Kapitel · ${allC} Fragen${mC?` · ${mC} ✓ gemeistert (${Math.round(mC/allC*100)} %)`:''} · Prüfung: ${isym(IC.cap,'Fragen')} ${cq} · ⏱ ${cm} Min. · ${isym(IC.award,'Notenschema')} ${cp} %${hasMC?` · ${modeShort(csm)}`:''}${cnm!=='none'?` · ${negShort(cnm)}`:''}</span><b>${esc(c)}</b>`;
-  const prog=allC?`<div class="bar" style="height:4px;margin:8px 0 2px" title="${mC} von ${allC} Fragen gemeistert (${Math.round(mC/allC*100)} %)"><i style="width:${mC/allC*100}%;background:var(${mC===allC?'--ok':'--ac'})"></i></div>`:'';
-  return `<div class="card ccard" style="margin:14px 0 8px;padding:12px 16px;border-left:4px solid var(${cCol})"><div class="crs">${isSetView?`<div class="chb" style="padding:2px 0;cursor:default"><span>${sub}</span></div>`:`<input type="checkbox" aria-label="Alle Kapitel auswählen" ${allSel(l)?'checked':''} onchange="togC(${gi},this.checked)"><button class="chb" style="padding:2px 0" aria-expanded="${!col.has(c)}" onclick="fold(${gi})"><span>${col.has(c)?'▸':'▾'}</span><span>${sub}</span></button>`}<span class="gc"><button class="x" title="Kurs exportieren" aria-label="Kurs exportieren" onclick="exportC(this,${gi})">${IC.exp}</button>${crpend===gi?`<span class="mut">Zurücksetzen?</span><button class="btn sm" onclick="resetCourseProg(${gi})">Ja</button><button class="btn sec sm" onclick="crpend=null;rerenderC()">Nein</button>`:hasCP?`<button class="x" title="Lernstand dieses Kurses zurücksetzen" aria-label="Lernstand dieses Kurses zurücksetzen" onclick="crpend=${gi};cpend=null;rpend=null;pend=null;rerenderC()">${IC.res}</button>`:''}<button class="x" title="Kurs, Zeit, Wertung & Notenschema bearbeiten" aria-label="Kurs bearbeiten" onclick="startCEdit(${gi})">${IC.edit}</button>${cpend===gi?`<span class="mut">Löschen?</span><button class="btn sm" onclick="delC2(${gi})">Ja</button><button class="btn sec sm" onclick="delC(${gi})">Nein</button>`:`<button class="x" title="Kurs löschen" aria-label="Kurs löschen" onclick="delC(${gi})">${IC.x}</button>`}</span></div>${prog}${cedit===gi?`<div class="ge" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)"><label class="mut" for="ecn">Kursname bearbeiten</label><input id="ecn" value="${esc(cdraft)}"><label class="mut" for="ecq">Anzahl der Fragen (Prüfung)</label><input id="ecq" type="number" min="1" max="200" value="${cqdraft}"><label class="mut" for="ect">Prüfungszeit (Minuten)</label><input id="ect" type="number" min="1" max="300" value="${ctdraft}"><label class="mut" for="ecp">Notenschema (Positiv-Grenze für Prüfungen)</label><select id="ecp"><option value="50" ${cpdraft===50?'selected':''}>50 % – Positiv ab 50 % (1: ≥87,5 % · 2: ≥75 % · 3: ≥62,5 % · 4: ≥50 %)</option><option value="60" ${cpdraft===60?'selected':''}>60 % – Positiv ab 60 % (1: ≥90 % · 2: ≥80 % · 3: ≥70 % · 4: ≥60 %)</option><option value="70" ${cpdraft===70?'selected':''}>70 % – Positiv ab 70 % (1: ≥92,5 % · 2: ≥85 % · 3: ≥77,5 % · 4: ≥70 %)</option></select>${hasMC?`<label class="mut" for="ecm">Multiple-Choice-Wertung (Prüfung)</label><select id="ecm"><option value="all" ${cmdraft==='all'?'selected':''}>Gesamtfrage – 1 Punkt nur wenn komplett richtig (Alles-oder-nichts)</option><option value="opt" ${cmdraft==='opt'?'selected':''}>Einzelantworten (inkl. Nicht-Ankreuzen) – +1 Punkt je richtiger Option (auch richtig weggelassene)</option><option value="pos" ${cmdraft==='pos'?'selected':''}>Einzelantworten (nur richtige) – +1 Punkt je richtig angekreuzter Option</option><option value="part" ${cmdraft==='part'?'selected':''}>Teilpunkte (normiert) – 1 Punkt pro Frage, anteilig über die Optionen</option></select>`:''}<label class="mut" for="ecnm">Minuspunkte bei Fehlern (Prüfung)</label><select id="ecnm"><option value="none" ${cndraft==='none'?'selected':''}>Keine Minuspunkte (Fehler = 0 Punkte)</option>${hasMC||cndraft==='clamp'?`<option value="clamp" ${cndraft==='clamp'?'selected':''}>Minuspunkte pro Fehler, aber mind. 0 Punkte pro Frage (kein Abzug von anderen Fragen)</option>`:''}<option value="full" ${cndraft==='full'?'selected':''}>Minuspunkte pro Fehler, auch unter 0 Punkte pro Frage (Gesamtabzug; Offen = 0 Punkte)</option></select><p class="err">${esc(cerr)}</p><div class="row act"><button class="btn sec sm" onclick="cancelCEdit()">Abbrechen</button><button class="btn sm" onclick="saveCEdit(${gi})">Speichern</button></div></div>`:''}</div>`;
+  const sub=`<span class="mut" style="display:block;font-size:.82rem;margin-bottom:1px">${l.length} Kapitel · ${allC} Fragen${mC?` · ${mC} ✓ gemeistert`:''} · Prüfung: ${isym(IC.cap,'Fragen')} ${cq} · ⏱ ${cm} Min. · ${isym(IC.award,'Notenschema')} ${cp} %${hasMC?` · ${modeShort(csm)}`:''}${cnm!=='none'?` · ${negShort(cnm)}`:''}</span><b>${esc(c)}</b>`;
+  return `<div class="card ccard" style="margin:14px 0 8px;padding:12px 16px;border-left:4px solid var(${cCol})"><div class="crs">${isSetView?`<div class="chb" style="padding:2px 0;cursor:default"><span>${sub}</span></div>`:`<input type="checkbox" aria-label="Alle Kapitel auswählen" ${allSel(l)?'checked':''} onchange="togC(${gi},this.checked)"><button class="chb" style="padding:2px 0" aria-expanded="${!col.has(c)}" onclick="fold(${gi})"><span>${col.has(c)?'▸':'▾'}</span><span>${sub}</span></button>`}<span class="gc"><button class="x" title="Kurs exportieren" aria-label="Kurs exportieren" onclick="exportC(this,${gi})">${IC.exp}</button>${crpend===gi?`<span class="mut">Zurücksetzen?</span><button class="btn sm" onclick="resetCourseProg(${gi})">Ja</button><button class="btn sec sm" onclick="crpend=null;rerenderC()">Nein</button>`:hasCP?`<button class="x" title="Lernstand dieses Kurses zurücksetzen" aria-label="Lernstand dieses Kurses zurücksetzen" onclick="crpend=${gi};cpend=null;rpend=null;pend=null;rerenderC()">${IC.res}</button>`:''}<button class="x" title="Kurs, Zeit, Wertung & Notenschema bearbeiten" aria-label="Kurs bearbeiten" onclick="startCEdit(${gi})">${IC.edit}</button>${cpend===gi?`<span class="mut">Löschen?</span><button class="btn sm" onclick="delC2(${gi})">Ja</button><button class="btn sec sm" onclick="delC(${gi})">Nein</button>`:`<button class="x" title="Kurs löschen" aria-label="Kurs löschen" onclick="delC(${gi})">${IC.x}</button>`}</span></div>${cedit===gi?`<div class="ge" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)"><label class="mut" for="ecn">Kursname bearbeiten</label><input id="ecn" value="${esc(cdraft)}"><label class="mut" for="ecq">Anzahl der Fragen (Prüfung)</label><input id="ecq" type="number" min="1" max="200" value="${cqdraft}"><label class="mut" for="ect">Prüfungszeit (Minuten)</label><input id="ect" type="number" min="1" max="300" value="${ctdraft}"><label class="mut" for="ecp">Notenschema (Positiv-Grenze für Prüfungen)</label><select id="ecp"><option value="50" ${cpdraft===50?'selected':''}>50 % – Positiv ab 50 % (1: ≥87,5 % · 2: ≥75 % · 3: ≥62,5 % · 4: ≥50 %)</option><option value="60" ${cpdraft===60?'selected':''}>60 % – Positiv ab 60 % (1: ≥90 % · 2: ≥80 % · 3: ≥70 % · 4: ≥60 %)</option><option value="70" ${cpdraft===70?'selected':''}>70 % – Positiv ab 70 % (1: ≥92,5 % · 2: ≥85 % · 3: ≥77,5 % · 4: ≥70 %)</option></select>${hasMC?`<label class="mut" for="ecm">Multiple-Choice-Wertung (Prüfung)</label><select id="ecm"><option value="all" ${cmdraft==='all'?'selected':''}>Gesamtfrage – 1 Punkt nur wenn komplett richtig (Alles-oder-nichts)</option><option value="opt" ${cmdraft==='opt'?'selected':''}>Einzelantworten (inkl. Nicht-Ankreuzen) – +1 Punkt je richtiger Option (auch richtig weggelassene)</option><option value="pos" ${cmdraft==='pos'?'selected':''}>Einzelantworten (nur richtige) – +1 Punkt je richtig angekreuzter Option</option><option value="part" ${cmdraft==='part'?'selected':''}>Teilpunkte (normiert) – 1 Punkt pro Frage, anteilig über die Optionen</option></select>`:''}<label class="mut" for="ecnm">Minuspunkte bei Fehlern (Prüfung)</label><select id="ecnm"><option value="none" ${cndraft==='none'?'selected':''}>Keine Minuspunkte (Fehler = 0 Punkte)</option>${hasMC||cndraft==='clamp'?`<option value="clamp" ${cndraft==='clamp'?'selected':''}>Minuspunkte pro Fehler, aber mind. 0 Punkte pro Frage (kein Abzug von anderen Fragen)</option>`:''}<option value="full" ${cndraft==='full'?'selected':''}>Minuspunkte pro Fehler, auch unter 0 Punkte pro Frage (Gesamtabzug; Offen = 0 Punkte)</option></select><p class="err">${esc(cerr)}</p><div class="row act"><button class="btn sec sm" onclick="cancelCEdit()">Abbrechen</button><button class="btn sm" onclick="saveCEdit(${gi})">Speichern</button></div></div>`:''}</div>`;
 }
 
 function wrongSelPool(){
@@ -557,10 +555,10 @@ function syncTitle(){
 }
 function updSyncUI(){
   const el=document.getElementById('cs');if(el)el.innerHTML=syncBadge();
-  const b=document.querySelector('.cnav');if(b)b.title=syncTitle();
-  if(curView==='c')cloudView();
+  const b=document.querySelector('.cnav');if(b)b.title='Einstellungen'+(gh.token?' · '+syncTitle():'');
+  const cb=document.getElementById('cbox');if(cb)cb.innerHTML=cloudHtml();
 }
-const nav=a=>`<nav class='nav'><button class='${a==='q'?'on':''}' title="Fragen" aria-label="Fragen" onclick="wp=null;qsearch='';home();toTop()">${IC.cap}<span class="nlbl">Fragen</span></button><button class='${a==='g'?'on':''}' title="Glossar" aria-label="Glossar" onclick='glos()'>${IC.book}<span class="nlbl">Glossar</span></button><button class='${a==='s'?'on':''}' title="Einstellungen" aria-label="Einstellungen" onclick='settings()'>${IC.cog}<span class="nlbl">Einstellungen</span></button><button class='cnav ${a==='c'?'on':''}' title="${esc(syncTitle())}" aria-label="Cloud-Sync" onclick='cloudView();toTop()'>${IC.cloud}<span class="nlbl">Cloud</span><span id="cs">${syncBadge()}</span></button></nav>`;
+const nav=a=>`<nav class='nav'><button class='${a==='q'?'on':''}' title="Fragen" aria-label="Fragen" onclick="wp=null;qsearch='';home();toTop()">${IC.cap}<span class="nlbl">Fragen</span></button><button class='${a==='g'?'on':''}' title="Glossar" aria-label="Glossar" onclick='glos()'>${IC.book}<span class="nlbl">Glossar</span></button><button class='cnav ${a==='s'?'on':''}' title="Einstellungen${gh.token?' · '+esc(syncTitle()):''}" aria-label="Einstellungen" onclick='settings()'>${IC.cog}<span class="nlbl">Einstellungen</span><span id="cs">${syncBadge()}</span></button></nav>`;
 let gpend=null,qsearch='',gq='',gedit=null,gdraft=null,gerr='';
 function glos(){gpend=null;wp=null;gedit=null;gdraft=null;gq='';glosView();toTop()}
 function settings(){cedit=null;cpend=null;crpend=null;wp=null;settingsView();toTop()}
@@ -568,7 +566,7 @@ function settingsView(){
   stopExamTimer();curView='s';$app.className='';
   const groups={};sets.forEach(s=>(groups[s.course]=groups[s.course]||[]).push(s));cnames=Object.keys(groups);
   const qn=getQuizCount(),ms=Math.max(1,Math.min(10,+opts.mastery||3)),th=THEMES.includes(opts.theme)?opts.theme:'auto';
-  $app.innerHTML=`${nav('s')}<h1>${IC.cog}<span>Einstellungen</span></h1><p class="mut">Übungsumfang für das Quiz, Darstellung und Einstellungen der vorhandenen Kurse verwalten.</p>
+  $app.innerHTML=`${nav('s')}<h1>${IC.cog}<span>Einstellungen</span></h1><p class="mut">Übungsumfang für das Quiz, Darstellung, Kurseinstellungen und Cloud-Sync verwalten.</p>
   <h2>Übungsmodus (Quiz) &amp; Darstellung</h2>
   <div class="card">
     <div class="srow">
@@ -615,7 +613,10 @@ function settingsView(){
   </div>
   <h2>Vorhandene Kurse (${cnames.length})</h2>
   <p class="mut">Alle Kurse im Überblick (ohne Kapitel und Fragen). Über das Stift-Symbol lassen sich Kursname, Prüfungsfragen-Anzahl, Prüfungszeit, Notenschema, Multiple-Choice-Wertung und Minuspunkte pro Kurs anpassen.</p>
-  ${cnames.length?Object.entries(groups).map(([c,l],gi)=>courseCardHtml(c,l,gi,true)).join(''):`<div class="card" style="margin-top:12px"><p class="mut">Noch keine Kurse vorhanden. Importiere zuerst ein Fragenset unter „Fragen“.</p></div>`}`;
+  ${cnames.length?Object.entries(groups).map(([c,l],gi)=>courseCardHtml(c,l,gi,true)).join(''):`<div class="card" style="margin-top:12px"><p class="mut">Noch keine Kurse vorhanden. Importiere zuerst ein Fragenset unter „Fragen“.</p></div>`}
+  <h2>Cloud-Sync (GitHub)</h2>
+  <p class="mut">Synchronisiert deine Fragen, Kurseinstellungen, deinen Lernstand und dein Glossar automatisch über ein privates GitHub-Repository (<b>${SYNC_REPO}</b>) zwischen Mac, iPad und iPhone.</p>
+  <div id="cbox">${cloudHtml()}</div>`;
 }
 function searchHtml(){return `<input id="qs" type="search" class="srch" placeholder="Fragen durchsuchen …" value="${esc(qsearch)}" oninput="qSearch(this.value)"><div id="res">${resHtml()}</div>`}
 function resHtml(){const t=qsearch.trim().toLowerCase();if(!t)return '';const r=[];sets.forEach(s=>s.qs.forEach((q,qi)=>{if((q.q+' '+q.opts.map(o=>o.t+' '+(o.why||'')).join(' ')+' '+q.exp).toLowerCase().includes(t))r.push([s,q,qi])}));
@@ -1113,19 +1114,16 @@ async function pullCloud(isConnect){
   }
 }
 
-function cloudView(){
-  const chg=curView!=='c';curView='c';$app.className='';
+function cloudHtml(){
   const last=gh.lastSync?new Date(gh.lastSync).toLocaleString('de-DE',{dateStyle:'short',timeStyle:'short'})+' Uhr':'Noch nicht synchronisiert';
-  $app.innerHTML=`${nav('c')}<h1>${IC.cloud}<span>Cloud-Sync</span></h1>
-  <p class="mut">Synchronisiert deine Fragen, deinen Lernstand und dein Glossar automatisch über ein privates GitHub-Repository (<b>${SYNC_REPO}</b>) zwischen Mac, iPad und iPhone.</p>
-  ${gh.token?`<div class="card" style="margin-top:14px">
+  return gh.token?`<div class="card" style="margin-top:12px">
     <p><b>Status:</b> ${syncState==='syncing'?'Synchronisiere …':syncState==='err'?`<span style="color:var(--bad)">Fehler (${esc(syncErr)})</span>`:`<span style="color:var(--ok)">✓ Verbunden${gh.user?` als @${esc(gh.user)}`:''}</span>`}</p>
     <p class="mut">Privates Repository: <code>${esc(gh.user||'…')}/${SYNC_REPO}</code><br>Letzter Abgleich: ${esc(last)}</p>
     <div class="row" style="margin-top:12px">
       <button class="btn" ${syncState==='syncing'?'disabled':''} onclick="pullCloud(false)">Jetzt synchronisieren</button>
       <button class="btn sec" onclick="disconnectCloud()">Verbindung trennen</button>
     </div>
-  </div>`:`<div class="card ge" style="margin-top:14px">
+  </div>`:`<div class="card ge" style="margin-top:12px">
     <label for="ght"><b>GitHub Personal Access Token</b></label>
     <p class="mut" style="margin:2px 0 8px">Gib deinen GitHub-Token (<code>ghp_…</code> mit <code>repo</code>-Berechtigung) ein. Der Token wird ausschließlich lokal auf diesem Gerät gespeichert.</p>
     <input id="ght" type="password" placeholder="ghp_…" autocomplete="off">
@@ -1133,14 +1131,13 @@ function cloudView(){
     <div class="row" style="margin-top:8px">
       <button class="btn" ${syncState==='syncing'?'disabled':''} onclick="connectCloud()">${syncState==='syncing'?'Verbinde …':'Verbinden & Synchronisieren'}</button>
     </div>
-  </div>`}`;
-  if(chg)toTop();
+  </div>`;
 }
 
 async function connectCloud(){
   const el=document.getElementById('ght'),tok=(el?el.value:'').trim();
-  if(!tok){syncErr='Bitte gib einen GitHub-Token ein.';cloudView();return}
-  syncState='syncing';syncErr='';cloudView();
+  if(!tok){syncErr='Bitte gib einen GitHub-Token ein.';updSyncUI();return}
+  syncState='syncing';syncErr='';updSyncUI();
   try{
     const user=await ensureCloudRepo(tok);
     gh={token:tok,user,sha:'',lastSync:0};
@@ -1148,7 +1145,7 @@ async function connectCloud(){
     await pullCloud(true);
   }catch(e){
     gh={token:'',user:'',sha:'',lastSync:0};saveGH();
-    syncState='err';syncErr=e.message||'Verbindung fehlgeschlagen.';cloudView();
+    syncState='err';syncErr=e.message||'Verbindung fehlgeschlagen.';updSyncUI();
   }
 }
 
@@ -1156,7 +1153,7 @@ function disconnectCloud(){
   clearTimeout(syncTimer);
   gh={token:'',user:'',sha:'',lastSync:0};syncState='idle';syncErr='';
   try{localStorage.removeItem('pt:gh')}catch(e){}
-  cloudView();
+  updSyncUI();
 }
 
 const autoPull=()=>{if(document.visibilityState==='visible'&&gh.token&&syncState!=='syncing')pullCloud(false)};

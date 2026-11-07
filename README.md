@@ -20,8 +20,8 @@ Interaktiver Prüfungs- und Vorlesungstrainer zum Üben, Auswerten und Verwalten
   - **Intelligente Gewichtung & Gezieltes Fehler-Training:** Zuletzt falsch beantwortete und noch unbekannte Fragen werden bei der Quiz-Zusammenstellung bevorzugt gezogen; zusätzlich lassen sich alle zuletzt falsch beantworteten Fragen der ausgewählten Kapitel direkt per Schnellstart („Falsche üben“) trainieren.
   - Der Lernstand lässt sich jederzeit pro Frage per Klick umschalten sowie pro Kapitel, pro Kurs oder global zurücksetzen.
 - **Einstellungsseite & Kursübersicht:**
-  - Eigener Reiter **Einstellungen** zum Festlegen von Quiz-Fragenanzahl, Gemeistert-Schwelle, Ausblenden gemeisterter Fragen, Antwort-Mischung und Erscheinungsbild (*Systemstandard / Hell / Dunkel*).
-  - Kompakte Übersicht aller vorhandenen Kurse (ohne Kapitel und Einzelfragen) mit Fortschrittsbalken sowie direkter Bearbeitung aller Kurseinstellungen, Export, Lernstand-Reset und Löschen.
+  - Eigener Reiter **Einstellungen** zum Festlegen von Quiz-Fragenanzahl, Gemeistert-Schwelle, Ausblenden gemeisterter Fragen, Antwort-Mischung, Erscheinungsbild (*System / Hell / Dunkel*) und **Cloud-Sync**.
+  - Kompakte Übersicht aller vorhandenen Kurse (ohne Kapitel und Einzelfragen) inklusive direkter Bearbeitung aller Kurseinstellungen, Export, Lernstand-Reset und Löschen.
 - **Prüfungsmodus & Notenschemata:**
   - **Fragenanzahl & Countdown-Timer pro Kurs:** Anzahl der Prüfungsfragen und Prüfungszeit in Minuten lassen sich pro Kurs individuell einstellen; mit visueller Warnung (ab 5 Min. gelb, ab 1 Min. rot), Schutzabfrage gegen versehentliches Abbrechen und automatischer Abgabe bei Zeitablauf.
   - **Prüfungsnahe Fragenauswahl:** Zieht proportional aus allen ausgewählten Kapiteln (inklusive bereits gemeisterter Fragen) ohne sofortiges Feedback während der Bearbeitung; unbeantwortete Prüfungsfragen setzen den bestehenden Lernstand nicht zurück.
@@ -45,7 +45,7 @@ Interaktiver Prüfungs- und Vorlesungstrainer zum Üben, Auswerten und Verwalten
   - Bereits vorhandene Kurse, Kapitel und Fragen werden beim Import automatisch zusammengeführt (keine doppelten Fragen), wobei der höhere Lernstand erhalten bleibt.
   - Export aller Fragen, einzelner Kurse oder des Glossars als `.json`-Datei (inkl. aktuellem Lernstand `streak` / `wrong` / `flagged` sowie den Kurseinstellungen `einstellungen`).
 - **Automatischer Cloud-Sync (GitHub):**
-  - Über das Wolken-Symbol in der oberen Navigationsleiste kann ein GitHub Personal Access Token (`repo`-Berechtigung) hinterlegt werden.
+  - Direkt in den **Einstellungen** kann ein GitHub Personal Access Token (`repo`-Berechtigung) hinterlegt werden.
   - Quizomat legt automatisch ein privates Repository (`quizomat-sync`) an und synchronisiert Fragen, Kurseinstellungen, Lernstand und Glossar im Hintergrund zwischen Mac, iPad und iPhone.
 - **Optimiert für Mac, iPad & iPhone:**
   - **Mac / Desktop:** Zweispaltiges Layout mit untereinanderstehenden Antworten und vollständiger Tastatursteuerung (`1`–`9` zur Antwortauswahl, `Enter` / `Leertaste` zum Prüfen & Weiterblättern, `←` / `→` und `L` im Prüfungsmodus, `M` zum Markieren, `Esc` für „Zurück zur Übersicht“).
