@@ -27,7 +27,10 @@ body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.55 "Atkinson Hype
 @media (max-width:880px){.cols{grid-template-columns:minmax(0,1fr)}.qhead,.qmain,.side{grid-column:1;grid-row:auto}.side{margin:14px 0}.ph{display:none}.ge .act{justify-content:flex-end}}
 .ph{border-style:dashed}
 .mstart{display:none}
-.term{margin:.7em 0 0;font-size:.95rem}
+.gtabs{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.gtab{display:inline-flex;align-items:center;gap:4px;background:var(--bg);color:var(--fg);border:1px solid var(--ink);border-radius:99px;padding:5px 12px;font-size:.88rem;font-weight:700;cursor:pointer;text-align:left}
+.gtab.on{background:var(--ac);color:var(--acfg);border-color:var(--ac)}
+.gbox{margin-top:10px;padding:10px 12px;background:var(--bg);border:1px solid var(--bd);border-radius:8px;font-size:.93rem}
 .crs{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0}.crs input[type=checkbox]{width:22px;height:22px;accent-color:var(--ac);flex:none;cursor:pointer}
 .chb{background:none;border:0;font:inherit;font-weight:700;font-size:1.15rem;cursor:pointer;text-align:left;padding:6px 0;color:var(--fg);display:flex;gap:8px;flex-wrap:wrap;align-items:baseline;flex:1;min-width:150px}.chb .mut{font-weight:400}
 .sb{background:none;border:0;font:inherit;cursor:pointer;text-align:left;padding:6px 0;color:var(--fg);display:flex;gap:8px;align-items:baseline;flex:1;min-width:140px}
@@ -42,7 +45,7 @@ img,svg,pre,textarea,button,.card{max-width:100%}.row>*{min-width:0}
 .btn{background:var(--ac);color:var(--acfg);border:1px solid var(--ac);border-radius:8px;padding:.65em 1.1em;font-weight:700;cursor:pointer;box-shadow:none;white-space:nowrap}
 .btn.sec{background:var(--card);color:var(--fg);border:1px solid var(--ink)}
 .btn:disabled{opacity:.45;cursor:default}
-.btn:focus-visible,.opt:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,.x:focus-visible,.badge:focus-visible,.chb:focus-visible,.sb:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+.btn:focus-visible,.opt:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,.x:focus-visible,.badge:focus-visible,.gtab:focus-visible,.chb:focus-visible,.sb:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .card{background:var(--card);border:1px solid var(--ink);border-radius:10px;padding:14px 16px;box-shadow:none}
 .set{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 14px;margin:8px 0;background:var(--card);border:1px solid var(--ink);border-radius:10px}
@@ -86,7 +89,7 @@ pre{white-space:pre-wrap;font-size:.85rem;background:var(--card);border:1px soli
 .nav button.on{color:var(--fg);border-bottom-color:var(--ac)}
 .sdot{font-size:.8rem;font-weight:700}.sdot.ok{color:var(--ok)}.sdot.bad{color:var(--bad)}
 .srow{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:12px 0;border-top:1px solid var(--bd)}.srow:first-child{padding-top:0;border-top:0}.srow:last-child{padding-bottom:0}.srow>div{flex:1;min-width:0}.srow input,.srow select{flex:none}
-@media (pointer:coarse){.x{min-width:42px;min-height:42px}.ico{width:44px;height:44px}.badge{min-height:34px;padding:4px 12px}.crs input[type=checkbox],.set input[type=checkbox],.orow input[type=checkbox],.orow input[type=radio],.srow input[type=checkbox]{width:24px;height:24px}.chb,.sb{min-height:44px;align-items:center}.opt{padding:14px 16px;min-height:52px}.nav button{min-height:48px;padding:12px 16px}}
+@media (pointer:coarse){.x{min-width:42px;min-height:42px}.ico{width:44px;height:44px}.badge{min-height:34px;padding:4px 12px}.gtab{min-height:36px;padding:6px 13px}.crs input[type=checkbox],.set input[type=checkbox],.orow input[type=checkbox],.orow input[type=radio],.srow input[type=checkbox]{width:24px;height:24px}.chb,.sb{min-height:44px;align-items:center}.opt{padding:14px 16px;min-height:52px}.nav button{min-height:48px;padding:12px 16px}}
 @media (pointer:coarse) and (min-width:561px){#app{padding:20px 24px calc(96px + env(safe-area-inset-bottom,0px))}.dstart{display:none}.mstart,.qfoot{display:block;position:fixed;left:0;right:0;bottom:0;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:10px 24px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--bd);margin:0;z-index:5}.mstart .row,.qfoot .row{justify-content:center;max-width:560px;margin:0 auto;flex-wrap:nowrap}.mstart .btn,.qfoot .btn{flex:1;max-width:420px;padding:.75em 1.2em;font-size:1.02rem}}
 @media (max-width:560px){body{font-size:16px}#app{padding:calc(42px + env(safe-area-inset-top,0px)) 14px calc(134px + env(safe-area-inset-bottom,0px))}h1{font-size:1.5rem;margin:.25em 0 .35em}h1 svg{width:24px;height:24px}.x{min-width:40px;min-height:40px}.ico{width:42px;height:42px}.nav{position:fixed;top:auto;bottom:0;left:0;right:0;height:calc(52px + env(safe-area-inset-bottom,0px));padding:0 8px env(safe-area-inset-bottom,0px);margin:0;background:var(--card);border-bottom:0;border-top:1px solid var(--bd);z-index:6}.nav button{flex:1;text-align:center;border-bottom:0;border-top:3px solid transparent;padding:10px 0;gap:4px}.nav svg{width:22px;height:22px}.nav .nlbl{display:none}.nav button.on{border-bottom-color:transparent;border-top-color:var(--ac)}.nav .cnav{margin-left:0;font-size:inherit}.dstart{display:none}.mstart{display:block;position:fixed;left:0;right:0;bottom:calc(52px + env(safe-area-inset-bottom,0px));background:var(--bg);padding:8px 14px;border-top:1px solid var(--bd);margin:0;z-index:5}.qfoot{display:block;position:fixed;left:0;right:0;bottom:0;background:var(--bg);padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--bd);margin:0;z-index:5}.mstart .row,.qfoot .row{flex-wrap:nowrap}.mstart .btn,.qfoot .btn{flex:1;width:100%}}
 @media (max-width:430px){#app{padding-left:max(14px,env(safe-area-inset-left));padding-right:max(14px,env(safe-area-inset-right))}.q{font-size:1.1rem}.opt{padding:12px;gap:10px}.set{gap:6px}.ql{margin-left:10px}.crs{gap:6px}.chb{font-size:1.05rem}}
@@ -909,7 +912,7 @@ function start(pool){
     qs=weightedPick(shuf(cands),Math.min(getQuizCount(),cands.length));
   }
   Q=qs.map(q=>{const ref=q._ref||q;return{...ref,_ref:ref,_course:q._course||'',_title:q._title||'',_newlyMastered:false,opts:(opts.shuffle&&!ref.fixed)?shuf(ref.opts):ref.opts.slice()}});
-  idx=0;log=[];picked=new Set();examPicks=Q.map(()=>new Set());checked=false;quiz();toTop();
+  idx=0;log=[];picked=new Set();examPicks=Q.map(()=>new Set());checked=false;gopen=-1;quiz();toTop();
 }
 function startExam(){
   stopExamTimer();
@@ -1013,12 +1016,12 @@ function pick(i){
 function check(){
   const q=Q[idx],src=q._ref||q,wasM=isMastered(src),ok=q.opts.every((o,i)=>o.ok===picked.has(i));
   examPicks[idx]=new Set(picked);
-  checked=true;log[idx]=ok;
+  checked=true;gopen=-1;log[idx]=ok;
   if(ok){src.streak=(src.streak||0)+1;src.wrong=false;q._newlyMastered=!wasM&&isMastered(src)}
   else{src.streak=0;src.wrong=true;q._newlyMastered=false}
   save();quiz();
 }
-function next(){picked=new Set();checked=false;idx++;idx<Q.length?quiz():result();toTop()}
+function next(){picked=new Set();checked=false;gopen=-1;idx++;idx<Q.length?quiz():result();toTop()}
 
 function examSide(){
   const ansCnt=examPicks.filter(p=>p.size>0).length,openCnt=Q.length-ansCnt;
@@ -1031,7 +1034,9 @@ function examSide(){
   ${examSubPend?`<div class="card" style="border-color:var(--warn);padding:10px 12px;margin-top:8px"><p style="margin:0 0 8px"><b>Noch ${openCnt} ${openCnt===1?'Frage':'Fragen'} unbeantwortet.</b><br><span class="mut">Nicht beantwortete Fragen geben 0 Punkte.</span></p><div class="row"><button class="btn sm" onclick="finishExam(false)">Jetzt abgeben</button><button class="btn sec sm" onclick="examSubPend=false;quiz()">Weiterarbeiten</button></div></div>`:`<button class="btn${openCnt?' sec':''}" style="width:100%" onclick="tryFinishExam()">Prüfung abgeben (${ansCnt}/${Q.length})</button>`}</div>`;
 }
 
-let rexp=new Set();
+let rexp=new Set(),gopen=-1,rgopen={};
+function togQGloss(k){gopen=gopen===k?-1:k;quiz()}
+function togRGloss(qi,gi){rgopen[qi]=rgopen[qi]===gi?-1:gi;result()}
 function togRexp(i){rexp.has(i)?rexp.delete(i):rexp.add(i);result()}
 function togAllRexp(){if(rexp.size===Q.length)rexp.clear();else Q.forEach((_,i)=>rexp.add(i));result()}
 function togResFlag(i){
@@ -1054,12 +1059,12 @@ function resQList(title,smode,nmode){
       else if(pk){c+=' bad';mk='✕';note=optStep?`Deine Antwort (falsch · ${nmode==='none'?'0':'−'+optStep} Pkt.)`:'Deine Antwort (falsch)'}
       else if(optStep&&(smode==='opt'||smode==='part')){mk='✓';note=`Richtig nicht gewählt (+${optStep} Pkt.)`}
       return `<div class="${c}" style="cursor:default${!o.ok&&!pk&&!(optStep&&(smode==='opt'||smode==='part'))?';opacity:.72':''}"><span class="m">${mk}</span><span>${esc(o.t)}${note||o.why?`<span class="why">${note?`<b>${note}</b>${o.why?' · ':''}`:''}${esc(o.why||'')}</span>`:''}</span></div>`;
-    }).join('')}${q.exp?`<div class="exp" style="margin:8px 0 2px"><b style="color:var(--ac);display:block;margin-bottom:2px">Begründung</b>${esc(q.exp)}</div>`:''}${(()=>{const gt=terms(q);return gt.length?`<div class="card" style="margin-top:8px;padding:10px 12px;background:var(--bg)"><b style="font-size:.88rem">Glossar</b>${gt.map(g=>`<p class="term" style="margin:.4em 0 0;font-size:.88rem"><b>${esc(g.b)}</b> – ${esc(g.i)}</p>`).join('')}</div>`:''})()}</div>`:''}</div>`;
+    }).join('')}${q.exp?`<div class="exp" style="margin:8px 0 2px"><b style="color:var(--ac);display:block;margin-bottom:2px">Begründung</b>${esc(q.exp)}</div>`:''}${(()=>{const gt=terms(q),ag=gt[rgopen[i]];return gt.length?`<div class="card" style="margin-top:8px;padding:10px 12px;background:var(--bg)"><div class="row" style="justify-content:space-between;gap:6px"><b style="font-size:.88rem">Glossar (${gt.length})</b><span class="mut" style="font-size:.78rem">${ag?'Antippen zum Schließen':'Begriff antippen'}</span></div><div class="gtabs">${gt.map((g,gi)=>`<button class="gtab${rgopen[i]===gi?' on':''}" style="background:var(${rgopen[i]===gi?'--ac':'--card'})" aria-expanded="${rgopen[i]===gi}" onclick="togRGloss(${i},${gi})">${isym(IC.book)}${esc(g.b)}</button>`).join('')}</div>${ag?`<div class="gbox" style="background:var(--card)"><b>${esc(ag.b)}</b> – ${esc(ag.i)}</div>`:''}</div>`:''})()}</div>`:''}</div>`;
   }).join('')}`;
 }
 
 function result(){stopExamTimer();const chg=curView!=='r';curView='r';$app.className='';
-  if(chg)rexp=new Set(Q.map((_,i)=>i).filter(i=>!log[i]));
+  if(chg){rexp=new Set(Q.map((_,i)=>i).filter(i=>!log[i]));rgopen={}}
   const ok=log.filter(Boolean).length,exactPct=Q.length?ok/Q.length*100:0,pct=Math.round(exactPct),wrong=Q.filter((_,i)=>!log[i]),newlyM=Q.filter(q=>q._newlyMastered).length;
   if(examMode){
     const passPct=getPass(examCourse),smode=getScoreMode(examCourse),nmode=getNegMode(examCourse),hasMC=Q.some(q=>q.type==='multi')||(examCourse&&courseHasMulti(examCourse));
@@ -1124,17 +1129,29 @@ function result(){stopExamTimer();const chg=curView!=='r';curView='r';$app.class
   ${resQList('Beantwortete Fragen')}`;
   if(chg)toTop();
 }
-function has(t,w,short){let i=t.indexOf(w);while(i>=0){if(!short)return true;const a=t[i-1]||' ',b=t[i+w.length]||' ';if(!/[a-zäöüß]/.test(a)&&!/[a-zäöüß]/.test(b))return true;i=t.indexOf(w,i+1)}return false}
+function has(t,w,short){let i=t.indexOf(w);while(i>=0){if(!short)return true;const a=t[i-1]||' ',b=t[i+w.length]||' ';if(!/[a-zäöüß0-9]/.test(a)&&!/[a-zäöüß0-9]/.test(b))return true;i=t.indexOf(w,i+1)}return false}
 function terms(q){
-  const t=(q.q+' '+q.opts.map(o=>o.t+' '+(o.why||'')).join(' ')+' '+q.exp).toLowerCase();
+  const tQ=String(q.q||'').toLowerCase(),tO=(q.opts||[]).map(o=>o.t||'').join(' ').toLowerCase(),tE=((q.opts||[]).map(o=>o.why||'').join(' ')+' '+(q.exp||'')).toLowerCase();
   const crs=q._course?norm(q._course):'';
   const pool=crs?gloss.filter(g=>norm(g.course)===crs):gloss;
-  return pool.filter(g=>[g.b,...g.a].some(w=>{w=w.toLowerCase();return has(t,w,w.length<=4)})).slice(0,6);
+  const sc=[];
+  pool.forEach((g,idx)=>{
+    const ws=[g.b,...(g.a||[])].map(w=>w.toLowerCase()).filter(Boolean);
+    let s=0;
+    ws.forEach(w=>{
+      const sh=w.length<=4;
+      if(has(tQ,w,sh))s=Math.max(s,has(tQ,w,true)?7:6);
+      else if(has(tO,w,sh))s=Math.max(s,has(tO,w,true)?5:4);
+      else if(has(tE,w,sh))s=Math.max(s,has(tE,w,true)?2:1);
+    });
+    if(s>0)sc.push({g,s,idx});
+  });
+  return sc.sort((a,b)=>b.s-a.s||a.idx-b.idx).slice(0,8).map(x=>x.g);
 }
 function side(q){
   if(!checked)return `<div class='card ph'><p class='mut' style='margin:0'>Nach dem Prüfen der Antwort erscheinen hier die Begründung und passende Begriffe aus dem Glossar.</p></div>`;
-  const src=q._ref||q,st=src.streak||0,m=isMastered(src),t=terms(q);
-  return `<div class="exp" style="margin:0"><div class="row" style="justify-content:space-between;margin-bottom:4px"><b style="color:var(--ac)">Begründung</b><span class="badge ${m?'ok':src.wrong?'bad':''}" style="cursor:default">${m?`✓ Gemeistert (${st}/${opts.mastery})`:`Lernstand: ${st} / ${opts.mastery}`}</span></div>${esc(q.exp)}</div><div class='card'><b>Weiterführende Informationen</b>${t.length?t.map(g=>`<p class='term'><b>${esc(g.b)}</b> – ${esc(g.i)}</p>`).join(''):`<p class='mut'>Zu dieser Frage ist für diesen Kurs noch kein Begriff im Glossar hinterlegt.</p>`}</div>`}
+  const src=q._ref||q,st=src.streak||0,m=isMastered(src),t=terms(q),ag=t[gopen];
+  return `<div class="exp" style="margin:0"><div class="row" style="justify-content:space-between;margin-bottom:4px"><b style="color:var(--ac)">Begründung</b><span class="badge ${m?'ok':src.wrong?'bad':''}" style="cursor:default">${m?`✓ Gemeistert (${st}/${opts.mastery})`:`Lernstand: ${st} / ${opts.mastery}`}</span></div>${esc(q.exp)}</div><div class='card'><div class="row" style="justify-content:space-between;gap:6px"><b>Weiterführende Informationen</b>${t.length?`<span class="mut" style="font-size:.8rem">${ag?'Antippen zum Schließen':'Begriff antippen'}</span>`:''}</div>${t.length?`<div class="gtabs">${t.map((g,i)=>`<button class="gtab${gopen===i?' on':''}" aria-expanded="${gopen===i}" onclick="togQGloss(${i})">${isym(IC.book)}${esc(g.b)}</button>`).join('')}</div>${ag?`<div class="gbox"><b>${esc(ag.b)}</b> – ${esc(ag.i)}</div>`:''}`:`<p class='mut'>Zu dieser Frage ist für diesen Kurs noch kein Begriff im Glossar hinterlegt.</p>`}</div>`}
 function addGloss(l,noSave){
   l.forEach(g=>{
     if(!g||!(g.begriff||g.b)||!(g.info||g.i))return;
