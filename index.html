@@ -53,7 +53,9 @@ img,svg,pre,textarea,button,.card{max-width:100%}.row>*{min-width:0}
 .set:last-child{margin-bottom:2px}
 .set input[type=checkbox]{width:22px;height:22px;accent-color:var(--ac);cursor:pointer;flex:none}
 .x{background:none;border:0;border-radius:8px;color:var(--mut);cursor:pointer;font-size:1.05rem;min-width:36px;min-height:36px;padding:6px;display:inline-grid;place-items:center}
-@media (hover:hover){.x:hover{background:color-mix(in srgb,var(--fg) 8%,transparent);color:var(--fg)}}
+.x:disabled{opacity:.3;cursor:default}
+@media (hover:hover){.x:not(:disabled):hover{background:color-mix(in srgb,var(--fg) 8%,transparent);color:var(--fg)}}
+.drop-target{outline:2px dashed var(--ac);outline-offset:2px}
 .bar{height:6px;border:0;background:var(--bd);border-radius:3px;overflow:hidden;margin:10px 0 18px}
 .bar i{display:block;height:100%;background:var(--hi)}
 .q{font-size:1.2rem;font-weight:700;margin:.2em 0 .8em}
@@ -115,7 +117,7 @@ pre{white-space:pre-wrap;font-size:.85rem;background:var(--card);border:1px soli
 <div id="app"></div>
 <script>
 const $app=document.getElementById('app');
-let exp=new Set(),pq=null,col=new Set(),gcol=new Set(),pend=null,rpend=null,cpend=null,crpend=null,gcpend=null,gloss=[],courses={},cnames=[],gcnames=[],gen={name:'',f:['single','multi','tf']},sets=[],sel=new Set(),opts={n:20,shuffle:true,hideMastered:true,mastery:3,theme:'auto',examMins:30,pass:50,scoreMode:'all',negMode:'none',cpass:{},ctime:{},cqcount:{},cmode:{},cneg:{}},Q=[],idx=0,picked=new Set(),checked=false,log=[],msg='';
+let exp=new Set(),pq=null,col=new Set(),gcol=new Set(),pend=null,rpend=null,cpend=null,crpend=null,gcpend=null,gloss=[],courses={},cnames=[],gcnames=[],gen={name:'',f:['single','multi','tf']},sets=[],sel=new Set(),opts={n:20,shuffle:true,hideMastered:true,mastery:3,theme:'auto',examMins:30,pass:50,scoreMode:'all',negMode:'none',cpass:{},ctime:{},cqcount:{},cmode:{},cneg:{},corder:[]},Q=[],idx=0,picked=new Set(),checked=false,log=[],msg='';
 let cedit=null,cdraft='',cpdraft=50,ctdraft=30,cqdraft=20,cmdraft='all',cndraft='none',cerr='',gcedit=null,gcdraft='',gcerr='',sedit=null,sdraft=null,serr='',qedit=null,qdraft=null,qerr='',curView='q';
 let examMode=false,examPicks=[],examMarks=new Set(),examEnd=0,examStart=0,examElapsed=0,examTimer=null,examSubPend=false,examExitPend=false,examTimeUp=false,examCourse='',examDurMins=30;
 let gh={token:'',user:'',sha:'',lastSync:0},localTs=0,syncState='idle',syncErr='',syncTimer=null,forceOverwrite=false;
@@ -127,6 +129,8 @@ const IC={
   del:`<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>`,
   edit:`<svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`,
   plus:`<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
+  up:`<svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>`,
+  down:`<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>`,
   x:`<svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
   cloud:`<svg viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>`,
   flag:`<svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>`,
@@ -256,7 +260,7 @@ function load(){
   }
   enforceSingleCourse();
   exp=new Set([...exp].filter(id=>sets.some(s=>s.id===id)));
-  try{const o=JSON.parse(localStorage.getItem('pt:opts')||'null');if(o&&typeof o==='object')opts={...opts,...o,n:Math.max(1,+o.n||20),examMins:Math.max(1,+o.examMins||30),pass:[50,60,70].includes(+o.pass)?+o.pass:50,scoreMode:SCORE_MODES.includes(o.scoreMode)?o.scoreMode:'all',negMode:NEG_MODES.includes(o.negMode)?o.negMode:'none',cpass:(o.cpass&&typeof o.cpass==='object')?o.cpass:{},ctime:(o.ctime&&typeof o.ctime==='object')?o.ctime:{},cqcount:(o.cqcount&&typeof o.cqcount==='object')?o.cqcount:{},cmode:(o.cmode&&typeof o.cmode==='object')?o.cmode:{},cneg:(o.cneg&&typeof o.cneg==='object')?o.cneg:{},shuffle:o.shuffle!==false,hideMastered:o.hideMastered!==false,mastery:Math.max(1,Math.min(10,+o.mastery||3)),theme:THEMES.includes(o.theme)?o.theme:'auto'}}catch(e){}
+  try{const o=JSON.parse(localStorage.getItem('pt:opts')||'null');if(o&&typeof o==='object')opts={...opts,...o,n:Math.max(1,+o.n||20),examMins:Math.max(1,+o.examMins||30),pass:[50,60,70].includes(+o.pass)?+o.pass:50,scoreMode:SCORE_MODES.includes(o.scoreMode)?o.scoreMode:'all',negMode:NEG_MODES.includes(o.negMode)?o.negMode:'none',cpass:(o.cpass&&typeof o.cpass==='object')?o.cpass:{},ctime:(o.ctime&&typeof o.ctime==='object')?o.ctime:{},cqcount:(o.cqcount&&typeof o.cqcount==='object')?o.cqcount:{},cmode:(o.cmode&&typeof o.cmode==='object')?o.cmode:{},cneg:(o.cneg&&typeof o.cneg==='object')?o.cneg:{},corder:Array.isArray(o.corder)?o.corder.filter(Boolean):[],shuffle:o.shuffle!==false,hideMastered:o.hideMastered!==false,mastery:Math.max(1,Math.min(10,+o.mastery||3)),theme:THEMES.includes(o.theme)?o.theme:'auto'}}catch(e){}
   applyTheme();
   try{localTs=+localStorage.getItem('pt:ts')||0}catch(e){localTs=0}
   try{const g=JSON.parse(localStorage.getItem('pt:gh')||'null');if(g&&typeof g==='object')gh={...gh,...g}}catch(e){}
@@ -401,8 +405,10 @@ function saveCEdit(gi){
   if(!opts.cqcount||typeof opts.cqcount!=='object')opts.cqcount={};
   if(!opts.cmode||typeof opts.cmode!=='object')opts.cmode={};
   if(!opts.cneg||typeof opts.cneg!=='object')opts.cneg={};
+  if(!Array.isArray(opts.corder))opts.corder=cnames.slice();
   if(isNew){
     courses[nw]=KINDS.map(x=>x[0]);saveC();
+    if(!opts.corder.includes(nw))opts.corder.push(nw);
     if(col.has(nw)){col.delete(nw);saveCol()}
   }else if(nw!==old){
     sets.forEach(s=>{if(s.course===old)s.course=nw});
@@ -410,6 +416,7 @@ function saveCEdit(gi){
     gloss.forEach(g=>{if(g.course===old){g.course=nw;gChg=true}});
     if(gChg){dedupGloss();saveGloss(true)}
     courses[nw]=courses[old]||KINDS.map(x=>x[0]);delete courses[old];saveC();
+    opts.corder=opts.corder.map(x=>x===old?nw:x).filter((x,i,a)=>a.indexOf(x)===i);
     if(col.has(old)){col.delete(old);col.add(nw);saveCol()}
     if(gcol.has(old)){gcol.delete(old);gcol.add(nw);saveGCol()}
     delete opts.cpass[old];
@@ -561,17 +568,103 @@ function qForm(sid,qi){
   return `<div class="qi"><div class="ge">${qi<0?'<b style="display:block;margin-bottom:6px;color:var(--ac)">Neue Frage hinzufügen</b>':''}<label class="mut" for="eq_type">Fragetyp</label><select id="eq_type" onchange="changeQType(this.value)"><option value="single" ${d.type==='single'?'selected':''}>Single Choice</option><option value="multi" ${d.type==='multi'?'selected':''}>Multiple Choice</option><option value="tf" ${isTf?'selected':''}>Wahr / Falsch</option></select><label class="mut" for="eq_q">Frage</label><textarea id="eq_q" style="min-height:64px">${esc(d.q)}</textarea>${isTf?`<label class="mut" style="margin-bottom:4px">Richtige Antwort &amp; optionale Begründungen</label><div class="orow" style="grid-template-columns:auto auto 1fr"><input type="radio" name="eq_tf" value="true" ${d.tfOk?'checked':''}><span style="min-width:52px;font-weight:700">Wahr</span><input id="eq_tfw0" placeholder="Begründung zu Wahr (optional)" value="${esc(tw[0]||'')}"></div><div class="orow" style="grid-template-columns:auto auto 1fr;margin-bottom:10px"><input type="radio" name="eq_tf" value="false" ${!d.tfOk?'checked':''}><span style="min-width:52px;font-weight:700">Falsch</span><input id="eq_tfw1" placeholder="Begründung zu Falsch (optional)" value="${esc(tw[1]||'')}"></div>`:`<label class="mut" style="margin-bottom:4px">Antwortoptionen (Häkchen = richtig, optional Begründung)</label>${d.opts.map((o,k)=>`<div class="orow"><input class="eq_ok" type="${isSingle?'radio':'checkbox'}" name="eq_ok_grp" title="Als richtige Antwort markieren" ${o.ok?'checked':''}><input class="eq_ot" placeholder="Antwort ${k+1}" value="${esc(o.t)}"><input class="eq_ow" placeholder="Begründung (optional)" value="${esc(o.why)}"><button class="x" type="button" title="Option entfernen" aria-label="Option entfernen" ${d.opts.length<=2?'disabled':''} onclick="delQOpt(${k})">${IC.x}</button></div>`).join('')}<button class="btn sec sm" type="button" style="margin:2px 0 10px" onclick="addQOpt()">+ Option hinzufügen</button>`}<label class="mut" for="eq_exp">Erklärung</label><textarea id="eq_exp" style="min-height:64px">${esc(d.exp)}</textarea><p class="err">${esc(qerr)}</p><div class="row act"><button class="btn sec sm" type="button" onclick="cancelQEdit()">Abbrechen</button><button class="btn sm" type="button" onclick="saveQEdit('${sid}',${qi})">Speichern</button></div></div></div>`;
 }
 
+let dragItem=null;
+function reorderCourseAt(fromGi,toGi){
+  buildGroups();
+  if(fromGi<0||fromGi>=cnames.length||toGi<0||toGi>=cnames.length||fromGi===toGi)return;
+  const next=cnames.slice();
+  const [moved]=next.splice(fromGi,1);
+  next.splice(toGi,0,moved);
+  cnames=next;
+  opts.corder=next.slice();
+  const byC={};next.forEach(c=>byC[c]=[]);
+  sets.forEach(s=>(byC[s.course]=byC[s.course]||[]).push(s));
+  sets=next.flatMap(c=>byC[c]||[]);
+  saveO(true);save(true);rerenderC();
+}
+function moveCourse(gi,dir){reorderCourseAt(gi,gi+dir)}
+function reorderSet(srcId,targetId){
+  if(!srcId||!targetId||srcId===targetId)return;
+  const a=sets.find(s=>s.id===srcId),b=sets.find(s=>s.id===targetId);
+  if(!a||!b||a.course!==b.course)return;
+  const c=a.course,cSets=sets.filter(s=>s.course===c);
+  const fromIdx=cSets.findIndex(s=>s.id===srcId),toIdx=cSets.findIndex(s=>s.id===targetId);
+  if(fromIdx<0||toIdx<0||fromIdx===toIdx)return;
+  const [moved]=cSets.splice(fromIdx,1);
+  cSets.splice(toIdx,0,moved);
+  let k=0;
+  sets=sets.map(s=>s.course===c?cSets[k++]:s);
+  save(true);home();
+}
+function moveSet(sid,dir){
+  const s=sets.find(x=>x.id===sid);if(!s)return;
+  const cSets=sets.filter(x=>x.course===s.course);
+  const idx=cSets.findIndex(x=>x.id===sid),t=cSets[idx+dir];
+  if(t)reorderSet(sid,t.id);
+}
+function dragCStart(ev,gi){
+  const tag=(ev.target&&ev.target.tagName)||'';
+  if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'){ev.preventDefault();return}
+  dragItem={kind:'c',gi};
+  if(ev.dataTransfer){ev.dataTransfer.effectAllowed='move';try{ev.dataTransfer.setData('text/plain','c:'+gi)}catch(e){}}
+}
+function dragCOver(ev,gi){
+  if(!dragItem||dragItem.kind!=='c'||dragItem.gi===gi)return;
+  ev.preventDefault();
+  if(ev.dataTransfer)ev.dataTransfer.dropEffect='move';
+  ev.currentTarget.classList.add('drop-target');
+}
+function dragLeave(ev){
+  if(!ev.currentTarget.contains(ev.relatedTarget))ev.currentTarget.classList.remove('drop-target');
+}
+function dropC(ev,gi){
+  ev.currentTarget.classList.remove('drop-target');
+  if(!dragItem||dragItem.kind!=='c')return;
+  ev.preventDefault();
+  const from=dragItem.gi;dragItem=null;
+  reorderCourseAt(from,gi);
+}
+function dragSStart(ev,sid,c){
+  const tag=(ev.target&&ev.target.tagName)||'';
+  if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'){ev.preventDefault();return}
+  ev.stopPropagation();
+  dragItem={kind:'s',sid,c};
+  if(ev.dataTransfer){ev.dataTransfer.effectAllowed='move';try{ev.dataTransfer.setData('text/plain','s:'+sid)}catch(e){}}
+}
+function dragSOver(ev,sid,c){
+  if(!dragItem||dragItem.kind!=='s'||dragItem.c!==c||dragItem.sid===sid)return;
+  ev.preventDefault();ev.stopPropagation();
+  if(ev.dataTransfer)ev.dataTransfer.dropEffect='move';
+  ev.currentTarget.classList.add('drop-target');
+}
+function dropS(ev,sid,c){
+  ev.currentTarget.classList.remove('drop-target');
+  if(!dragItem||dragItem.kind!=='s'||dragItem.c!==c)return;
+  ev.preventDefault();ev.stopPropagation();
+  const from=dragItem.sid;dragItem=null;
+  reorderSet(from,sid);
+}
+function dragEnd(){
+  dragItem=null;
+  document.querySelectorAll('.drop-target').forEach(el=>el.classList.remove('drop-target'));
+}
+
 function courseCardHtml(c,l,gi,isSetView){
   const mC=l.reduce((a,s)=>a+masteredInSet(s),0),allC=l.reduce((a,s)=>a+s.qs.length,0),gC=gloss.filter(g=>norm(g.course)===norm(c)).length,hasCP=l.some(s=>s.qs.some(q=>(q.streak||0)>0||q.wrong)),hasMC=l.some(s=>s.qs.some(q=>q.type==='multi')),cp=getPass(c),cm=getExamMins(c),cq=getExamCount(c),csm=getScoreMode(c),cnm=getNegMode(c),cCol=mC===allC&&allC?'--ok':l.some(s=>sel.has(s.id))?'--ac':'--ink';
   const sub=`<span class="mut" style="display:block;font-size:.82rem;margin-bottom:1px">${l.length} Kapitel · ${allC} Fragen${mC?` · ${mC} ✓ gemeistert`:''}${gC?` · ${isym(IC.book,'Glossar')} ${gC}`:''} · Prüfung: ${isym(IC.cap,'Fragen')} ${cq} · ⏱ ${cm} Min. · ${isym(IC.award,'Notenschema')} ${cp} %${hasMC?` · ${modeShort(csm)}`:''}${cnm!=='none'?` · ${negShort(cnm)}`:''}</span><b>${esc(c)}</b>`;
-  return `<div class="card ccard" style="margin:14px 0 8px;padding:12px 16px;border-left:4px solid var(${cCol})"><div class="crs">${isSetView?`<div class="chb" style="padding:2px 0;cursor:default"><span>${sub}</span></div>`:`<input type="checkbox" aria-label="Alle Kapitel auswählen" ${allSel(l)?'checked':''} ${l.length?'':'disabled'} onchange="togC(${gi},this.checked)"><button class="chb" style="padding:2px 0" aria-expanded="${!col.has(c)}" onclick="fold(${gi})"><span>${col.has(c)?'▸':'▾'}</span><span>${sub}</span></button>`}<span class="gc">${isSetView?'':`<button class="x" title="Neues Kapitel zu diesem Kurs hinzufügen" aria-label="Neues Kapitel hinzufügen" onclick="startSNew(${gi})">${IC.plus}</button>`}<button class="x" title="Kurs exportieren" aria-label="Kurs exportieren" onclick="exportC(this,${gi})">${IC.exp}</button>${crpend===gi?`<span class="mut">Zurücksetzen?</span><button class="btn sm" onclick="resetCourseProg(${gi})">Ja</button><button class="btn sec sm" onclick="crpend=null;rerenderC()">Nein</button>`:hasCP?`<button class="x" title="Lernstand dieses Kurses zurücksetzen" aria-label="Lernstand dieses Kurses zurücksetzen" onclick="crpend=${gi};cpend=null;rpend=null;pend=null;rerenderC()">${IC.res}</button>`:''}<button class="x" title="Kurs, Zeit, Wertung & Notenschema bearbeiten" aria-label="Kurs bearbeiten" onclick="startCEdit(${gi})">${IC.edit}</button>${cpend===gi?`<span class="mut">Löschen?</span><button class="btn sm" onclick="delC2(${gi})">Ja</button><button class="btn sec sm" onclick="delC(${gi})">Nein</button>`:`<button class="x" title="Kurs löschen" aria-label="Kurs löschen" onclick="delC(${gi})">${IC.x}</button>`}</span></div>${cedit===gi?cForm(gi,hasMC):''}</div>`;
+  const canDrag=cnames.length>1&&cedit!==gi;
+  return `<div class="card ccard" style="margin:14px 0 8px;padding:12px 16px;border-left:4px solid var(${cCol})" ${canDrag?`draggable="true" ondragstart="dragCStart(event,${gi})" ondragover="dragCOver(event,${gi})" ondragleave="dragLeave(event)" ondrop="dropC(event,${gi})" ondragend="dragEnd()"`:''}><div class="crs">${isSetView?`<div class="chb" style="padding:2px 0;cursor:default"><span>${sub}</span></div>`:`<input type="checkbox" aria-label="Alle Kapitel auswählen" ${allSel(l)?'checked':''} ${l.length?'':'disabled'} onchange="togC(${gi},this.checked)"><button class="chb" style="padding:2px 0" aria-expanded="${!col.has(c)}" onclick="fold(${gi})"><span>${col.has(c)?'▸':'▾'}</span><span>${sub}</span></button>`}<span class="gc">${cnames.length>1?`<button class="x" title="Kurs nach oben verschieben" aria-label="Kurs nach oben" ${gi===0?'disabled':''} onclick="moveCourse(${gi},-1)">${IC.up}</button><button class="x" title="Kurs nach unten verschieben" aria-label="Kurs nach unten" ${gi===cnames.length-1?'disabled':''} onclick="moveCourse(${gi},1)">${IC.down}</button>`:''}${isSetView?'':`<button class="x" title="Neues Kapitel zu diesem Kurs hinzufügen" aria-label="Neues Kapitel hinzufügen" onclick="startSNew(${gi})">${IC.plus}</button>`}<button class="x" title="Kurs exportieren" aria-label="Kurs exportieren" onclick="exportC(this,${gi})">${IC.exp}</button>${crpend===gi?`<span class="mut">Zurücksetzen?</span><button class="btn sm" onclick="resetCourseProg(${gi})">Ja</button><button class="btn sec sm" onclick="crpend=null;rerenderC()">Nein</button>`:hasCP?`<button class="x" title="Lernstand dieses Kurses zurücksetzen" aria-label="Lernstand dieses Kurses zurücksetzen" onclick="crpend=${gi};cpend=null;rpend=null;pend=null;rerenderC()">${IC.res}</button>`:''}<button class="x" title="Kurs, Zeit, Wertung & Notenschema bearbeiten" aria-label="Kurs bearbeiten" onclick="startCEdit(${gi})">${IC.edit}</button>${cpend===gi?`<span class="mut">Löschen?</span><button class="btn sm" onclick="delC2(${gi})">Ja</button><button class="btn sec sm" onclick="delC(${gi})">Nein</button>`:`<button class="x" title="Kurs löschen" aria-label="Kurs löschen" onclick="delC(${gi})">${IC.x}</button>`}</span></div>${cedit===gi?cForm(gi,hasMC):''}</div>`;
 }
 
 function buildGroups(){
-  const groups={};
-  sets.forEach(s=>(groups[s.course]=groups[s.course]||[]).push(s));
-  Object.keys(courses).forEach(c=>{if(c&&!groups[c])groups[c]=[]});
-  cnames=Object.keys(groups);
+  const groups={},order=[],avail=new Set();
+  sets.forEach(s=>{if(s.course)avail.add(s.course)});
+  Object.keys(courses).forEach(c=>{if(c)avail.add(c)});
+  const addC=c=>{if(c&&avail.has(c)&&!order.includes(c)){order.push(c);groups[c]=[]}};
+  if(Array.isArray(opts.corder))opts.corder.forEach(addC);
+  sets.forEach(s=>{addC(s.course);if(s.course)groups[s.course].push(s)});
+  Object.keys(courses).forEach(addC);
+  cnames=order;
   return groups;
 }
 
@@ -586,11 +679,11 @@ function home(){stopExamTimer();enforceSingleCourse();const chg=curView!=='q';cu
   $app.innerHTML=`${nav('q')}<div class="row" style="justify-content:space-between;align-items:center"><h1>${IC.cap}<span>Quizomat</span></h1>${sets.length?`<div class="row dstart"><button class="btn sec" ${allSelCount?'':'disabled'} onclick="startExam()">Prüfung starten${eCnt?` (${eCnt})`:''}</button><button class="btn" ${total?'':'disabled'} onclick="start()">Quiz starten${qCnt?` (${qCnt})`:''}</button></div>`:''}</div><p class="mut">Fragen aus deinen Vorlesungsunterlagen üben und auswerten.</p>
   ${topBar()}${sets.length?optsHtml(total,allSelCount)+searchHtml()+flaggedHtml():''}${dl}
   ${topNew?`<div class="card ccard" style="margin-top:14px;border-left:4px solid var(--ac)">${cForm('__new__',false)}</div>`:''}
-  ${cnames.length?Object.entries(groups).map(([c,l],gi)=>{
-    const inNew=sedit==='__new__'&&sdraft&&sdraft.targetC===c;
+  ${cnames.length?cnames.map((c,gi)=>{
+    const l=groups[c],inNew=sedit==='__new__'&&sdraft&&sdraft.targetC===c;
     return courseCardHtml(c,l,gi,false)+(col.has(c)?'':`<div class="grp" style="margin:0 0 16px 12px">${l.map((s,si)=>{
-      const mS=masteredInSet(s),hasP=s.qs.some(q=>(q.streak||0)>0||q.wrong),sCol=mS===s.qs.length&&s.qs.length?'--ok':sel.has(s.id)?'--ac':'--ink';
-      return `<div class="set" style="border-left:4px solid var(${sCol})"><input type="checkbox" aria-label="${esc(s.title)} auswählen" ${sel.has(s.id)?'checked':''} onchange="tog('${s.id}')"><button class="sb" style="padding:2px 0" aria-expanded="${exp.has(s.id)}" onclick="openS('${s.id}')"><span>${exp.has(s.id)?'▾':'▸'}</span><span><span class="mut" style="display:block;font-size:.82rem;margin-bottom:1px">Kapitel ${si+1} · ${s.qs.length} Fragen${mS?` · ${mS} ✓ gemeistert`:''}</span><b>${esc(s.title)}</b></span></button><span class="gc"><button class="x" title="Neue Frage hinzufügen" aria-label="Neue Frage hinzufügen" onclick="startQNew('${s.id}')">${IC.plus}</button>${rpend===s.id?`<span class="mut">Zurücksetzen?</span><button class="btn sm" onclick="resetProg('${s.id}')">Ja</button><button class="btn sec sm" onclick="rpend=null;home()">Nein</button>`:hasP?`<button class="x" title="Lernstand dieses Kapitels zurücksetzen" aria-label="Lernstand zurücksetzen" onclick="rpend='${s.id}';pend=null;cpend=null;crpend=null;home()">${IC.res}</button>`:''}<button class="x" title="Kapitel bearbeiten" aria-label="Kapitel bearbeiten" onclick="startSEdit('${s.id}')">${IC.edit}</button>${pend===s.id?`<span class="mut">Löschen?</span><button class="btn sm" onclick="del2('${s.id}')">Ja</button><button class="btn sec sm" onclick="del('${s.id}')">Nein</button>`:`<button class="x" title="Set löschen" aria-label="Set löschen" onclick="del('${s.id}')">${IC.x}</button>`}</span>${sedit===s.id?sForm(s.id):''}</div>${exp.has(s.id)?`<div class="ql">${s.qs.map((q,i)=>qedit===s.id+':'+i?qForm(s.id,i):`<div class="qi"><span>${esc(q.q)}</span><span class="gc">${qBadge(s.id,i,q)}<button class="x${q.flagged?' warn':''}" title="${q.flagged?'Markierung aufheben':'Zum Bearbeiten markieren'}" aria-label="Markieren" onclick="togFlag('${s.id}',${i})">${IC.flag}</button><button class="x" title="Frage bearbeiten" aria-label="Frage bearbeiten" onclick="startQEdit('${s.id}',${i})">${IC.edit}</button>${pq===s.id+':'+i?`<button class="btn sm" onclick="delQ('${s.id}',${i})">Löschen</button><button class="btn sec sm" onclick="pq=null;home()">Nein</button>`:`<button class="x" title="Frage löschen" aria-label="Frage löschen" onclick="pq='${s.id}:${i}';home()">${IC.x}</button>`}</span></div>`).join('')}${qedit===s.id+':new'?qForm(s.id,-1):`<div class="qi" style="padding:10px 0 6px"><button class="btn sec sm" type="button" onclick="startQNew('${s.id}')">+ Neue Frage hinzufügen</button></div>`}</div>`:''}`}).join('')}${inNew?`<div class="set" style="border-left:4px solid var(--ac)">${sForm('__new__')}</div>`:(!l.length?`<div class="set" style="padding:10px 14px"><button class="btn sec sm" type="button" onclick="startSNew(${gi})">+ Neues Kapitel hinzufügen</button></div>`:'')}</div>`);
+      const mS=masteredInSet(s),hasP=s.qs.some(q=>(q.streak||0)>0||q.wrong),sCol=mS===s.qs.length&&s.qs.length?'--ok':sel.has(s.id)?'--ac':'--ink',canDragS=l.length>1&&sedit!==s.id;
+      return `<div class="set" style="border-left:4px solid var(${sCol})" ${canDragS?`draggable="true" ondragstart="dragSStart(event,'${s.id}',${esc(JSON.stringify(c))})" ondragover="dragSOver(event,'${s.id}',${esc(JSON.stringify(c))})" ondragleave="dragLeave(event)" ondrop="dropS(event,'${s.id}',${esc(JSON.stringify(c))})" ondragend="dragEnd()"`:''}><input type="checkbox" aria-label="${esc(s.title)} auswählen" ${sel.has(s.id)?'checked':''} onchange="tog('${s.id}')"><button class="sb" style="padding:2px 0" aria-expanded="${exp.has(s.id)}" onclick="openS('${s.id}')"><span>${exp.has(s.id)?'▾':'▸'}</span><span><span class="mut" style="display:block;font-size:.82rem;margin-bottom:1px">Kapitel ${si+1} · ${s.qs.length} Fragen${mS?` · ${mS} ✓ gemeistert`:''}</span><b>${esc(s.title)}</b></span></button><span class="gc">${l.length>1?`<button class="x" title="Kapitel nach oben verschieben" aria-label="Kapitel nach oben" ${si===0?'disabled':''} onclick="moveSet('${s.id}',-1)">${IC.up}</button><button class="x" title="Kapitel nach unten verschieben" aria-label="Kapitel nach unten" ${si===l.length-1?'disabled':''} onclick="moveSet('${s.id}',1)">${IC.down}</button>`:''}<button class="x" title="Neue Frage hinzufügen" aria-label="Neue Frage hinzufügen" onclick="startQNew('${s.id}')">${IC.plus}</button>${rpend===s.id?`<span class="mut">Zurücksetzen?</span><button class="btn sm" onclick="resetProg('${s.id}')">Ja</button><button class="btn sec sm" onclick="rpend=null;home()">Nein</button>`:hasP?`<button class="x" title="Lernstand dieses Kapitels zurücksetzen" aria-label="Lernstand zurücksetzen" onclick="rpend='${s.id}';pend=null;cpend=null;crpend=null;home()">${IC.res}</button>`:''}<button class="x" title="Kapitel bearbeiten" aria-label="Kapitel bearbeiten" onclick="startSEdit('${s.id}')">${IC.edit}</button>${pend===s.id?`<span class="mut">Löschen?</span><button class="btn sm" onclick="del2('${s.id}')">Ja</button><button class="btn sec sm" onclick="del('${s.id}')">Nein</button>`:`<button class="x" title="Set löschen" aria-label="Set löschen" onclick="del('${s.id}')">${IC.x}</button>`}</span>${sedit===s.id?sForm(s.id):''}</div>${exp.has(s.id)?`<div class="ql">${s.qs.map((q,i)=>qedit===s.id+':'+i?qForm(s.id,i):`<div class="qi"><span>${esc(q.q)}</span><span class="gc">${qBadge(s.id,i,q)}<button class="x${q.flagged?' warn':''}" title="${q.flagged?'Markierung aufheben':'Zum Bearbeiten markieren'}" aria-label="Markieren" onclick="togFlag('${s.id}',${i})">${IC.flag}</button><button class="x" title="Frage bearbeiten" aria-label="Frage bearbeiten" onclick="startQEdit('${s.id}',${i})">${IC.edit}</button>${pq===s.id+':'+i?`<button class="btn sm" onclick="delQ('${s.id}',${i})">Löschen</button><button class="btn sec sm" onclick="pq=null;home()">Nein</button>`:`<button class="x" title="Frage löschen" aria-label="Frage löschen" onclick="pq='${s.id}:${i}';home()">${IC.x}</button>`}</span></div>`).join('')}${qedit===s.id+':new'?qForm(s.id,-1):`<div class="qi" style="padding:10px 0 6px"><button class="btn sec sm" type="button" onclick="startQNew('${s.id}')">+ Neue Frage hinzufügen</button></div>`}</div>`:''}`}).join('')}${inNew?`<div class="set" style="border-left:4px solid var(--ac)">${sForm('__new__')}</div>`:(!l.length?`<div class="set" style="padding:10px 14px"><button class="btn sec sm" type="button" onclick="startSNew(${gi})">+ Neues Kapitel hinzufügen</button></div>`:'')}</div>`);
   }).join('')+(sets.length?`<div class="mstart"><div class="row"><button class="btn sec" ${allSelCount?'':'disabled'} onclick="startExam()">Prüfung${eCnt?` (${eCnt})`:''}</button><button class="btn" ${total?'':'disabled'} onclick="start()">Quiz${qCnt?` (${qCnt})`:''}</button></div></div>`:'')
   :(topNew?'':`<div class="card" style="margin-top:18px"><p><b>Noch keine Kurse oder Fragen vorhanden.</b></p><p class="mut">Lege oben über „+ Neuer Kurs“ einen neuen Kurs an oder lass dir in Claude aus deinen Unterlagen ein Fragenset als JSON erstellen und füge es hier ein.</p></div>`)}
 `;if(chg)toTop();
@@ -604,7 +697,7 @@ function optsHtml(total,allSelCount){
   const mastCount=allSelCount-[...sel].reduce((a,id)=>{const s=sets.find(x=>x.id===id);return a+(s?s.qs.filter(q=>!isMastered(q)).length:0)},0),ap=activePass(),at=activeTime(),aq=activeCount(),asm=activeScoreMode(),anm=activeNegMode(),cs=selCourses(),hasMC=cs.length===1&&courseHasMulti(cs[0]),qCnt=Math.min(getQuizCount(),total);
   return `<p class="mut" style="margin:8px 0 4px">${total?`<b>${total}</b> ${total===1?'Frage':'Fragen'} zum Üben verfügbar (Quiz: <b>${qCnt}</b>`+(mastCount?` · ${mastCount} gemeisterte ${opts.hideMastered?'ausgeblendet':'enthalten'} · für Prüfung alle ${allSelCount} verfügbar`:'')+`)`:allSelCount&&mastCount===allSelCount?`Alle ${allSelCount} ausgewählten Fragen sind gemeistert – setze den Lernstand zurück oder starte eine Prüfung.`:sel.size?'Noch keine Fragen in den ausgewählten Kapiteln.':'Wähle mindestens ein Kapitel eines Kurses aus.'}${cs.length===1?` · Kurs „${esc(cs[0])}“ (Prüfung: ${isym(IC.cap,'Fragen')} ${aq} · ⏱ ${at} Min. · ${isym(IC.award,'Notenschema')} ${ap} %${hasMC?` · ${modeShort(asm)}`:''}${anm!=='none'?` · ${negShort(anm)}`:''})`:''}</p>`;
 }
-function wipe(k){if(k==='q'){sets=[];courses={};sel=new Set();exp=new Set();col=new Set();saveSel();saveExp();saveCol();saveC();save(true);wp=null;home()}else{gloss=[];gcol=new Set();saveGCol();saveGloss(true);wp=null;glosView()}}
+function wipe(k){if(k==='q'){sets=[];courses={};opts.corder=[];sel=new Set();exp=new Set();col=new Set();saveSel();saveExp();saveCol();saveC();saveO();save(true);wp=null;home()}else{gloss=[];gcol=new Set();saveGCol();saveGloss(true);wp=null;glosView()}}
 const allSel=l=>l.length>0&&l.every(s=>sel.has(s.id));
 function fold(gi){const c=cnames[gi];col.has(c)?col.delete(c):col.add(c);saveCol();home()}
 function gfold(gi){const c=gcnames[gi];gcol.has(c)?gcol.delete(c):gcol.add(c);saveGCol();glosView()}
@@ -646,7 +739,7 @@ function delC2(gi){
     sets.filter(s=>s.course===c).forEach(s=>{sel.delete(s.id);exp.delete(s.id)});
     sets=sets.filter(s=>s.course!==c);
     if(gloss.some(g=>g.course===c)){gloss=gloss.filter(g=>g.course!==c);gcol.delete(c);saveGCol();saveGloss(true)}
-    delete courses[c];col.delete(c);if(opts.cpass)delete opts.cpass[c];if(opts.ctime)delete opts.ctime[c];if(opts.cqcount)delete opts.cqcount[c];if(opts.cmode)delete opts.cmode[c];if(opts.cneg)delete opts.cneg[c];
+    delete courses[c];col.delete(c);if(opts.cpass)delete opts.cpass[c];if(opts.ctime)delete opts.ctime[c];if(opts.cqcount)delete opts.cqcount[c];if(opts.cmode)delete opts.cmode[c];if(opts.cneg)delete opts.cneg[c];if(Array.isArray(opts.corder))opts.corder=opts.corder.filter(x=>x!==c);
     saveSel();saveExp();saveCol();saveC();saveO();save(true);
   }
   cpend=null;crpend=null;rpend=null;pend=null;rerenderC();
@@ -743,7 +836,7 @@ function settingsView(){
   </div>
   <h2>Vorhandene Kurse (${cnames.length})</h2>
   <p class="mut">Alle Kurse im Überblick (ohne Kapitel und Fragen). Über das Stift-Symbol lassen sich Kursname, Prüfungsfragen-Anzahl, Prüfungszeit, Notenschema, Multiple-Choice-Wertung und Minuspunkte pro Kurs anpassen.</p>
-  ${cnames.length?Object.entries(groups).map(([c,l],gi)=>courseCardHtml(c,l,gi,true)).join(''):`<div class="card" style="margin-top:12px"><p class="mut">Noch keine Kurse vorhanden. Importiere zuerst ein Fragenset unter „Fragen“.</p></div>`}
+  ${cnames.length?cnames.map((c,gi)=>courseCardHtml(c,groups[c],gi,true)).join(''):`<div class="card" style="margin-top:12px"><p class="mut">Noch keine Kurse vorhanden. Importiere zuerst ein Fragenset unter „Fragen“.</p></div>`}
   <h2>Cloud-Sync (GitHub)</h2>
   <p class="mut">Synchronisiert deine Fragen, Kurseinstellungen, deinen Lernstand und dein Glossar automatisch über ein privates GitHub-Repository (<b>${SYNC_REPO}</b>) zwischen Mac, iPad und iPhone.</p>
   <div id="cbox">${cloudHtml()}</div>`;
@@ -1304,6 +1397,7 @@ function mergeCloudOpts(ro,preferRemote){
     cqcount:mm(opts.cqcount,ro.cqcount),
     cmode:mm(opts.cmode,ro.cmode),
     cneg:mm(opts.cneg,ro.cneg),
+    corder:Array.isArray(pick(opts.corder,ro.corder))?pick(opts.corder,ro.corder).filter(Boolean):[],
     shuffle:pick(opts.shuffle,ro.shuffle)!==false,
     hideMastered:pick(opts.hideMastered,ro.hideMastered)!==false,
     mastery:Math.max(1,Math.min(10,+pick(opts.mastery,ro.mastery)||3)),
