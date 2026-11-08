@@ -39,7 +39,7 @@ Interaktiver Prüfungs- und Vorlesungstrainer zum Üben, Auswerten und Verwalten
   - Beim Prüfen einer Antwort sowie in der Ergebnis-/Klausureinsicht werden passende Begriffe aus dem Glossar des jeweiligen Kurses automatisch erkannt, nach Relevanz für die Lösung sortiert (Fokus auf richtige Antwort & Begründung vor Fragetext und falschen Optionen) und als kompakte **Begriffs-Pills** dargestellt – der relevanteste Begriff ist direkt geöffnet, weitere Begriffe lassen sich per Antippen umschalten oder schließen.
 - **Direktes Erstellen, Bearbeiten, Sortieren, Markieren & Verwalten:**
   - Neue Kurse (`+ Neuer Kurs` in der Aktionsleiste), neue Kapitel (`+` bzw. `+ Neues Kapitel hinzufügen` direkt am jeweiligen Kurs), neue Fragen (`+ Neue Frage hinzufügen`) und neue Glossarbegriffe (`+ Begriff hinzufügen` – global oder direkt am jeweiligen Kurs) lassen sich direkt im Browser anlegen.
-  - Die Reihenfolge von Kursen untereinander sowie von Kapiteln innerhalb eines Kurses lässt sich jederzeit über die Pfeil-Buttons (`↑` / `↓`) oder per Drag & Drop ändern.
+  - Die Reihenfolge von Kursen untereinander sowie von Kapiteln innerhalb eines Kurses lässt sich jederzeit per Drag & Drop ändern.
   - Kurse (inkl. Notenschema, MC-Wertung, Minuspunkte, Prüfungszeit & Fragenanzahl für Prüfungen), Kapitel/Themen, einzelne Fragen (inkl. Fragetyp, Antwortoptionen, Begründungen und Erklärung) sowie Kurs-Glossare und einzelne Glossareinträge lassen sich direkt im Browser bearbeiten oder mit Sicherheitsabfrage löschen.
   - Fragen können während des Quiz/der Prüfung oder in der Auswertung mit einem Fähnchen (Taste `M`) zum späteren Überarbeiten markiert werden.
 - **Import & Export (inkl. Duplikatschutz, Lernstand & Kurseinstellungen):**
