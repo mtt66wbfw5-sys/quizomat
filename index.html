@@ -9,14 +9,14 @@
 <title>Quizomat</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap">
 <style>
-:root{--ink:#c5ccd6;--bg:#f5f6f8;--fg:#1c2430;--mut:#5b6675;--card:#fff;--bd:#dde1e7;--ac:#2f4b8f;--acfg:#fff;--hi:#2f4b8f;--ok:#1f7a45;--okbg:#e6f3ea;--bad:#b23a3a;--badbg:#f8e9e9;--warn:#9a5b00;--warnbg:#fff3db;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#3a4553;--bg:#12161c;--fg:#e7ebf0;--mut:#98a3b1;--card:#1a2029;--bd:#2a323d;--ac:#8aa8e8;--acfg:#0f141a;--hi:#8aa8e8;--ok:#6cc58a;--okbg:#17301f;--bad:#f08a8a;--badbg:#351c1c;--warn:#f2b84b;--warnbg:#352912;color-scheme:dark}}
-:root[data-theme="dark"]{--ink:#3a4553;--bg:#12161c;--fg:#e7ebf0;--mut:#98a3b1;--card:#1a2029;--bd:#2a323d;--ac:#8aa8e8;--acfg:#0f141a;--hi:#8aa8e8;--ok:#6cc58a;--okbg:#17301f;--bad:#f08a8a;--badbg:#351c1c;--warn:#f2b84b;--warnbg:#352912;color-scheme:dark}
+:root{--ink:#8a94a3;--bg:#f5f6f8;--fg:#1c2430;--mut:#5b6675;--card:#fff;--bd:#dde1e7;--ac:#2f4b8f;--acfg:#fff;--hi:#2f4b8f;--ok:#1f7a45;--okbg:#e6f3ea;--bad:#b23a3a;--badbg:#f8e9e9;--warn:#9a5b00;--warnbg:#fff3db;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#6b7788;--bg:#12161c;--fg:#e7ebf0;--mut:#98a3b1;--card:#1a2029;--bd:#2a323d;--ac:#8aa8e8;--acfg:#0f141a;--hi:#8aa8e8;--ok:#6cc58a;--okbg:#17301f;--bad:#f08a8a;--badbg:#351c1c;--warn:#f2b84b;--warnbg:#352912;color-scheme:dark}}
+:root[data-theme="dark"]{--ink:#6b7788;--bg:#12161c;--fg:#e7ebf0;--mut:#98a3b1;--card:#1a2029;--bd:#2a323d;--ac:#8aa8e8;--acfg:#0f141a;--hi:#8aa8e8;--ok:#6cc58a;--okbg:#17301f;--bad:#f08a8a;--badbg:#351c1c;--warn:#f2b84b;--warnbg:#352912;color-scheme:dark}
 html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%;text-size-adjust:100%}
 html,body{max-width:100%;overflow-x:clip}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.55 "Atkinson Hyperlegible",system-ui,sans-serif;overflow-wrap:break-word}
-#app{width:100%;max-width:960px;margin:0 auto;padding:20px 20px 60px}
+#app{width:100%;max-width:960px;margin:0 auto;padding:calc(20px + env(safe-area-inset-top,0px)) 20px 60px}
 #app.wide{max-width:1240px}
 .cols{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);column-gap:28px;align-items:start}
 .cols>*{min-width:0}
@@ -68,11 +68,11 @@ img,svg,pre,textarea,button,.card{max-width:100%}.row>*{min-width:0}
 .why{display:block;font-size:.93rem;color:var(--mut);margin-top:4px}
 .exp{border:1.5px solid var(--ac);padding:12px 14px;margin:14px 0;background:color-mix(in srgb,var(--ac) 8%,var(--card));border-radius:8px}
 .score{font-size:2.5rem;font-weight:700;line-height:1.1;color:var(--fg);letter-spacing:-.5px}
-textarea{width:100%;min-height:200px;background:var(--card);border:1px solid var(--ink);border-radius:8px;padding:10px;font:14px/1.4 ui-monospace,monospace}
+textarea{width:100%;min-height:200px;background:var(--card);border:1px solid var(--ink);border-radius:8px;padding:10px;font:16px/1.4 ui-monospace,monospace}
 input[type=number]{width:4.5em;background:var(--card);border:1px solid var(--ink);border-radius:6px;padding:4px 8px}
 select.inl{background:var(--card);border:1px solid var(--ink);border-radius:6px;padding:4px 8px}
-.enav{display:grid;grid-template-columns:repeat(auto-fill,minmax(38px,1fr));gap:6px;margin:10px 0}
-.enav button{height:38px;border:1px solid var(--ink);border-radius:7px;background:var(--bg);color:var(--fg);font-weight:700;font-size:.9rem;cursor:pointer;padding:0;display:grid;place-items:center}
+.enav{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:6px;margin:10px 0}
+.enav button{height:44px;border:1px solid var(--ink);border-radius:7px;background:var(--bg);color:var(--fg);font-weight:700;font-size:.9rem;cursor:pointer;padding:0;display:grid;place-items:center}
 .enav button.ans{background:color-mix(in srgb,var(--ac) 16%,var(--card));border-color:var(--ac);color:var(--fg)}
 .enav button.mk{border-color:var(--warn);background:var(--warnbg);color:var(--warn)}
 .enav button.cur{outline:2px solid var(--ac);outline-offset:1px}
@@ -91,7 +91,7 @@ pre{white-space:pre-wrap;font-size:.85rem;background:var(--card);border:1px soli
 .sdot{font-size:.8rem;font-weight:700}.sdot.ok{color:var(--ok)}.sdot.bad{color:var(--bad)}
 .srow{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:12px 0;border-top:1px solid var(--bd)}.srow:first-child{padding-top:0;border-top:0}.srow:last-child{padding-bottom:0}.srow>div{flex:1;min-width:0}.srow input,.srow select{flex:none}
 @media (pointer:coarse){.x{min-width:42px;min-height:42px}.ico{width:44px;height:44px}.badge{min-height:34px;padding:4px 12px}.gtab{min-height:36px;padding:6px 13px}.crs input[type=checkbox],.set input[type=checkbox],.orow input[type=checkbox],.orow input[type=radio],.srow input[type=checkbox]{width:24px;height:24px}.chb,.sb{min-height:44px;align-items:center}.opt{padding:14px 16px;min-height:52px}.nav button{min-height:48px;padding:12px 16px}}
-@media (pointer:coarse) and (min-width:561px){#app{padding:20px 24px calc(96px + env(safe-area-inset-bottom,0px))}.dstart{display:none}.mstart,.qfoot{display:block;position:fixed;left:0;right:0;bottom:0;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:10px 24px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--bd);margin:0;z-index:5}.mstart .row,.qfoot .row{justify-content:center;max-width:560px;margin:0 auto;flex-wrap:nowrap}.mstart .btn,.qfoot .btn{flex:1;max-width:420px;padding:.75em 1.2em;font-size:1.02rem}}
+@media (pointer:coarse) and (min-width:561px){#app{padding:calc(20px + env(safe-area-inset-top,0px)) 24px calc(96px + env(safe-area-inset-bottom,0px))}.dstart{display:none}.mstart,.qfoot{display:block;position:fixed;left:0;right:0;bottom:0;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:10px 24px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--bd);margin:0;z-index:5}.mstart .row,.qfoot .row{justify-content:center;max-width:560px;margin:0 auto;flex-wrap:nowrap}.mstart .btn,.qfoot .btn{flex:1;max-width:420px;padding:.75em 1.2em;font-size:1.02rem}}
 @media (max-width:560px){body{font-size:16px}#app{padding:calc(42px + env(safe-area-inset-top,0px)) 14px calc(134px + env(safe-area-inset-bottom,0px))}h1{font-size:1.5rem;margin:.25em 0 .35em}h1 svg{width:24px;height:24px}.x{min-width:40px;min-height:40px}.ico{width:42px;height:42px}.nav{position:fixed;top:auto;bottom:0;left:0;right:0;height:calc(52px + env(safe-area-inset-bottom,0px));padding:0 8px env(safe-area-inset-bottom,0px);margin:0;background:var(--card);border-bottom:0;border-top:1px solid var(--bd);z-index:6}.nav button{flex:1;text-align:center;border-bottom:0;border-top:3px solid transparent;padding:10px 0;gap:4px}.nav svg{width:22px;height:22px}.nav .nlbl{display:none}.nav button.on{border-bottom-color:transparent;border-top-color:var(--ac)}.nav .cnav{margin-left:0;font-size:inherit}.dstart{display:none}.mstart{display:block;position:fixed;left:0;right:0;bottom:calc(52px + env(safe-area-inset-bottom,0px));background:var(--bg);padding:8px 14px;border-top:1px solid var(--bd);margin:0;z-index:5}.qfoot{display:block;position:fixed;left:0;right:0;bottom:0;background:var(--bg);padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--bd);margin:0;z-index:5}.mstart .row,.qfoot .row{flex-wrap:nowrap}.mstart .btn,.qfoot .btn{flex:1;width:100%}}
 @media (max-width:430px){#app{padding-left:max(14px,env(safe-area-inset-left));padding-right:max(14px,env(safe-area-inset-right))}.q{font-size:1.1rem}.opt{padding:12px;gap:10px}.set{gap:6px}.ql{margin-left:10px}.crs{gap:6px}.chb{font-size:1.05rem}}
 .gi{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;padding:10px 0;border-top:1px solid var(--bd)}.gi:first-child{border-top:0}.gi>div{min-width:0}.gc{display:flex;gap:4px;align-items:center;flex:none;margin-left:auto}.qhead .gc{flex-wrap:wrap;justify-content:flex-end}
@@ -110,17 +110,23 @@ pre{white-space:pre-wrap;font-size:.85rem;background:var(--card);border:1px soli
 .orow input:not([type=checkbox]):not([type=radio]){margin:0}
 .orow input[type=checkbox],.orow input[type=radio]{width:20px;height:20px;accent-color:var(--ac)}
 @media (max-width:560px){.orow{grid-template-columns:auto 1fr auto}.orow .eq_ow{grid-column:2 / 4}}
-</style>
-</head>
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}</style>
+<meta name="theme-color" content="#f5f6f8" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#12161c" media="(prefers-color-scheme: dark)"><link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Quizomat%22%2C%22short_name%22%3A%22Quizomat%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f5f6f8%22%2C%22theme_color%22%3A%22%23f5f6f8%22%7D"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232563eb'/%3E%3Ctext x='32' y='44' font-size='38' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='700'%3EQ%3C/text%3E%3C/svg%3E"><link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232563eb'/%3E%3Ctext x='32' y='44' font-size='38' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='700'%3EQ%3C/text%3E%3C/svg%3E"></head>
 <body>
 <div id="app"></div>
 <script>
 const $app=document.getElementById('app');
+(()=>{const d=Object.getOwnPropertyDescriptor(Element.prototype,'innerHTML'),key=e=>e.id||e.dataset.act||e.dataset.chg||e.dataset.chk||e.getAttribute('onclick')||e.getAttribute('onchange')||e.getAttribute('aria-label')||e.getAttribute('title')||'';
+Object.defineProperty($app,'innerHTML',{get(){return d.get.call(this)},set(h){const a=document.activeElement;let k='',n=0,t='';
+if(a&&a!==document.body&&this.contains(a)&&!/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)){t=a.tagName;k=key(a);if(k)n=[...this.querySelectorAll(t)].filter(x=>key(x)===k).indexOf(a)}
+d.set.call(this,h);syncHist();
+if(k){const c=[...this.querySelectorAll(t)].filter(x=>key(x)===k)[n];if(c&&!c.disabled)c.focus({preventScroll:true})}}})})();
+(()=>{const si=Storage.prototype.setItem;let shown=0;Storage.prototype.setItem=function(k,v){try{return si.call(this,k,v)}catch(e){if(!shown){shown=1;const b=document.createElement('div');b.setAttribute('role','alert');b.style.cssText='position:fixed;left:12px;right:12px;top:12px;z-index:99;padding:12px 14px;border-radius:8px;background:var(--badbg);color:var(--bad);border:1px solid var(--bad);font-weight:700';b.textContent='Speichern fehlgeschlagen (Speicher voll?). Bitte jetzt exportieren, sonst gehen Änderungen verloren.';b.onclick=()=>b.remove();document.body.appendChild(b)}throw e}}})();
 let exp=new Set(),pq=null,col=new Set(),gcol=new Set(),pend=null,rpend=null,cpend=null,crpend=null,gcpend=null,gloss=[],courses={},cnames=[],gcnames=[],gen={name:'',f:['single','multi','tf']},sets=[],sel=new Set(),opts={n:20,shuffle:true,hideMastered:true,mastery:3,theme:'auto',examMins:30,pass:50,scoreMode:'all',negMode:'none',cpass:{},ctime:{},cqcount:{},cmode:{},cneg:{},corder:[]},Q=[],idx=0,picked=new Set(),checked=false,log=[],msg='';
 let cedit=null,cdraft='',cpdraft=50,ctdraft=30,cqdraft=20,cmdraft='all',cndraft='none',cerr='',gcedit=null,gcdraft='',gcerr='',sedit=null,sdraft=null,serr='',qedit=null,qdraft=null,qerr='',curView='q';
 let examMode=false,examPicks=[],examMarks=new Set(),examEnd=0,examStart=0,examElapsed=0,examTimer=null,examSubPend=false,examExitPend=false,examTimeUp=false,examCourse='',examDurMins=30;
 let gh={token:'',user:'',sha:'',lastSync:0},localTs=0,syncState='idle',syncErr='',syncTimer=null,forceOverwrite=false;
-const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const IC={
   imp:`<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
   exp:`<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`,
@@ -140,7 +146,14 @@ const IC={
 const isym=(svg,t)=>`<span class="isym"${t?` title="${esc(t)}"`:''}>${svg}</span>`;
 const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 const toTop=()=>{window.scrollTo(0,0);document.documentElement.scrollTop=0;document.body.scrollTop=0};
-const stopExamTimer=()=>{if(examTimer){clearInterval(examTimer);examTimer=null}};
+const stopExamTimer=()=>{if(examTimer){clearInterval(examTimer);examTimer=null}try{localStorage.removeItem('pt:exam')}catch(e){}};
+function saveExam(){if(!examMode)return;try{localStorage.setItem('pt:exam',JSON.stringify({c:examCourse,m:examDurMins,s:examStart,e:examEnd,i:idx,mk:[...examMarks],p:examPicks.map(x=>[...x]),q:Q.map(q=>{const r=q._ref,st=sets.find(x=>x.qs.includes(r));return st?{s:st.id,i:st.qs.indexOf(r),o:q.opts.map(o=>r.opts.findIndex(x=>x.t===o.t))}:null})}))}catch(e){}}
+const readExam=()=>{try{return JSON.parse(localStorage.getItem('pt:exam')||'null')}catch(e){return null}};
+function resumeExam(x){try{
+  const qs=x.q.map(r=>{if(!r)throw 0;const st=sets.find(y=>y.id===r.s),ref=st&&st.qs[r.i];if(!ref)throw 0;const os=r.o.map(j=>ref.opts[j]);if(os.some(o=>!o))throw 0;return{...ref,_ref:ref,_course:st.course,_title:st.title,_newlyMastered:false,opts:os}});
+  stopExamTimer();Q=qs;examMode=true;idx=x.i;log=[];examPicks=x.p.map(a=>new Set(a));examMarks=new Set(x.mk);examSubPend=examExitPend=examTimeUp=false;checked=false;examCourse=x.c;examDurMins=x.m;examStart=x.s;examEnd=x.e;
+  examTimer=setInterval(tickExam,1000);quiz();saveExam();
+}catch(e){try{localStorage.removeItem('pt:exam')}catch(_){}}}
 const fmtTime=s=>`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
 const fmtPct=n=>String(Math.round(n*10)/10).replace('.',',')+' %';
 const fmtPts=n=>String(Math.round(n*100)/100).replace('.',',').replace('-','−');
@@ -172,6 +185,7 @@ function applyTheme(){
 function setQuizCount(v){opts.n=Math.max(1,Math.min(500,parseInt(v,10)||20));saveO();if(curView==='s')settingsView()}
 function setMastery(v){opts.mastery=Math.max(1,Math.min(10,parseInt(v,10)||3));saveO();if(curView==='s')settingsView()}
 function setHideMastered(v){opts.hideMastered=!!v;saveO();if(curView==='s')settingsView()}
+function setAutoCheck(v){opts.autoCheck=!!v;saveO();if(curView==='s')settingsView()}
 function setShuffle(v){opts.shuffle=!!v;saveO();if(curView==='s')settingsView()}
 function setTheme(v){opts.theme=THEMES.includes(v)?v:'auto';applyTheme();saveO();if(curView==='s')settingsView()}
 function selCourses(){const cs=new Set();sets.forEach(s=>{if(sel.has(s.id))cs.add(s.course)});return[...cs]}
@@ -188,9 +202,12 @@ function activeTime(){const cs=selCourses();return cs.length===1?getExamMins(cs[
 function activeCount(){const cs=selCourses();return cs.length===1?getExamCount(cs[0]):getExamCount('')}
 function activeScoreMode(){const cs=selCourses();return cs.length===1?getScoreMode(cs[0]):getScoreMode('')}
 function activeNegMode(){const cs=selCourses();return cs.length===1?getNegMode(cs[0]):getNegMode('')}
-function setActivePass(v,crs){const p=[50,60,70].includes(+v)?+v:50;if(!opts.cpass||typeof opts.cpass!=='object')opts.cpass={};if(crs){opts.cpass[crs]=p;syncCourseCfg(crs)}else{opts.pass=p;selCourses().forEach(c=>{opts.cpass[c]=p;syncCourseCfg(c)})}saveO(true)}
-function setActiveScoreMode(v,crs){const m=SCORE_MODES.includes(v)?v:'all';if(!opts.cmode||typeof opts.cmode!=='object')opts.cmode={};if(crs){opts.cmode[crs]=m;syncCourseCfg(crs)}else{opts.scoreMode=m;selCourses().forEach(c=>{opts.cmode[c]=m;syncCourseCfg(c)})}saveO(true)}
-function setActiveNegMode(v,crs){const n=NEG_MODES.includes(v)?v:'none';if(!opts.cneg||typeof opts.cneg!=='object')opts.cneg={};if(crs){opts.cneg[crs]=n;syncCourseCfg(crs)}else{opts.negMode=n;selCourses().forEach(c=>{opts.cneg[c]=n;syncCourseCfg(c)})}saveO(true)}
+const CFG_MAPS=['cpass','ctime','cqcount','cmode','cneg'];
+function ensureCfgMaps(){CFG_MAPS.forEach(k=>{if(!opts[k]||typeof opts[k]!=='object')opts[k]={}})}
+function setActiveCfg(map,single,val,crs){ensureCfgMaps();if(crs){opts[map][crs]=val;syncCourseCfg(crs)}else{opts[single]=val;selCourses().forEach(c=>{opts[map][c]=val;syncCourseCfg(c)})}saveO(true)}
+function setActivePass(v,crs){setActiveCfg('cpass','pass',[50,60,70].includes(+v)?+v:50,crs)}
+function setActiveScoreMode(v,crs){setActiveCfg('cmode','scoreMode',SCORE_MODES.includes(v)?v:'all',crs)}
+function setActiveNegMode(v,crs){setActiveCfg('cneg','negMode',NEG_MODES.includes(v)?v:'none',crs)}
 function scoreExamQ(q,p,smode,nmode){
   const multi=q.type==='multi',open=!p||p.size===0,N=q.opts.length,R=Math.max(1,q.opts.filter(o=>o.ok).length);
   const max=!multi?1:smode==='opt'?N:smode==='pos'?R:1;
@@ -263,11 +280,12 @@ function load(){
   try{const g=JSON.parse(localStorage.getItem('pt:gh')||'null');if(g&&typeof g==='object')gh={...gh,...g}}catch(e){}
 }
 function saveGH(){try{localStorage.setItem('pt:gh',JSON.stringify(gh))}catch(e){}}
-function touchLocal(overwrite){
+let syncDirty=false,lastPull=0;
+function touchLocal(overwrite){syncDirty=true;
   localTs=Date.now();
   if(overwrite)forceOverwrite=true;
   try{localStorage.setItem('pt:ts',String(localTs))}catch(e){}
-  if(gh.token){clearTimeout(syncTimer);syncTimer=setTimeout(()=>pushCloudNow(),600)}
+  if(gh.token){clearTimeout(syncTimer);syncTimer=setTimeout(()=>pushCloudNow(),15000)}
 }
 function saveO(ow){try{localStorage.setItem('pt:opts',JSON.stringify(opts))}catch(e){}touchLocal(ow!==false)}
 function saveC(){try{localStorage.setItem('pt:courses',JSON.stringify(courses))}catch(e){}touchLocal()}
@@ -275,8 +293,8 @@ function saveCol(){try{localStorage.setItem('pt:col',JSON.stringify([...col]))}c
 function saveGCol(){try{localStorage.setItem('pt:gcol',JSON.stringify([...gcol]))}catch(e){}}
 function saveSel(){try{localStorage.setItem('pt:sel',JSON.stringify([...sel]))}catch(e){}}
 function saveExp(){try{localStorage.setItem('pt:exp',JSON.stringify([...exp]))}catch(e){}}
-function saveGloss(ow){try{localStorage.setItem('pt:gloss',JSON.stringify(gloss))}catch(e){}touchLocal(ow)}
-function save(ow){try{localStorage.setItem('pt:sets',JSON.stringify(sets))}catch(e){}touchLocal(ow)}
+function saveGloss(ow){termsCache=new WeakMap();try{localStorage.setItem('pt:gloss',JSON.stringify(gloss))}catch(e){}touchLocal(ow)}
+function save(ow){termsCache=new WeakMap();try{localStorage.setItem('pt:sets',JSON.stringify(sets))}catch(e){}touchLocal(ow)}
 
 const isMastered=q=>(q.streak||0)>=opts.mastery;
 const qWeight=q=>{
@@ -300,18 +318,22 @@ const PROMPT=`Erstelle aus den angehängten Unterlagen [ANZAHL] Prüfungsfragen 
 
 "richtig" enthält die Indizes (ab 0) der richtigen Optionen (bzw. true/false bei "tf"). Jede Frage enthält eine allgemeine "erklaerung" sowie in "begruendungen" für jede einzelne Antwortoption eine kurze Begründung.`;
 
+function cleanJson(t){t=String(t).trim();const m=t.match(/```(?:json)?\s*([\s\S]*?)```/);if(m)return m[1].trim();const a=t.search(/[\[{]/),b=Math.max(t.lastIndexOf('}'),t.lastIndexOf(']'));return a>=0&&b>a?t.slice(a,b+1):t}
 function parseSets(txt){
-  let d;try{d=JSON.parse(txt.trim().replace(/^```(?:json)?|```$/g,'').trim())}catch(e){throw new Error('Kein gültiges JSON: '+e.message)}
+  let d;try{d=JSON.parse(cleanJson(txt))}catch(e){throw new Error('Kein gültiges JSON: '+e.message)}
   const list=Array.isArray(d)?d:[d],out=[];
   list.forEach((s,si)=>{
     if(s&&Array.isArray(s.glossar)&&!s.fragen)return;
-    if(!s||!Array.isArray(s.fragen)||(!s.fragen.length&&!s.kurs&&!s.titel))throw new Error('Set '+(si+1)+': „fragen“ fehlt oder ist leer.');
+    if(!s||!Array.isArray(s.fragen)||(!s.fragen.length&&!s.kurs&&!s.titel))throw new Error('Kapitel '+(si+1)+': „fragen“ fehlt oder ist leer.');
     const qs=s.fragen.map((f,i)=>{
       const w='Frage '+(i+1)+': ';
       if(!f.frage)throw new Error(w+'„frage“ fehlt.');
       const st=Math.max(0,parseInt(f.streak,10)||0),wr=!!f.wrong,fl=!!(f.flagged||f.markiert);
       if(f.typ==='tf'){
-        const t=f.richtig===true||(Array.isArray(f.richtig)&&f.richtig[0]===0);
+        let rv=Array.isArray(f.richtig)?f.richtig[0]:f.richtig;
+        if(typeof rv==='string')rv=({true:true,wahr:true,false:false,falsch:false})[rv.trim().toLowerCase()];
+        if(typeof rv!=='boolean'&&rv!==0&&rv!==1)throw new Error(w+'„richtig“ muss true oder false sein.');
+        const t=rv===true||rv===0;
         const bg=Array.isArray(f.begruendungen)?f.begruendungen:[];
         return{q:f.frage,type:'single',exp:f.erklaerung||'',opts:[{t:'Wahr',ok:t,why:String(bg[0]||'')},{t:'Falsch',ok:!t,why:String(bg[1]||'')}],fixed:true,streak:st,wrong:wr,flagged:fl};
       }
@@ -330,15 +352,15 @@ function parseSets(txt){
 
 function qBadge(sid,qi,q){
   const st=q.streak||0,m=isMastered(q);
-  if(m)return `<button class="badge ok" title="Gemeistert (${st}× richtig in Folge) – Klicken zum Zurücksetzen" onclick="togMastery('${sid}',${qi})">✓ Gemeistert (${st})</button>`;
+  if(m)return `<button class="badge ok" aria-label="Gemeistert, Klicken zum Zurücksetzen" title="Gemeistert (${st}× richtig in Folge) – Klicken zum Zurücksetzen" data-act="togMastery" data-args="${esc(JSON.stringify([String(sid),qi]))}">✓ Gemeistert (${st})</button>`;
   const dots='●'.repeat(Math.min(st,opts.mastery))+'○'.repeat(Math.max(0,opts.mastery-st));
-  return `<button class="badge${q.wrong?' bad':''}" title="${q.wrong?'Zuletzt falsch – ':''}Lernstand ${st}/${opts.mastery} (Klicken um als gemeistert zu markieren)" onclick="togMastery('${sid}',${qi})">${dots}</button>`;
+  return `<button class="badge${q.wrong?' bad':''}" aria-label="Lernstand ${st} von ${opts.mastery}" title="${q.wrong?'Zuletzt falsch – ':''}Lernstand ${st}/${opts.mastery} (Klicken um als gemeistert zu markieren)" data-act="togMastery" data-args="${esc(JSON.stringify([String(sid),qi]))}">${dots}</button>`;
 }
 
 function togMastery(sid,qi){
   const s=sets.find(x=>x.id===sid);if(!s||!s.qs[qi])return;
   const q=s.qs[qi];
-  if(isMastered(q)){q.streak=0;q.wrong=false}else{q.streak=opts.mastery;q.wrong=false}
+  if(isMastered(q)){q.streak=0;q.wrong=false}else{if(!okFlag){appDialog('Frage als gemeistert markieren? Sie wird beim Üben dann ausgeblendet.',()=>{okFlag=true;try{togMastery(sid,qi)}finally{okFlag=false}});return}q.streak=opts.mastery;q.wrong=false}
   save();home();
 }
 
@@ -359,7 +381,7 @@ function flaggedAll(){
 }
 function flaggedHtml(){
   const fl=flaggedAll();if(!fl.length)return '';
-  return `<div class="card fbox" style="margin:12px 0;border-color:var(--warn)"><div class="row" style="justify-content:space-between;margin-bottom:4px"><b style="color:var(--warn);display:inline-flex;align-items:center;gap:6px">${IC.flag} Zum Bearbeiten markiert (${fl.length})</b></div>${fl.map(([s,q,qi])=>`<div class="qi"><button class="lnk" onclick="goQEdit('${s.id}',${qi})"><span class="mut">${esc(s.course)} › ${esc(s.title)}</span><br>${esc(q.q)}</button><span class="gc"><button class="btn sec sm" onclick="goQEdit('${s.id}',${qi})">Bearbeiten</button><button class="x warn" title="Markierung aufheben" aria-label="Markierung aufheben" onclick="togFlag('${s.id}',${qi})">${IC.flag}</button></span></div>`).join('')}</div>`;
+  return `<div class="card fbox" style="margin:12px 0;border-color:var(--warn)"><div class="row" style="justify-content:space-between;margin-bottom:4px"><b style="color:var(--warn);display:inline-flex;align-items:center;gap:6px">${IC.flag} Zum Bearbeiten markiert (${fl.length})</b></div>${fl.map(([s,q,qi])=>`<div class="qi"><button class="lnk" data-act="goQEdit" data-args="${esc(JSON.stringify([String(s.id),qi]))}"><span class="mut">${esc(s.course)} › ${esc(s.title)}</span><br>${esc(q.q)}</button><span class="gc"><button class="btn sec sm" data-act="goQEdit" data-args="${esc(JSON.stringify([String(s.id),qi]))}">Bearbeiten</button><button class="x warn" title="Markierung aufheben" aria-label="Markierung aufheben" data-act="togFlag" data-args="${esc(JSON.stringify([String(s.id),qi]))}">${IC.flag}</button></span></div>`).join('')}</div>`;
 }
 
 function resetProg(sid){
@@ -388,7 +410,7 @@ function dedupGloss(){
 function startCNew(){
   qsearch='';cedit='__new__';cdraft='';cpdraft=getPass('');ctdraft=getExamMins('');cqdraft=getExamCount('');cmdraft=getScoreMode('');cndraft=getNegMode('');cerr='';
   cpend=null;crpend=null;sedit=null;qedit=null;rpend=null;pend=null;pq=null;wp=null;rerenderC();
-  setTimeout(()=>{const el=document.getElementById('ecn');if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.focus()}},30);
+  setTimeout(()=>{const el=document.getElementById('ecn');if(el){el.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth',block:'center'});el.focus()}},30);
 }
 function startCEdit(gi){cedit=gi;cdraft=cnames[gi]||'';cpdraft=getPass(cdraft);ctdraft=getExamMins(cdraft);cqdraft=getExamCount(cdraft);cmdraft=getScoreMode(cdraft);cndraft=getNegMode(cdraft);cerr='';cpend=null;crpend=null;sedit=null;qedit=null;rpend=null;pend=null;pq=null;wp=null;rerenderC()}
 function cancelCEdit(){cedit=null;cdraft='';cerr='';rerenderC()}
@@ -396,12 +418,8 @@ function saveCEdit(gi){
   const isNew=gi==='__new__',old=isNew?'':cnames[gi],el=document.getElementById('ecn'),pEl=document.getElementById('ecp'),tEl=document.getElementById('ect'),qEl=document.getElementById('ecq'),mEl=document.getElementById('ecm'),nEl=document.getElementById('ecnm'),nw=(el?el.value:cdraft).trim(),np=pEl?+pEl.value:cpdraft,nt=tEl?Math.max(1,+tEl.value||30):ctdraft,nq=qEl?Math.max(1,+qEl.value||20):cqdraft,nm=mEl?mEl.value:cmdraft,nn=nEl?nEl.value:cndraft;
   cdraft=el?el.value:cdraft;cpdraft=[50,60,70].includes(np)?np:50;ctdraft=nt;cqdraft=nq;cmdraft=SCORE_MODES.includes(nm)?nm:'all';cndraft=NEG_MODES.includes(nn)?nn:'none';
   if(!nw){cerr='Kursname darf nicht leer sein.';rerenderC();return}
-  if(isNew&&cnames.some(x=>norm(x)===norm(nw))){cerr='Diesen Kurs gibt es schon.';rerenderC();return}
-  if(!opts.cpass||typeof opts.cpass!=='object')opts.cpass={};
-  if(!opts.ctime||typeof opts.ctime!=='object')opts.ctime={};
-  if(!opts.cqcount||typeof opts.cqcount!=='object')opts.cqcount={};
-  if(!opts.cmode||typeof opts.cmode!=='object')opts.cmode={};
-  if(!opts.cneg||typeof opts.cneg!=='object')opts.cneg={};
+  if((isNew||nw!==old)&&cnames.some(x=>x!==old&&norm(x)===norm(nw))){cerr='Diesen Kurs gibt es schon.';rerenderC();return}
+  ensureCfgMaps();
   if(!Array.isArray(opts.corder))opts.corder=cnames.slice();
   if(isNew){
     courses[nw]=KINDS.map(x=>x[0]);saveC();
@@ -433,8 +451,8 @@ function saveCEdit(gi){
   cedit=null;cdraft='';cerr='';rerenderC();
 }
 function cForm(gi,hasMC){
-  const isNew=gi==='__new__',act=isNew?"'__new__'":gi,kd=`if(event.key==='Enter'){event.preventDefault();saveCEdit(${act})}`;
-  return `<div class="ge"${isNew?'':' style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)"'}>${isNew?'<b style="display:block;margin-bottom:6px;color:var(--ac)">Neuen Kurs anlegen</b>':''}<label class="mut" for="ecn">${isNew?'Kursname':'Kursname bearbeiten'}</label><input id="ecn" value="${esc(cdraft)}" placeholder="Name des Kurses" onkeydown="${kd}"><label class="mut" for="ecq">Anzahl der Fragen (Prüfung)</label><input id="ecq" type="number" min="1" max="200" value="${cqdraft}"><label class="mut" for="ect">Prüfungszeit (Minuten)</label><input id="ect" type="number" min="1" max="300" value="${ctdraft}"><label class="mut" for="ecp">Notenschema (Positiv-Grenze für Prüfungen)</label><select id="ecp"><option value="50" ${cpdraft===50?'selected':''}>50 % – Positiv ab 50 % (1: ≥87,5 % · 2: ≥75 % · 3: ≥62,5 % · 4: ≥50 %)</option><option value="60" ${cpdraft===60?'selected':''}>60 % – Positiv ab 60 % (1: ≥90 % · 2: ≥80 % · 3: ≥70 % · 4: ≥60 %)</option><option value="70" ${cpdraft===70?'selected':''}>70 % – Positiv ab 70 % (1: ≥92,5 % · 2: ≥85 % · 3: ≥77,5 % · 4: ≥70 %)</option></select>${hasMC?`<label class="mut" for="ecm">Multiple-Choice-Wertung (Prüfung)</label><select id="ecm"><option value="all" ${cmdraft==='all'?'selected':''}>Gesamtfrage – 1 Punkt nur wenn komplett richtig (Alles-oder-nichts)</option><option value="opt" ${cmdraft==='opt'?'selected':''}>Einzelantworten (inkl. Nicht-Ankreuzen) – +1 Punkt je richtiger Option (auch richtig weggelassene)</option><option value="pos" ${cmdraft==='pos'?'selected':''}>Einzelantworten (nur richtige) – +1 Punkt je richtig angekreuzter Option</option><option value="part" ${cmdraft==='part'?'selected':''}>Teilpunkte (normiert) – 1 Punkt pro Frage, anteilig über die Optionen</option></select>`:''}<label class="mut" for="ecnm">Minuspunkte bei Fehlern (Prüfung)</label><select id="ecnm"><option value="none" ${cndraft==='none'?'selected':''}>Keine Minuspunkte (Fehler = 0 Punkte)</option>${hasMC||cndraft==='clamp'?`<option value="clamp" ${cndraft==='clamp'?'selected':''}>Minuspunkte pro Fehler, aber mind. 0 Punkte pro Frage (kein Abzug von anderen Fragen)</option>`:''}<option value="full" ${cndraft==='full'?'selected':''}>Minuspunkte pro Fehler, auch unter 0 Punkte pro Frage (Gesamtabzug; Offen = 0 Punkte)</option></select><p class="err">${esc(cerr)}</p><div class="row act"><button class="btn sec sm" type="button" onclick="cancelCEdit()">Abbrechen</button><button class="btn sm" type="button" onclick="saveCEdit(${act})">${isNew?'Anlegen':'Speichern'}</button></div></div>`;
+  const isNew=gi==='__new__',act=isNew?'__new__':gi,kd=`data-kd="saveCEdit" data-args="${esc(JSON.stringify([isNew?'__new__':gi]))}"`;
+  return `<div class="ge"${isNew?'':' style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)"'}>${isNew?'<b style="display:block;margin-bottom:6px;color:var(--ac)">Neuen Kurs anlegen</b>':''}<label class="mut" for="ecn">${isNew?'Kursname':'Kursname bearbeiten'}</label><input id="ecn" value="${esc(cdraft)}" placeholder="Name des Kurses" ${kd}><label class="mut" for="ecq">Anzahl der Fragen (Prüfung)</label><input id="ecq" type="number" min="1" max="200" value="${cqdraft}"><label class="mut" for="ect">Prüfungszeit (Minuten)</label><input id="ect" type="number" min="1" max="300" value="${ctdraft}"><label class="mut" for="ecp">Notenschema (Positiv-Grenze für Prüfungen)</label><select id="ecp"><option value="50" ${cpdraft===50?'selected':''}>50 % – Positiv ab 50 % (1: ≥87,5 % · 2: ≥75 % · 3: ≥62,5 % · 4: ≥50 %)</option><option value="60" ${cpdraft===60?'selected':''}>60 % – Positiv ab 60 % (1: ≥90 % · 2: ≥80 % · 3: ≥70 % · 4: ≥60 %)</option><option value="70" ${cpdraft===70?'selected':''}>70 % – Positiv ab 70 % (1: ≥92,5 % · 2: ≥85 % · 3: ≥77,5 % · 4: ≥70 %)</option></select>${hasMC?`<label class="mut" for="ecm">Multiple-Choice-Wertung (Prüfung)</label><select id="ecm"><option value="all" ${cmdraft==='all'?'selected':''}>Gesamtfrage – 1 Punkt nur wenn komplett richtig (Alles-oder-nichts)</option><option value="opt" ${cmdraft==='opt'?'selected':''}>Einzelantworten (inkl. Nicht-Ankreuzen) – +1 Punkt je richtiger Option (auch richtig weggelassene)</option><option value="pos" ${cmdraft==='pos'?'selected':''}>Einzelantworten (nur richtige) – +1 Punkt je richtig angekreuzter Option</option><option value="part" ${cmdraft==='part'?'selected':''}>Teilpunkte (normiert) – 1 Punkt pro Frage, anteilig über die Optionen</option></select>`:''}<label class="mut" for="ecnm">Minuspunkte bei Fehlern (Prüfung)</label><select id="ecnm"><option value="none" ${cndraft==='none'?'selected':''}>Keine Minuspunkte (Fehler = 0 Punkte)</option>${hasMC||cndraft==='clamp'?`<option value="clamp" ${cndraft==='clamp'?'selected':''}>Minuspunkte pro Fehler, aber mind. 0 Punkte pro Frage (kein Abzug von anderen Fragen)</option>`:''}<option value="full" ${cndraft==='full'?'selected':''}>Minuspunkte pro Fehler, auch unter 0 Punkte pro Frage (Gesamtabzug; Offen = 0 Punkte)</option></select><p class="err" role="alert">${esc(cerr)}</p><div class="row act"><button class="btn sec sm" type="button" data-act="cancelCEdit" data-args='[]'>Abbrechen</button><button class="btn sm" type="button" data-act="saveCEdit" data-args="${esc(JSON.stringify([act]))}">${isNew?'Anlegen':'Speichern'}</button></div></div>`;
 }
 
 function startSNew(gi){
@@ -442,12 +460,12 @@ function startSNew(gi){
   qsearch='';if(col.has(c)){col.delete(c);saveCol()}
   sedit='__new__';sdraft={course:c,title:'',targetC:c};serr='';
   cedit=null;qedit=null;pend=null;rpend=null;cpend=null;crpend=null;pq=null;wp=null;home();
-  setTimeout(()=>{const el=document.getElementById('esc_t');if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.focus()}},30);
+  setTimeout(()=>{const el=document.getElementById('esc_t');if(el){el.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth',block:'center'});el.focus()}},30);
 }
 function startSEdit(sid){
   const s=sets.find(x=>x.id===sid);if(!s)return;
   sedit=sid;sdraft={course:s.course,title:s.title,targetC:''};serr='';cedit=null;qedit=null;pend=null;rpend=null;cpend=null;crpend=null;pq=null;wp=null;home();
-  setTimeout(()=>{const el=document.getElementById('esc_t');if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.focus()}},30);
+  setTimeout(()=>{const el=document.getElementById('esc_t');if(el){el.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth',block:'center'});el.focus()}},30);
 }
 function cancelSEdit(){sedit=null;sdraft=null;serr='';home()}
 function saveSEdit(sid){
@@ -480,8 +498,8 @@ function saveSEdit(sid){
 }
 function sForm(sid){
   const isNew=sid==='__new__',d=sdraft||{course:'',title:'',targetC:''};
-  const kd=`if(event.key==='Enter'){event.preventDefault();saveSEdit('${sid}')}`;
-  return `<div class="ge"${isNew?'':' style="margin-top:8px;padding-top:8px;border-top:1px solid var(--bd)"'}>${isNew?'<b style="display:block;margin-bottom:6px;color:var(--ac)">Neues Kapitel hinzufügen</b>':`<label class="mut" for="esc_c">Kurs</label><input id="esc_c" list="cl" value="${esc(d.course)}" placeholder="Name des Kurses" onkeydown="${kd}">`}<label class="mut" for="esc_t">Thema / Kapitel</label><input id="esc_t" value="${esc(d.title)}" placeholder="z. B. Vorlesung 1 – Grundlagen" onkeydown="${kd}"><p class="err">${esc(serr)}</p><div class="row act"><button class="btn sec sm" type="button" onclick="cancelSEdit()">Abbrechen</button><button class="btn sm" type="button" onclick="saveSEdit('${sid}')">${isNew?'Anlegen':'Speichern'}</button></div></div>`;
+  const kd=`data-kd="saveSEdit" data-args="${esc(JSON.stringify([String(sid)]))}"`;
+  return `<div class="ge"${isNew?'':' style="margin-top:8px;padding-top:8px;border-top:1px solid var(--bd)"'}>${isNew?'<b style="display:block;margin-bottom:6px;color:var(--ac)">Neues Kapitel hinzufügen</b>':`<label class="mut" for="esc_c">Kurs</label><input id="esc_c" list="cl" value="${esc(d.course)}" placeholder="Name des Kurses" ${kd}>`}<label class="mut" for="esc_t">Thema / Kapitel</label><input id="esc_t" value="${esc(d.title)}" placeholder="z. B. Vorlesung 1 – Grundlagen" ${kd}><p class="err" role="alert">${esc(serr)}</p><div class="row act"><button class="btn sec sm" type="button" data-act="cancelSEdit" data-args='[]'>Abbrechen</button><button class="btn sm" type="button" data-act="saveSEdit" data-args="${esc(JSON.stringify([String(sid)]))}">${isNew?'Anlegen':'Speichern'}</button></div></div>`;
 }
 
 function startQEdit(sid,qi){
@@ -504,7 +522,7 @@ function startQNew(sid){
   qedit=sid+':new';
   qdraft={type:'single',q:'',exp:'',tfOk:true,tfWhy:['',''],opts:[{t:'',ok:true,why:''},{t:'',ok:false,why:''},{t:'',ok:false,why:''},{t:'',ok:false,why:''}]};
   qerr='';cedit=null;sedit=null;pq=null;home();
-  setTimeout(()=>{const el=document.getElementById('eq_q');if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.focus()}},30);
+  setTimeout(()=>{const el=document.getElementById('eq_q');if(el){el.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth',block:'center'});el.focus()}},30);
 }
 function cancelQEdit(){qedit=null;qdraft=null;qerr='';home()}
 function syncQDraft(){
@@ -562,7 +580,7 @@ function saveQEdit(sid,qi){
 
 function qForm(sid,qi){
   const d=qdraft,isTf=d.type==='tf',isSingle=d.type==='single',tw=d.tfWhy||['',''];
-  return `<div class="qi"><div class="ge">${qi<0?'<b style="display:block;margin-bottom:6px;color:var(--ac)">Neue Frage hinzufügen</b>':''}<label class="mut" for="eq_type">Fragetyp</label><select id="eq_type" onchange="changeQType(this.value)"><option value="single" ${d.type==='single'?'selected':''}>Single Choice</option><option value="multi" ${d.type==='multi'?'selected':''}>Multiple Choice</option><option value="tf" ${isTf?'selected':''}>Wahr / Falsch</option></select><label class="mut" for="eq_q">Frage</label><textarea id="eq_q" style="min-height:64px">${esc(d.q)}</textarea>${isTf?`<label class="mut" style="margin-bottom:4px">Richtige Antwort &amp; optionale Begründungen</label><div class="orow" style="grid-template-columns:auto auto 1fr"><input type="radio" name="eq_tf" value="true" ${d.tfOk?'checked':''}><span style="min-width:52px;font-weight:700">Wahr</span><input id="eq_tfw0" placeholder="Begründung zu Wahr (optional)" value="${esc(tw[0]||'')}"></div><div class="orow" style="grid-template-columns:auto auto 1fr;margin-bottom:10px"><input type="radio" name="eq_tf" value="false" ${!d.tfOk?'checked':''}><span style="min-width:52px;font-weight:700">Falsch</span><input id="eq_tfw1" placeholder="Begründung zu Falsch (optional)" value="${esc(tw[1]||'')}"></div>`:`<label class="mut" style="margin-bottom:4px">Antwortoptionen (Häkchen = richtig, optional Begründung)</label>${d.opts.map((o,k)=>`<div class="orow"><input class="eq_ok" type="${isSingle?'radio':'checkbox'}" name="eq_ok_grp" title="Als richtige Antwort markieren" ${o.ok?'checked':''}><input class="eq_ot" placeholder="Antwort ${k+1}" value="${esc(o.t)}"><input class="eq_ow" placeholder="Begründung (optional)" value="${esc(o.why)}"><button class="x" type="button" title="Option entfernen" aria-label="Option entfernen" ${d.opts.length<=2?'disabled':''} onclick="delQOpt(${k})">${IC.x}</button></div>`).join('')}<button class="btn sec sm" type="button" style="margin:2px 0 10px" onclick="addQOpt()">+ Option hinzufügen</button>`}<label class="mut" for="eq_exp">Erklärung</label><textarea id="eq_exp" style="min-height:64px">${esc(d.exp)}</textarea><p class="err">${esc(qerr)}</p><div class="row act"><button class="btn sec sm" type="button" onclick="cancelQEdit()">Abbrechen</button><button class="btn sm" type="button" onclick="saveQEdit('${sid}',${qi})">Speichern</button></div></div></div>`;
+  return `<div class="qi"><div class="ge">${qi<0?'<b style="display:block;margin-bottom:6px;color:var(--ac)">Neue Frage hinzufügen</b>':''}<label class="mut" for="eq_type">Fragetyp</label><select id="eq_type" data-chg="changeQType" data-args='[]'><option value="single" ${d.type==='single'?'selected':''}>Single Choice</option><option value="multi" ${d.type==='multi'?'selected':''}>Multiple Choice</option><option value="tf" ${isTf?'selected':''}>Wahr / Falsch</option></select><label class="mut" for="eq_q">Frage</label><textarea id="eq_q" style="min-height:64px">${esc(d.q)}</textarea>${isTf?`<label class="mut" style="margin-bottom:4px">Richtige Antwort &amp; optionale Begründungen</label><div class="orow" style="grid-template-columns:auto auto 1fr"><input type="radio" name="eq_tf" value="true" ${d.tfOk?'checked':''}><span style="min-width:52px;font-weight:700">Wahr</span><input id="eq_tfw0" placeholder="Begründung zu Wahr (optional)" value="${esc(tw[0]||'')}"></div><div class="orow" style="grid-template-columns:auto auto 1fr;margin-bottom:10px"><input type="radio" name="eq_tf" value="false" ${!d.tfOk?'checked':''}><span style="min-width:52px;font-weight:700">Falsch</span><input id="eq_tfw1" placeholder="Begründung zu Falsch (optional)" value="${esc(tw[1]||'')}"></div>`:`<label class="mut" style="margin-bottom:4px">Antwortoptionen (Häkchen = richtig, optional Begründung)</label>${d.opts.map((o,k)=>`<div class="orow"><input class="eq_ok" type="${isSingle?'radio':'checkbox'}" name="eq_ok_grp" title="Als richtige Antwort markieren" ${o.ok?'checked':''}><input class="eq_ot" placeholder="Antwort ${k+1}" value="${esc(o.t)}"><input class="eq_ow" placeholder="Begründung (optional)" value="${esc(o.why)}"><button class="x" type="button" title="Option entfernen" aria-label="Option entfernen" ${d.opts.length<=2?'disabled':''} data-act="delQOpt" data-args="${esc(JSON.stringify([k]))}">${IC.x}</button></div>`).join('')}<button class="btn sec sm" type="button" style="margin:2px 0 10px" data-act="addQOpt" data-args='[]'>+ Option hinzufügen</button>`}<label class="mut" for="eq_exp">Erklärung</label><textarea id="eq_exp" style="min-height:64px">${esc(d.exp)}</textarea><p class="err" role="alert">${esc(qerr)}</p><div class="row act"><button class="btn sec sm" type="button" data-act="cancelQEdit" data-args='[]'>Abbrechen</button><button class="btn sm" type="button" data-act="saveQEdit" data-args="${esc(JSON.stringify([String(sid),qi]))}">Speichern</button></div></div></div>`;
 }
 
 let dragItem=null;
@@ -579,6 +597,8 @@ function reorderCourseAt(fromGi,toGi){
   sets=next.flatMap(c=>byC[c]||[]);
   saveO(true);save(true);rerenderC();
 }
+function moveC(gi,d){reorderCourseAt(gi,gi+d);home()}
+function moveS(sid,d){const a=sets.find(x=>x.id===sid);if(!a)return;const c=sets.filter(x=>x.course===a.course),i=c.findIndex(x=>x.id===sid),t=c[i+d];if(t){reorderSet(sid,t.id);home()}}
 function reorderSet(srcId,targetId){
   if(!srcId||!targetId||srcId===targetId)return;
   const a=sets.find(s=>s.id===srcId),b=sets.find(s=>s.id===targetId);
@@ -641,9 +661,9 @@ function dragEnd(){
 
 function courseCardHtml(c,l,gi,isSetView){
   const mC=l.reduce((a,s)=>a+masteredInSet(s),0),allC=l.reduce((a,s)=>a+s.qs.length,0),gC=gloss.filter(g=>norm(g.course)===norm(c)).length,hasCP=l.some(s=>s.qs.some(q=>(q.streak||0)>0||q.wrong)),hasMC=l.some(s=>s.qs.some(q=>q.type==='multi')),cp=getPass(c),cm=getExamMins(c),cq=getExamCount(c),csm=getScoreMode(c),cnm=getNegMode(c),cCol=mC===allC&&allC?'--ok':l.some(s=>sel.has(s.id))?'--ac':'--ink';
-  const sub=`<span class="mut" style="display:block;font-size:.82rem;margin-bottom:1px">${l.length} Kapitel · ${allC} Fragen${mC?` · ${mC} ✓ gemeistert`:''}${gC?` · ${isym(IC.book,'Glossar')} ${gC}`:''} · Prüfung: ${isym(IC.cap,'Fragen')} ${cq} · ⏱ ${cm} Min. · ${isym(IC.award,'Notenschema')} ${cp} %${hasMC?` · ${modeShort(csm)}`:''}${cnm!=='none'?` · ${negShort(cnm)}`:''}</span><b>${esc(c)}</b>`;
+  const sub=`<span class="mut" style="display:block;font-size:.82rem;margin-bottom:1px">${l.length} Kapitel · ${allC} Fragen${mC?` · ${mC} gemeistert`:''}${gC?` · ${gC} Glossarbegriffe`:''}</span><span class=\"mut\" style=\"display:block;font-size:.82rem;margin-bottom:2px\">Prüfung: ${cq} Fragen · ${cm} Min. · bestanden ab ${cp} %${hasMC?` · ${modeShort(csm)}`:''}${cnm!=='none'?` · ${negShort(cnm)}`:''}</span><b>${esc(c)}</b>`;
   const canDrag=cnames.length>1&&cedit!==gi;
-  return `<div class="card ccard" style="margin:14px 0 8px;padding:12px 16px;border-left:4px solid var(${cCol})" ${canDrag?`draggable="true" ondragstart="dragCStart(event,${gi})" ondragover="dragCOver(event,${gi})" ondragleave="dragLeave(event)" ondrop="dropC(event,${gi})" ondragend="dragEnd()"`:''}><div class="crs">${isSetView?`<div class="chb" style="padding:2px 0;cursor:default"><span>${sub}</span></div>`:`<input type="checkbox" aria-label="Alle Kapitel auswählen" ${allSel(l)?'checked':''} ${l.length?'':'disabled'} onchange="togC(${gi},this.checked)"><button class="chb" style="padding:2px 0" aria-expanded="${!col.has(c)}" onclick="fold(${gi})"><span>${col.has(c)?'▸':'▾'}</span><span>${sub}</span></button>`}<span class="gc">${isSetView?'':`<button class="x" title="Neues Kapitel zu diesem Kurs hinzufügen" aria-label="Neues Kapitel hinzufügen" onclick="startSNew(${gi})">${IC.plus}</button>`}<button class="x" title="Kurs exportieren" aria-label="Kurs exportieren" onclick="exportC(this,${gi})">${IC.exp}</button>${crpend===gi?`<span class="mut">Zurücksetzen?</span><button class="btn sm" onclick="resetCourseProg(${gi})">Ja</button><button class="btn sec sm" onclick="crpend=null;rerenderC()">Nein</button>`:hasCP?`<button class="x" title="Lernstand dieses Kurses zurücksetzen" aria-label="Lernstand dieses Kurses zurücksetzen" onclick="crpend=${gi};cpend=null;rpend=null;pend=null;rerenderC()">${IC.res}</button>`:''}<button class="x" title="Kurs, Zeit, Wertung & Notenschema bearbeiten" aria-label="Kurs bearbeiten" onclick="startCEdit(${gi})">${IC.edit}</button>${cpend===gi?`<span class="mut">Löschen?</span><button class="btn sm" onclick="delC2(${gi})">Ja</button><button class="btn sec sm" onclick="delC(${gi})">Nein</button>`:`<button class="x" title="Kurs löschen" aria-label="Kurs löschen" onclick="delC(${gi})">${IC.x}</button>`}</span></div>${cedit===gi?cForm(gi,hasMC):''}</div>`;
+  return `<div class="card ccard" style="margin:14px 0 8px;padding:12px 16px;border-left:4px solid var(${cCol})" ${canDrag?`draggable="true" data-dragstart="dragCStart" data-dragover="dragCOver" data-dragleave="dragLeave" data-drop="dropC" data-dragend="dragEnd" data-args="${esc(JSON.stringify([gi]))}"`:''}><div class="crs">${isSetView?`<div class="chb" style="padding:2px 0;cursor:default"><span>${sub}</span></div>`:`<input type="checkbox" aria-label="Alle Kapitel auswählen" ${allSel(l)?'checked':''} ${l.length?'':'disabled'} data-chk="togC" data-args="${esc(JSON.stringify([gi]))}"><button class="chb" style="padding:2px 0" aria-expanded="${!col.has(c)}" data-act="fold" data-args="${esc(JSON.stringify([gi]))}"><span>${col.has(c)?'▸':'▾'}</span><span>${sub}</span></button>`}<span class="gc">${isSetView?'':`<button class="x" title="Neues Kapitel zu diesem Kurs hinzufügen" aria-label="Neues Kapitel hinzufügen" data-act="startSNew" data-args="${esc(JSON.stringify([gi]))}">${IC.plus}</button>`}<button class="x" title="Kurs exportieren" aria-label="Kurs exportieren" data-act="exportC" data-el data-args="${esc(JSON.stringify([gi]))}">${IC.exp}</button>${crpend===gi?`<span class="mut">Zurücksetzen?</span><button class="btn sm" data-act="resetCourseProg" data-args="${esc(JSON.stringify([gi]))}">Ja</button><button class="btn sec sm" data-act="_h1">Nein</button>`:hasCP?`<button class="x" title="Lernstand dieses Kurses zurücksetzen" aria-label="Lernstand dieses Kurses zurücksetzen" data-act="_h2" data-args="${esc(JSON.stringify([gi]))}">${IC.res}</button>`:''}${canDrag?`<button class="x" aria-label="Kurs ${esc(c)} nach oben" title="Nach oben" ${gi===0?'disabled':''} data-act="moveC" data-args="${esc(JSON.stringify([gi,-1]))}">↑</button><button class="x" aria-label="Kurs ${esc(c)} nach unten" title="Nach unten" ${gi===cnames.length-1?'disabled':''} data-act="moveC" data-args="${esc(JSON.stringify([gi,1]))}">↓</button>`:''}<button class="x" title="Kurs, Zeit, Wertung & Notenschema bearbeiten" aria-label="Kurs bearbeiten" data-act="startCEdit" data-args="${esc(JSON.stringify([gi]))}">${IC.edit}</button>${cpend===gi?`<span class="mut">Löschen?</span><button class="btn sm" data-act="delC2" data-args="${esc(JSON.stringify([gi]))}">Ja</button><button class="btn sec sm" data-act="delC" data-args="${esc(JSON.stringify([gi]))}">Nein</button>`:`<button class="x" title="Kurs löschen" aria-label="Kurs löschen" data-act="delC" data-args="${esc(JSON.stringify([gi]))}">${IC.del}</button>`}</span></div>${cedit===gi?cForm(gi,hasMC):''}</div>`;
 }
 
 function buildGroups(){
@@ -666,28 +686,28 @@ function home(){stopExamTimer();enforceSingleCourse();const chg=curView!=='q';cu
   const eCnt=Math.min(examMax,allSelCount),qCnt=Math.min(getQuizCount(),total);
   const dl=`<datalist id="cl">${allCourses().map(c=>`<option value="${esc(c)}">`).join('')}</datalist>`;
   const topNew=cedit==='__new__';
-  $app.innerHTML=`${nav('q')}<div class="row" style="justify-content:space-between;align-items:center"><h1>${IC.cap}<span>Quizomat</span></h1>${sets.length?`<div class="row dstart"><button class="btn sec" ${allSelCount?'':'disabled'} onclick="startExam()">Prüfung starten${eCnt?` (${eCnt})`:''}</button><button class="btn" ${total?'':'disabled'} onclick="start()">Quiz starten${qCnt?` (${qCnt})`:''}</button></div>`:''}</div><p class="mut">Fragen aus deinen Vorlesungsunterlagen üben und auswerten.</p>
+  $app.innerHTML=`${nav('q')}<div class="row" style="justify-content:space-between;align-items:center"><h1>${IC.cap}<span>Quizomat</span></h1>${sets.length?`<div class="row dstart"><button class="btn sec" ${allSelCount?'':'disabled'} data-act="startExam" data-args='[]'>Prüfung starten${eCnt?` (${eCnt})`:''}</button><button class="btn" ${total?'':'disabled'} data-act="start" data-args='[]'>Quiz starten${qCnt?` (${qCnt})`:''}</button></div>`:''}</div><p class="mut">Fragen aus deinen Vorlesungsunterlagen üben und auswerten.</p>
   ${topBar()}${sets.length?optsHtml(total,allSelCount)+searchHtml()+flaggedHtml():''}${dl}
   ${topNew?`<div class="card ccard" style="margin-top:14px;border-left:4px solid var(--ac)">${cForm('__new__',false)}</div>`:''}
   ${cnames.length?cnames.map((c,gi)=>{
     const l=groups[c],inNew=sedit==='__new__'&&sdraft&&sdraft.targetC===c;
     return courseCardHtml(c,l,gi,false)+(col.has(c)?'':`<div class="grp" style="margin:0 0 16px 12px">${l.map((s,si)=>{
       const mS=masteredInSet(s),hasP=s.qs.some(q=>(q.streak||0)>0||q.wrong),sCol=mS===s.qs.length&&s.qs.length?'--ok':sel.has(s.id)?'--ac':'--ink',canDragS=l.length>1&&sedit!==s.id;
-      return `<div class="set" style="border-left:4px solid var(${sCol})" ${canDragS?`draggable="true" ondragstart="dragSStart(event,'${s.id}',${esc(JSON.stringify(c))})" ondragover="dragSOver(event,'${s.id}',${esc(JSON.stringify(c))})" ondragleave="dragLeave(event)" ondrop="dropS(event,'${s.id}',${esc(JSON.stringify(c))})" ondragend="dragEnd()"`:''}><input type="checkbox" aria-label="${esc(s.title)} auswählen" ${sel.has(s.id)?'checked':''} onchange="tog('${s.id}')"><button class="sb" style="padding:2px 0" aria-expanded="${exp.has(s.id)}" onclick="openS('${s.id}')"><span>${exp.has(s.id)?'▾':'▸'}</span><span><span class="mut" style="display:block;font-size:.82rem;margin-bottom:1px">Kapitel ${si+1} · ${s.qs.length} Fragen${mS?` · ${mS} ✓ gemeistert`:''}</span><b>${esc(s.title)}</b></span></button><span class="gc"><button class="x" title="Neue Frage hinzufügen" aria-label="Neue Frage hinzufügen" onclick="startQNew('${s.id}')">${IC.plus}</button>${rpend===s.id?`<span class="mut">Zurücksetzen?</span><button class="btn sm" onclick="resetProg('${s.id}')">Ja</button><button class="btn sec sm" onclick="rpend=null;home()">Nein</button>`:hasP?`<button class="x" title="Lernstand dieses Kapitels zurücksetzen" aria-label="Lernstand zurücksetzen" onclick="rpend='${s.id}';pend=null;cpend=null;crpend=null;home()">${IC.res}</button>`:''}<button class="x" title="Kapitel bearbeiten" aria-label="Kapitel bearbeiten" onclick="startSEdit('${s.id}')">${IC.edit}</button>${pend===s.id?`<span class="mut">Löschen?</span><button class="btn sm" onclick="del2('${s.id}')">Ja</button><button class="btn sec sm" onclick="del('${s.id}')">Nein</button>`:`<button class="x" title="Set löschen" aria-label="Set löschen" onclick="del('${s.id}')">${IC.x}</button>`}</span>${sedit===s.id?sForm(s.id):''}</div>${exp.has(s.id)?`<div class="ql">${s.qs.map((q,i)=>qedit===s.id+':'+i?qForm(s.id,i):`<div class="qi"><span>${esc(q.q)}</span><span class="gc">${qBadge(s.id,i,q)}<button class="x${q.flagged?' warn':''}" title="${q.flagged?'Markierung aufheben':'Zum Bearbeiten markieren'}" aria-label="Markieren" onclick="togFlag('${s.id}',${i})">${IC.flag}</button><button class="x" title="Frage bearbeiten" aria-label="Frage bearbeiten" onclick="startQEdit('${s.id}',${i})">${IC.edit}</button>${pq===s.id+':'+i?`<button class="btn sm" onclick="delQ('${s.id}',${i})">Löschen</button><button class="btn sec sm" onclick="pq=null;home()">Nein</button>`:`<button class="x" title="Frage löschen" aria-label="Frage löschen" onclick="pq='${s.id}:${i}';home()">${IC.x}</button>`}</span></div>`).join('')}${qedit===s.id+':new'?qForm(s.id,-1):`<div class="qi" style="padding:10px 0 6px"><button class="btn sec sm" type="button" onclick="startQNew('${s.id}')">+ Neue Frage hinzufügen</button></div>`}</div>`:''}`}).join('')}${inNew?`<div class="set" style="border-left:4px solid var(--ac)">${sForm('__new__')}</div>`:(!l.length?`<div class="set" style="padding:10px 14px"><button class="btn sec sm" type="button" onclick="startSNew(${gi})">+ Neues Kapitel hinzufügen</button></div>`:'')}</div>`);
-  }).join('')+(sets.length?`<div class="mstart"><div class="row"><button class="btn sec" ${allSelCount?'':'disabled'} onclick="startExam()">Prüfung${eCnt?` (${eCnt})`:''}</button><button class="btn" ${total?'':'disabled'} onclick="start()">Quiz${qCnt?` (${qCnt})`:''}</button></div></div>`:'')
+      return `<div class="set" style="border-left:4px solid var(${sCol})" ${canDragS?`draggable="true" data-dragstart="dragSStart" data-dragover="dragSOver" data-dragleave="dragLeave" data-drop="dropS" data-dragend="dragEnd" data-args="${esc(JSON.stringify([String(s.id),c]))}"`:''}><input type="checkbox" aria-label="${esc(s.title)} auswählen" ${sel.has(s.id)?'checked':''} data-chk="tog" data-args="${esc(JSON.stringify([String(s.id)]))}"><button class="sb" style="padding:2px 0" aria-expanded="${exp.has(s.id)}" data-act="openS" data-args="${esc(JSON.stringify([String(s.id)]))}"><span>${exp.has(s.id)?'▾':'▸'}</span><span><span class="mut" style="display:block;font-size:.82rem;margin-bottom:1px">Kapitel ${si+1} · ${s.qs.length} Fragen${mS?` · ${mS} ✓ gemeistert`:''}</span><b>${esc(s.title)}</b></span></button><span class="gc"><button class="x" title="Neue Frage hinzufügen" aria-label="Neue Frage hinzufügen" data-act="startQNew" data-args="${esc(JSON.stringify([String(s.id)]))}">${IC.plus}</button>${rpend===s.id?`<span class="mut">Zurücksetzen?</span><button class="btn sm" data-act="resetProg" data-args="${esc(JSON.stringify([String(s.id)]))}">Ja</button><button class="btn sec sm" data-act="_h3">Nein</button>`:hasP?`<button class="x" title="Lernstand dieses Kapitels zurücksetzen" aria-label="Lernstand zurücksetzen" data-act="_h4" data-args="${esc(JSON.stringify([String(s.id)]))}">${IC.res}</button>`:''}${canDragS?`<button class="x" aria-label="Kapitel ${esc(s.title)} nach oben" title="Nach oben" ${l.indexOf(s)===0?'disabled':''} data-act="moveS" data-args="${esc(JSON.stringify([String(s.id),-1]))}">↑</button><button class="x" aria-label="Kapitel ${esc(s.title)} nach unten" title="Nach unten" ${l.indexOf(s)===l.length-1?'disabled':''} data-act="moveS" data-args="${esc(JSON.stringify([String(s.id),1]))}">↓</button>`:''}<button class="x" title="Kapitel bearbeiten" aria-label="Kapitel bearbeiten" data-act="startSEdit" data-args="${esc(JSON.stringify([String(s.id)]))}">${IC.edit}</button>${pend===s.id?`<span class="mut">Löschen?</span><button class="btn sm" data-act="del2" data-args="${esc(JSON.stringify([String(s.id)]))}">Ja</button><button class="btn sec sm" data-act="del" data-args="${esc(JSON.stringify([String(s.id)]))}">Nein</button>`:`<button class="x" title="Kapitel löschen" aria-label="Kapitel löschen" data-act="del" data-args="${esc(JSON.stringify([String(s.id)]))}">${IC.del}</button>`}</span>${sedit===s.id?sForm(s.id):''}</div>${exp.has(s.id)?`<div class="ql">${s.qs.map((q,i)=>qedit===s.id+':'+i?qForm(s.id,i):`<div class="qi"><span>${esc(q.q)}</span><span class="gc">${qBadge(s.id,i,q)}<button class="x${q.flagged?' warn':''}" title="${q.flagged?'Markierung aufheben':'Zum Bearbeiten markieren'}" aria-label="Markieren" data-act="togFlag" data-args="${esc(JSON.stringify([String(s.id),i]))}">${IC.flag}</button><button class="x" title="Frage bearbeiten" aria-label="Frage bearbeiten" data-act="startQEdit" data-args="${esc(JSON.stringify([String(s.id),i]))}">${IC.edit}</button>${pq===s.id+':'+i?`<button class="btn sm" data-act="delQ" data-args="${esc(JSON.stringify([String(s.id),i]))}">Löschen</button><button class="btn sec sm" data-act="_h5">Nein</button>`:`<button class="x" title="Frage löschen" aria-label="Frage löschen" data-act="_h6" data-args="${esc(JSON.stringify([s.id,i]))}">${IC.del}</button>`}</span></div>`).join('')}${qedit===s.id+':new'?qForm(s.id,-1):`<div class="qi" style="padding:10px 0 6px"><button class="btn sec sm" type="button" data-act="startQNew" data-args="${esc(JSON.stringify([String(s.id)]))}">+ Neue Frage hinzufügen</button></div>`}</div>`:''}`}).join('')}${inNew?`<div class="set" style="border-left:4px solid var(--ac)">${sForm('__new__')}</div>`:(!l.length?`<div class="set" style="padding:10px 14px"><button class="btn sec sm" type="button" data-act="startSNew" data-args="${esc(JSON.stringify([gi]))}">+ Neues Kapitel hinzufügen</button></div>`:'')}</div>`);
+  }).join('')+(sets.length?`<div class="mstart"><div class="row"><button class="btn sec" ${allSelCount?'':'disabled'} data-act="startExam" data-args='[]'>Prüfung${eCnt?` (${eCnt})`:''}</button><button class="btn" ${total?'':'disabled'} data-act="start" data-args='[]'>Quiz${qCnt?` (${qCnt})`:''}</button></div></div>`:'')
   :(topNew?'':`<div class="card" style="margin-top:18px"><p><b>Noch keine Kurse oder Fragen vorhanden.</b></p><p class="mut">Lege oben über „+ Neuer Kurs“ einen neuen Kurs an oder lass dir in Claude aus deinen Unterlagen ein Fragenset als JSON erstellen und füge es hier ein.</p></div>`)}
 `;if(chg)toTop();
 }
 let wp=null;
 function topBar(){
   const hasP=hasAnyProgress();
-  return `<div class="row act" style="margin:12px 0 6px"><button class="btn sec ico" title="Fragen importieren" aria-label="Fragen importieren" onclick="imp('fragen')">${IC.imp}</button><button class="btn sec sm" style="min-height:40px" onclick="startCNew()">+ Neuer Kurs</button>${sets.length?`<button class="btn sec ico" title="Alle Fragen exportieren" aria-label="Alle Fragen exportieren" onclick="exportQ(this)">${IC.exp}</button>`:''}${cnames.length?`<span class="gc" style="gap:8px">${hasP?(wp==='r'?`<span class="mut">Zurücksetzen?</span><button class="btn sm" onclick="resetProg()">Ja</button><button class="btn sec sm" onclick="wp=null;home()">Nein</button>`:`<button class="btn sec ico" title="Lernstand zurücksetzen" aria-label="Lernstand zurücksetzen" onclick="wp='r';home()">${IC.res}</button>`):''}${wp==='q'?`<span class="mut">Löschen?</span><button class="btn sm" onclick="wipe('q')">Ja</button><button class="btn sec sm" onclick="wp=null;home()">Nein</button>`:`<button class="btn sec ico" title="Alle Fragen löschen" aria-label="Alle Fragen löschen" onclick="wp='q';home()">${IC.del}</button>`}</span>`:''}</div>`;
+  return `<div class="row act" style="margin:12px 0 6px"><button class="btn sec ico" title="Fragen importieren" aria-label="Fragen importieren" data-act="imp" data-args='["fragen"]'>${IC.imp}</button><button class="btn sec sm" style="min-height:40px" data-act="startCNew" data-args='[]'>+ Neuer Kurs</button>${sets.length?`<button class="btn sec ico" title="Alle Fragen exportieren" aria-label="Alle Fragen exportieren" data-act="exportQ" data-el>${IC.exp}</button>`:''}${cnames.length?`<span class="gc" style="gap:8px">${hasP?(wp==='r'?`<span class="mut">Zurücksetzen?</span><button class="btn sm" data-act="resetProg" data-args='[]'>Ja</button><button class="btn sec sm" data-act="_h7">Nein</button>`:`<button class="btn sec ico" title="Lernstand zurücksetzen" aria-label="Lernstand zurücksetzen" data-act="_h8">${IC.res}</button>`):''}</span>`:''}</div>`;
 }
 function optsHtml(total,allSelCount){
   const mastCount=allSelCount-[...sel].reduce((a,id)=>{const s=sets.find(x=>x.id===id);return a+(s?s.qs.filter(q=>!isMastered(q)).length:0)},0),ap=activePass(),at=activeTime(),aq=activeCount(),asm=activeScoreMode(),anm=activeNegMode(),cs=selCourses(),hasMC=cs.length===1&&courseHasMulti(cs[0]),qCnt=Math.min(getQuizCount(),total);
-  return `<p class="mut" style="margin:8px 0 4px">${total?`<b>${total}</b> ${total===1?'Frage':'Fragen'} zum Üben verfügbar (Quiz: <b>${qCnt}</b>`+(mastCount?` · ${mastCount} gemeisterte ${opts.hideMastered?'ausgeblendet':'enthalten'} · für Prüfung alle ${allSelCount} verfügbar`:'')+`)`:allSelCount&&mastCount===allSelCount?`Alle ${allSelCount} ausgewählten Fragen sind gemeistert – setze den Lernstand zurück oder starte eine Prüfung.`:sel.size?'Noch keine Fragen in den ausgewählten Kapiteln.':'Wähle mindestens ein Kapitel eines Kurses aus.'}${cs.length===1?` · Kurs „${esc(cs[0])}“ (Prüfung: ${isym(IC.cap,'Fragen')} ${aq} · ⏱ ${at} Min. · ${isym(IC.award,'Notenschema')} ${ap} %${hasMC?` · ${modeShort(asm)}`:''}${anm!=='none'?` · ${negShort(anm)}`:''})`:''}</p>`;
+  return `<p class="mut" style="margin:8px 0 4px">${total?`<b>${total}</b> ${total===1?'Frage':'Fragen'} zum Üben verfügbar (Quiz: <b>${qCnt}</b>`+(mastCount?` · ${mastCount} gemeisterte ${opts.hideMastered?'ausgeblendet':'enthalten'} · für Prüfung alle ${allSelCount} verfügbar`:'')+`)`:allSelCount&&mastCount===allSelCount?`Alle ${allSelCount} ausgewählten Fragen sind gemeistert – setze den Lernstand zurück oder starte eine Prüfung.`:sel.size?'Noch keine Fragen in den ausgewählten Kapiteln.':'Wähle mindestens ein Kapitel eines Kurses aus.'}${cs.length===1?` · Kurs „${esc(cs[0])}“ (Prüfung: ${aq} Fragen · ${at} Min. · bestanden ab ${ap} %${hasMC?` · ${modeShort(asm)}`:''}${anm!=='none'?` · ${negShort(anm)}`:''})`:''}</p>`;
 }
-function wipe(k){if(k==='q'){sets=[];courses={};opts.corder=[];sel=new Set();exp=new Set();col=new Set();saveSel();saveExp();saveCol();saveC();saveO();save(true);wp=null;home()}else{gloss=[];gcol=new Set();saveGCol();saveGloss(true);wp=null;glosView()}}
+function wipe(k){if(k==='q'&&!okFlag){appDialog('Löscht alle Fragen, Kurse und (bei aktivem Sync) auch die Cloud-Daten. Zum Bestätigen LÖSCHEN eingeben:',()=>{okFlag=true;try{wipe('q')}finally{okFlag=false}},'LÖSCHEN');return}if(k==='q'){sets=[];courses={};opts.corder=[];sel=new Set();exp=new Set();col=new Set();saveSel();saveExp();saveCol();saveC();saveO();save(true);wp=null;home()}else{gloss=[];gcol=new Set();saveGCol();saveGloss(true);wp=null;glosView()}}
 const allSel=l=>l.length>0&&l.every(s=>sel.has(s.id));
 function fold(gi){const c=cnames[gi];col.has(c)?col.delete(c):col.add(c);saveCol();home()}
 function gfold(gi){const c=gcnames[gi];gcol.has(c)?gcol.delete(c):gcol.add(c);saveGCol();glosView()}
@@ -749,7 +769,7 @@ function extractGloss(d,defC){
     return[];
   });
 }
-function parseGloss(txt,defC){let d;try{d=JSON.parse(txt.trim().replace(/^```(?:json)?|```$/g,'').trim())}catch(e){throw new Error('Kein gültiges JSON: '+e.message)}
+function parseGloss(txt,defC){let d;try{d=JSON.parse(cleanJson(txt))}catch(e){throw new Error('Kein gültiges JSON: '+e.message)}
   const l=extractGloss(d,defC);
   if(!l.length)throw new Error('Kein Glossar gefunden. Erwartet wird {"kurs":"…","glossar":[{"begriff":"…","info":"…"}]}.');
   const bad=l.findIndex(g=>!g||!g.begriff||!g.info);if(bad>=0)throw new Error('Eintrag '+(bad+1)+': „begriff“ und „info“ sind Pflicht.');return l}
@@ -767,11 +787,12 @@ function syncTitle(){
   return 'Cloud-Sync aktiv'+(gh.lastSync?' (zuletzt '+new Date(gh.lastSync).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})+' Uhr)':'');
 }
 function updSyncUI(){
+  if(syncState!==lastSS){if(syncState==='err')announce('Synchronisierung fehlgeschlagen');else if(lastSS==='syncing'&&syncState==='ok')announce('Synchronisiert');lastSS=syncState}
   const el=document.getElementById('cs');if(el)el.innerHTML=syncBadge();
   const b=document.querySelector('.cnav');if(b)b.title='Einstellungen'+(gh.token?' · '+syncTitle():'');
   const cb=document.getElementById('cbox');if(cb)cb.innerHTML=cloudHtml();
 }
-const nav=a=>`<nav class='nav'><button class='${a==='q'?'on':''}' title="Fragen" aria-label="Fragen" onclick="wp=null;qsearch='';home();toTop()">${IC.cap}<span class="nlbl">Fragen</span></button><button class='${a==='g'?'on':''}' title="Glossar" aria-label="Glossar" onclick='glos()'>${IC.book}<span class="nlbl">Glossar</span></button><button class='cnav ${a==='s'?'on':''}' title="Einstellungen${gh.token?' · '+esc(syncTitle()):''}" aria-label="Einstellungen" onclick='settings()'>${IC.cog}<span class="nlbl">Einstellungen</span><span id="cs">${syncBadge()}</span></button></nav>`;
+const nav=a=>`<nav class='nav'><button class='${a==='q'?'on':''}' ${a==='q'?'aria-current="page"':''} title="Fragen" aria-label="Fragen" data-act="_h10">${IC.cap}<span class="nlbl">Fragen</span></button><button class='${a==='g'?'on':''}' ${a==='g'?'aria-current="page"':''} title="Glossar" aria-label="Glossar" data-act='glos'>${IC.book}<span class="nlbl">Glossar</span></button><button class='cnav ${a==='s'?'on':''}' ${a==='s'?'aria-current="page"':''} title="Einstellungen${gh.token?' · '+esc(syncTitle()):''}" aria-label="Einstellungen" data-act='settings'>${IC.cog}<span class="nlbl">Einstellungen</span><span id="cs">${syncBadge()}</span></button></nav>`;
 let gpend=null,qsearch='',gq='',gedit=null,gdraft=null,gerr='';
 function glos(){gpend=null;gcpend=null;gcedit=null;wp=null;gedit=null;gdraft=null;gq='';glosView();toTop()}
 function settings(){cedit=null;cpend=null;crpend=null;wp=null;settingsView();toTop()}
@@ -787,14 +808,14 @@ function settingsView(){
         <label for="sqn" style="font-weight:700;display:block">Anzahl der Fragen pro Übung (Quiz)</label>
         <p class="mut" style="margin:2px 0 0">Legt fest, wie viele Fragen bei einem Quiz-Durchgang maximal aus den ausgewählten Kapiteln gestellt werden.</p>
       </div>
-      <input id="sqn" type="number" min="1" max="500" value="${qn}" onchange="setQuizCount(this.value)" style="width:5em;font-weight:700;text-align:center">
+      <input id="sqn" type="number" min="1" max="500" value="${qn}" data-chg="setQuizCount" data-args='[]' style="width:5em;font-weight:700;text-align:center">
     </div>
     <div class="srow">
       <div>
         <label for="sms" style="font-weight:700;display:block">Frage gilt als „Gemeistert“ ab</label>
         <p class="mut" style="margin:2px 0 0">Wie oft eine Frage in Folge richtig beantwortet werden muss, bis sie den Status „✓ Gemeistert“ erhält.</p>
       </div>
-      <select id="sms" class="inl" onchange="setMastery(this.value)" style="font-weight:700">
+      <select id="sms" class="inl" data-chg="setMastery" data-args='[]' style="font-weight:700">
         ${[1,2,3,4,5].map(n=>`<option value="${n}" ${ms===n?'selected':''}>${n}× in Folge</option>`).join('')}
       </select>
     </div>
@@ -803,21 +824,28 @@ function settingsView(){
         <label for="shm" style="font-weight:700;display:block">Gemeisterte Fragen im Übungsmodus ausblenden</label>
         <p class="mut" style="margin:2px 0 0">Wenn aktiv, werden bereits gemeisterte Fragen im normalen Quiz übersprungen (in Prüfungen sind immer alle Fragen enthalten).</p>
       </div>
-      <input id="shm" type="checkbox" ${opts.hideMastered?'checked':''} onchange="setHideMastered(this.checked)" style="width:22px;height:22px;accent-color:var(--ac);cursor:pointer">
+      <input id="shm" type="checkbox" ${opts.hideMastered?'checked':''} data-chk="setHideMastered" style="width:22px;height:22px;accent-color:var(--ac);cursor:pointer">
     </div>
     <div class="srow">
       <div>
         <label for="ssh" style="font-weight:700;display:block">Antwortoptionen automatisch mischen</label>
         <p class="mut" style="margin:2px 0 0">Mischt die Reihenfolge der Antwortoptionen bei jedem Quiz- und Prüfungsdurchgang (außer bei Wahr/Falsch-Fragen).</p>
       </div>
-      <input id="ssh" type="checkbox" ${opts.shuffle?'checked':''} onchange="setShuffle(this.checked)" style="width:22px;height:22px;accent-color:var(--ac);cursor:pointer">
+      <input id="ssh" type="checkbox" ${opts.shuffle?'checked':''} data-chk="setShuffle" style="width:22px;height:22px;accent-color:var(--ac);cursor:pointer">
+    </div>
+    <div class="srow">
+      <div>
+        <label for="sac" style="font-weight:700;display:block">Single Choice sofort prüfen</label>
+        <p class="mut" style="margin:2px 0 0">Bei Single-Choice- und Wahr/Falsch-Fragen wird die Antwort direkt beim Antippen ausgewertet.</p>
+      </div>
+      <input id="sac" type="checkbox" ${opts.autoCheck?'checked':''} data-chk="setAutoCheck" style="width:22px;height:22px;accent-color:var(--ac);cursor:pointer">
     </div>
     <div class="srow">
       <div>
         <label for="sth" style="font-weight:700;display:block">Erscheinungsbild (Design)</label>
         <p class="mut" style="margin:2px 0 0">Wähle zwischen automatischer Anpassung an das Betriebssystem, hellem oder dunklem Design.</p>
       </div>
-      <select id="sth" class="inl" onchange="setTheme(this.value)" style="font-weight:700">
+      <select id="sth" class="inl" data-chg="setTheme" data-args='[]' style="font-weight:700">
         <option value="auto" ${th==='auto'?'selected':''}>System</option>
         <option value="light" ${th==='light'?'selected':''}>Hell</option>
         <option value="dark" ${th==='dark'?'selected':''}>Dunkel</option>
@@ -829,26 +857,30 @@ function settingsView(){
   ${cnames.length?cnames.map((c,gi)=>courseCardHtml(c,groups[c],gi,true)).join(''):`<div class="card" style="margin-top:12px"><p class="mut">Noch keine Kurse vorhanden. Importiere zuerst ein Fragenset unter „Fragen“.</p></div>`}
   <h2>Cloud-Sync (GitHub)</h2>
   <p class="mut">Synchronisiert deine Fragen, Kurseinstellungen, deinen Lernstand und dein Glossar automatisch über ein privates GitHub-Repository (<b>${SYNC_REPO}</b>) zwischen Mac, iPad und iPhone.</p>
-  <div id="cbox">${cloudHtml()}</div>`;
+  <div id="cbox">${cloudHtml()}</div>
+  <h2>Tastaturkürzel</h2>
+  <div class="card"><p class="mut" style="margin:0"><b>Quiz:</b> 1–9 Antwort wählen · Enter oder Leertaste prüfen/weiter · M zum Bearbeiten markieren · Esc zurück.<br><b>Prüfung:</b> ←/→ Frage wechseln · L für später markieren · M zum Bearbeiten markieren · Esc abbrechen.</p></div>
+  <h2>Gefahrenzone</h2>
+  <div class="card"><p class="mut" style="margin-top:0">Löscht alle Fragen, Kapitel und Kurse. Bei aktivem Cloud-Sync werden auch die Cloud-Daten überschrieben.</p><button class="btn sec" data-act="wipe" data-args='["q"]'>Alle Fragen und Kurse löschen</button></div>`;
 }
-function searchHtml(){return `<input id="qs" type="search" class="srch" placeholder="Fragen durchsuchen …" value="${esc(qsearch)}" oninput="qSearch(this.value)"><div id="res">${resHtml()}</div>`}
+function searchHtml(){return `<input id="qs" type="search" class="srch" placeholder="Fragen durchsuchen …" value="${esc(qsearch)}" data-in="qSearch" data-args='[]'><div id="res">${resHtml()}</div>`}
 function resHtml(){const t=qsearch.trim().toLowerCase();if(!t)return '';const r=[];sets.forEach(s=>s.qs.forEach((q,qi)=>{if((q.q+' '+q.opts.map(o=>o.t+' '+(o.why||'')).join(' ')+' '+q.exp).toLowerCase().includes(t))r.push([s,q,qi])}));
-  return `<p class="mut">${r.length} Treffer</p>`+(r.length?`<div class="card">${r.slice(0,50).map(([s,q,qi])=>`<div class="qi"><button class="lnk" data-s="${s.id}" onclick="goQ(this.dataset.s)"><span class="mut">${esc(s.course)} › ${esc(s.title)}</span><br>${esc(q.q)}</button><span class="gc">${qBadge(s.id,qi,q)}<button class="x${q.flagged?' warn':''}" title="${q.flagged?'Markierung aufheben':'Zum Bearbeiten markieren'}" aria-label="Markieren" onclick="togFlag('${s.id}',${qi})">${IC.flag}</button><button class="x" title="Frage bearbeiten" aria-label="Frage bearbeiten" onclick="goQEdit('${s.id}',${qi})">${IC.edit}</button></span></div>`).join('')}</div>`+(r.length>50?'<p class="mut">Es werden nur die ersten 50 Treffer angezeigt.</p>':''):'')}
+  return `<p class="mut">${r.length} Treffer</p>`+(r.length?`<div class="card">${r.slice(0,50).map(([s,q,qi])=>`<div class="qi"><button class="lnk" data-act="goQ" data-args="${esc(JSON.stringify([String(s.id)]))}"><span class="mut">${esc(s.course)} › ${esc(s.title)}</span><br>${esc(q.q)}</button><span class="gc">${qBadge(s.id,qi,q)}<button class="x${q.flagged?' warn':''}" title="${q.flagged?'Markierung aufheben':'Zum Bearbeiten markieren'}" aria-label="Markieren" data-act="togFlag" data-args="${esc(JSON.stringify([String(s.id),qi]))}">${IC.flag}</button><button class="x" title="Frage bearbeiten" aria-label="Frage bearbeiten" data-act="goQEdit" data-args="${esc(JSON.stringify([String(s.id),qi]))}">${IC.edit}</button></span></div>`).join('')}</div>`+(r.length>50?'<p class="mut">Es werden nur die ersten 50 Treffer angezeigt.</p>':''):'')}
 function qSearch(v){qsearch=v;$app.classList.toggle('searching',!!v.trim());document.getElementById('res').innerHTML=resHtml()}
 function goQ(id){const s=sets.find(x=>x.id===id);qsearch='';exp.add(id);saveExp();if(s&&col.has(s.course)){col.delete(s.course);saveCol()}home()}
-function goQEdit(id,qi){const s=sets.find(x=>x.id===id);qsearch='';exp.add(id);saveExp();if(s&&col.has(s.course)){col.delete(s.course);saveCol()}startQEdit(id,qi);setTimeout(()=>{const el=document.getElementById('eq_q');if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.focus()}},30)}
+function goQEdit(id,qi){const s=sets.find(x=>x.id===id);qsearch='';exp.add(id);saveExp();if(s&&col.has(s.course)){col.delete(s.course);saveCol()}startQEdit(id,qi);setTimeout(()=>{const el=document.getElementById('eq_q');if(el){el.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth',block:'center'});el.focus()}},30)}
 function startGNew(gi){
   const c=gi!==undefined&&gcnames[gi]?gcnames[gi]:'';
   const defC=c||selCourses()[0]||allCourses()[0]||'';
   if(c&&gcol.has(c)){gcol.delete(c);saveGCol()}
   gedit='__new__';gdraft={c:defC,b:'',i:'',a:'',targetC:c};gerr='';gpend=null;gcpend=null;gcedit=null;wp=null;glosView();
-  setTimeout(()=>{const el=document.getElementById(defC?'eb':'ec');if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.focus()}},30);
+  setTimeout(()=>{const el=document.getElementById(defC?'eb':'ec');if(el){el.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth',block:'center'});el.focus()}},30);
 }
 function startGEdit(k){
   const g=gloss[k];if(!g)return;
   gq='';if(gcol.has(g.course)){gcol.delete(g.course);saveGCol()}
   gedit=k;gdraft={c:g.course,b:g.b,i:g.i,a:g.a.join(', '),targetC:''};gerr='';gpend=null;gcpend=null;gcedit=null;wp=null;glosView();
-  setTimeout(()=>{const el=document.getElementById('eb');if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.focus()}},30);
+  setTimeout(()=>{const el=document.getElementById('eb');if(el){el.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth',block:'center'});el.focus()}},30);
 }
 function startGCEdit(gi){
   gcedit=gi;gcdraft=gcnames[gi]||'';gcerr='';gcpend=null;gpend=null;gedit=null;gdraft=null;wp=null;glosView();
@@ -877,16 +909,16 @@ function delGC2(gi){
   gcpend=null;gpend=null;gcedit=null;glosView();
 }
 function gRow(g,k,showCourse){
-  return `<div class="gi"><div>${showCourse?`<span class="mut" style="display:block;font-size:.82rem;margin-bottom:1px">${esc(g.course)}</span>`:''}<b>${esc(g.b)}</b>${g.a.length?`<span class="mut"> · ${esc(g.a.join(', '))}</span>`:''}<p class="mut" style="margin:.2em 0 0">${esc(g.i)}</p></div>${gpend===k?`<span class="gc"><span class="mut">Löschen?</span><button class="btn sm" onclick="delG(${k})">Ja</button><button class="btn sec sm" onclick="gpend=null;glosView()">Nein</button></span>`:`<span class="gc"><button class="x" title="Begriff bearbeiten" aria-label="Begriff bearbeiten" onclick="startGEdit(${k})">${IC.edit}</button><button class="x" title="Begriff löschen" aria-label="Begriff löschen" onclick="gpend=${k};gcpend=null;glosView()">${IC.x}</button></span>`}</div>`;
+  return `<div class="gi"><div>${showCourse?`<span class="mut" style="display:block;font-size:.82rem;margin-bottom:1px">${esc(g.course)}</span>`:''}<b>${esc(g.b)}</b>${g.a.length?`<span class="mut"> · ${esc(g.a.join(', '))}</span>`:''}<p class="mut" style="margin:.2em 0 0">${esc(g.i)}</p></div>${gpend===k?`<span class="gc"><span class="mut">Löschen?</span><button class="btn sm" data-act="delG" data-args="${esc(JSON.stringify([k]))}">Ja</button><button class="btn sec sm" data-act="_h11">Nein</button></span>`:`<span class="gc"><button class="x" title="Begriff bearbeiten" aria-label="Begriff bearbeiten" data-act="startGEdit" data-args="${esc(JSON.stringify([k]))}">${IC.edit}</button><button class="x" title="Begriff löschen" aria-label="Begriff löschen" data-act="_h12" data-args="${esc(JSON.stringify([k]))}">${IC.del}</button></span>`}</div>`;
 }
 function gForm(g,k){
   const isNew=k==='__new__',d=gdraft||{c:g.course||'',b:isNew?'':g.b,i:g.i,a:g.a.join(', ')};
-  return `<div class="gi ge"><div style="width:100%">${isNew?'<b style="display:block;margin-bottom:6px;color:var(--ac)">Neuen Begriff hinzufügen</b>':''}<label class="mut" for="ec">Kurs</label><input id="ec" list="cl" value="${esc(d.c)}" placeholder="Name des Kurses"><label class="mut" for="eb">Begriff</label><input id="eb" value="${esc(d.b)}"><label class="mut" for="ei">Erklärung</label><textarea id="ei" style="min-height:90px">${esc(d.i)}</textarea><label class="mut" for="ea">Alias (durch Komma getrennt)</label><input id="ea" value="${esc(d.a)}"><p class="err">${esc(gerr)}</p><div class="row act"><button class="btn sec sm" type="button" onclick="gedit=null;gdraft=null;gerr='';glosView()">Abbrechen</button><button class="btn sm" type="button" onclick="saveG(${isNew?"'__new__'":k})">Speichern</button></div></div></div>`;
+  return `<div class="gi ge"><div style="width:100%">${isNew?'<b style="display:block;margin-bottom:6px;color:var(--ac)">Neuen Begriff hinzufügen</b>':''}<label class="mut" for="ec">Kurs</label><input id="ec" list="cl" value="${esc(d.c)}" placeholder="Name des Kurses"><label class="mut" for="eb">Begriff</label><input id="eb" value="${esc(d.b)}"><label class="mut" for="ei">Erklärung</label><textarea id="ei" style="min-height:90px">${esc(d.i)}</textarea><label class="mut" for="ea">Alias (durch Komma getrennt)</label><input id="ea" value="${esc(d.a)}"><p class="err" role="alert">${esc(gerr)}</p><div class="row act"><button class="btn sec sm" type="button" data-act="_h13">Abbrechen</button><button class="btn sm" type="button" data-act="saveG" data-args="${esc(JSON.stringify([isNew?'__new__':k]))}">Speichern</button></div></div></div>`;
 }
 function gCourseCardHtml(c,l,gi){
   const on=isGSel(c),cCol=on?'--ac':'--ink';
   const sub=`<span class="mut" style="display:block;font-size:.82rem;margin-bottom:1px">${l.length} ${l.length===1?'Begriff':'Begriffe'}${on?' · ✓ Aktiv':''}</span><b>${esc(c)}</b>`;
-  return `<div class="card ccard" style="margin:14px 0 8px;padding:12px 16px;border-left:4px solid var(${cCol})"><div class="crs"><button class="chb" style="padding:2px 0" aria-expanded="${!gcol.has(c)}" onclick="gfold(${gi})"><span>${gcol.has(c)?'▸':'▾'}</span><span>${sub}</span></button><span class="gc"><button class="x" title="Neuen Begriff zu diesem Kurs hinzufügen" aria-label="Neuen Begriff hinzufügen" onclick="startGNew(${gi})">${IC.plus}</button><button class="x" title="Glossar dieses Kurses exportieren" aria-label="Kurs-Glossar exportieren" onclick="exportGC(this,${gi})">${IC.exp}</button><button class="x" title="Kursname bearbeiten" aria-label="Kursname bearbeiten" onclick="startGCEdit(${gi})">${IC.edit}</button>${gcpend===gi?`<span class="mut">Löschen?</span><button class="btn sm" onclick="delGC2(${gi})">Ja</button><button class="btn sec sm" onclick="delGC(${gi})">Nein</button>`:`<button class="x" title="Glossar dieses Kurses löschen" aria-label="Kurs-Glossar löschen" onclick="delGC(${gi})">${IC.x}</button>`}</span></div>${gcedit===gi?`<div class="ge" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)"><label class="mut" for="gecn">Kursname bearbeiten</label><input id="gecn" list="cl" value="${esc(gcdraft)}"><p class="err">${esc(gcerr)}</p><div class="row act"><button class="btn sec sm" onclick="cancelGCEdit()">Abbrechen</button><button class="btn sm" onclick="saveGCEdit(${gi})">Speichern</button></div></div>`:''}</div>`;
+  return `<div class="card ccard" style="margin:14px 0 8px;padding:12px 16px;border-left:4px solid var(${cCol})"><div class="crs"><button class="chb" style="padding:2px 0" aria-expanded="${!gcol.has(c)}" data-act="gfold" data-args="${esc(JSON.stringify([gi]))}"><span>${gcol.has(c)?'▸':'▾'}</span><span>${sub}</span></button><span class="gc"><button class="x" title="Neuen Begriff zu diesem Kurs hinzufügen" aria-label="Neuen Begriff hinzufügen" data-act="startGNew" data-args="${esc(JSON.stringify([gi]))}">${IC.plus}</button><button class="x" title="Glossar dieses Kurses exportieren" aria-label="Kurs-Glossar exportieren" data-act="exportGC" data-el data-args="${esc(JSON.stringify([gi]))}">${IC.exp}</button><button class="x" title="Kursname bearbeiten" aria-label="Kursname bearbeiten" data-act="startGCEdit" data-args="${esc(JSON.stringify([gi]))}">${IC.edit}</button>${gcpend===gi?`<span class="mut">Löschen?</span><button class="btn sm" data-act="delGC2" data-args="${esc(JSON.stringify([gi]))}">Ja</button><button class="btn sec sm" data-act="delGC" data-args="${esc(JSON.stringify([gi]))}">Nein</button>`:`<button class="x" title="Glossar dieses Kurses löschen" aria-label="Kurs-Glossar löschen" data-act="delGC" data-args="${esc(JSON.stringify([gi]))}">${IC.del}</button>`}</span></div>${gcedit===gi?`<div class="ge" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)"><label class="mut" for="gecn">Kursname bearbeiten</label><input id="gecn" list="cl" value="${esc(gcdraft)}"><p class="err" role="alert">${esc(gcerr)}</p><div class="row act"><button class="btn sec sm" data-act="cancelGCEdit" data-args='[]'>Abbrechen</button><button class="btn sm" data-act="saveGCEdit" data-args="${esc(JSON.stringify([gi]))}">Speichern</button></div></div>`:''}</div>`;
 }
 function gResHtml(){
   const t=gq.trim().toLowerCase();if(!t)return '';
@@ -907,13 +939,13 @@ function glosView(){
   const dl=`<datalist id="cl">${allCourses().map(c=>`<option value="${esc(c)}">`).join('')}</datalist>`;
   const topNew=gedit==='__new__'&&(!gdraft||!gdraft.targetC||!ggroups[gdraft.targetC]);
   $app.innerHTML=`${nav('g')}<h1>${IC.book}<span>Glossar</span></h1><p class="mut">Fachbegriffe aus deinen Vorlesungsunterlagen pro Kurs verwalten und nachschlagen.</p>
-  <div class="row act" style="margin:12px 0 6px"><button class="btn sec ico" title="Glossar importieren" aria-label="Glossar importieren" onclick="imp('glossar')">${IC.imp}</button><button class="btn sec sm" style="min-height:40px" onclick="startGNew()">+ Begriff hinzufügen</button>${gloss.length?`<button class="btn sec ico" title="Alle Glossare exportieren" aria-label="Glossar exportieren" onclick="exportG(this)">${IC.exp}</button><span class="gc" style="gap:8px">${wp==='g'?`<span class="mut">Löschen?</span><button class="btn sm" onclick="wipe('g')">Ja</button><button class="btn sec sm" onclick="wp=null;glosView()">Nein</button>`:`<button class="btn sec ico" title="Gesamtes Glossar löschen" aria-label="Gesamtes Glossar löschen" onclick="wp='g';glosView()">${IC.del}</button>`}</span>`:''}</div>
-  ${gloss.length?`<p class="mut" style="margin:8px 0 4px">${actC?`<b>${actCnt}</b> ${actCnt===1?'Begriff':'Begriffe'} für den ausgewählten Kurs „<b>${esc(actC)}</b>“ aktiv · `:''}Insgesamt <b>${gloss.length}</b> ${gloss.length===1?'Begriff':'Begriffe'} in <b>${gcnames.length}</b> ${gcnames.length===1?'Kurs':'Kursen'}.</p><input id="gs" type="search" class="srch" placeholder="${sPh}" value="${esc(gq)}" oninput="gSearch(this.value)"><div id="gres">${gResHtml()}</div>`:''}${dl}
+  <div class="row act" style="margin:12px 0 6px"><button class="btn sec ico" title="Glossar importieren" aria-label="Glossar importieren" data-act="imp" data-args='["glossar"]'>${IC.imp}</button><button class="btn sec sm" style="min-height:40px" data-act="startGNew" data-args='[]'>+ Begriff hinzufügen</button>${gloss.length?`<button class="btn sec ico" title="Alle Glossare exportieren" aria-label="Glossar exportieren" data-act="exportG" data-el>${IC.exp}</button><span class="gc" style="gap:8px">${wp==='g'?`<span class="mut">Löschen?</span><button class="btn sm" data-act="wipe" data-args='["g"]'>Ja</button><button class="btn sec sm" data-act="_h14">Nein</button>`:`<button class="btn sec ico" title="Gesamtes Glossar löschen" aria-label="Gesamtes Glossar löschen" data-act="_h15">${IC.del}</button>`}</span>`:''}</div>
+  ${gloss.length?`<p class="mut" style="margin:8px 0 4px">${actC?`<b>${actCnt}</b> ${actCnt===1?'Begriff':'Begriffe'} für den ausgewählten Kurs „<b>${esc(actC)}</b>“ aktiv · `:''}Insgesamt <b>${gloss.length}</b> ${gloss.length===1?'Begriff':'Begriffe'} in <b>${gcnames.length}</b> ${gcnames.length===1?'Kurs':'Kursen'}.</p><input id="gs" type="search" class="srch" placeholder="${sPh}" value="${esc(gq)}" data-in="gSearch" data-args='[]'><div id="gres">${gResHtml()}</div>`:''}${dl}
   ${topNew?`<div class="card" style="margin-top:14px">${gForm({course:(gdraft&&gdraft.c)||'',b:'__new__',i:'',a:[]},'__new__')}</div>`:''}
   ${gloss.length?Object.entries(ggroups).map(([c,l],gi)=>{
     const sorted=l.slice().sort((a,b)=>a.g.b.localeCompare(b.g.b,'de'));
     const inNew=gedit==='__new__'&&gdraft&&gdraft.targetC===c;
-    return gCourseCardHtml(c,l,gi)+(gcol.has(c)?'':`<div class="grp" style="margin:0 0 16px 12px"><div class="card"><div class="ggrid">${sorted.map(({g,k})=>gedit===k?gForm(g,k):gRow(g,k,false)).join('')}${inNew?gForm({course:c,b:'__new__',i:'',a:[]},'__new__'):''}</div>${inNew?'':`<div style="margin-top:8px;padding-top:10px;border-top:1px dashed var(--bd)"><button class="btn sec sm" type="button" onclick="startGNew(${gi})">+ Begriff hinzufügen</button></div>`}</div></div>`);
+    return gCourseCardHtml(c,l,gi)+(gcol.has(c)?'':`<div class="grp" style="margin:0 0 16px 12px"><div class="card"><div class="ggrid">${sorted.map(({g,k})=>gedit===k?gForm(g,k):gRow(g,k,false)).join('')}${inNew?gForm({course:c,b:'__new__',i:'',a:[]},'__new__'):''}</div>${inNew?'':`<div style="margin-top:8px;padding-top:10px;border-top:1px dashed var(--bd)"><button class="btn sec sm" type="button" data-act="startGNew" data-args="${esc(JSON.stringify([gi]))}">+ Begriff hinzufügen</button></div>`}</div></div>`);
   }).join(''):(topNew?'':`<div class="card" style="margin-top:18px"><p><b>Noch keine Begriffe vorhanden.</b></p><p class="mut">Importiere ein Kurs-Glossar als JSON oder füge einen neuen Begriff hinzu.</p></div>`)}`;
 }
 function gSearch(v){gq=v;$app.classList.toggle('searching',!!v.trim());const el=document.getElementById('gres');if(el)el.innerHTML=gResHtml()}
@@ -934,22 +966,22 @@ function delG(k){if(gloss[k])gloss.splice(k,1);gpend=null;saveGloss(true);glosVi
 let impMode='fragen';
 function imp(m){curView='i';impMode=m||'fragen';$app.className='';
   const allC=allCourses(),dl=`<datalist id="cl">${allC.map(c=>`<option value="${esc(c)}">`).join('')}</datalist>`;
-  const fi=`<label class="btn sec" style="position:relative;overflow:hidden;display:inline-flex;align-items:center;cursor:pointer">Datei wählen<input id="fi" type="file" accept=".json,application/json,text/plain" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer" onclick="this.value=''" onchange="fromFile(this)"></label>`;
+  const fi=`<label class="btn sec" style="position:relative;overflow:hidden;display:inline-flex;align-items:center;cursor:pointer">Datei wählen<input id="fi" type="file" accept=".json,application/json,text/plain" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer" data-act="_clr" data-el data-chg="fromFile" data-el></label>`;
   if(impMode==='glossar'){
     gen={name:'',f:KINDS.map(x=>x[0])};
-    $app.innerHTML=`${nav('g')}<h1>${IC.imp}<span>Glossar importieren</span></h1><p class='mut'>Füge das JSON von Claude ein, ziehe eine .json-Datei in das Feld oder wähle sie über „Datei wählen“. Gleiche Begriffe desselben Kurses werden aktualisiert.</p><textarea id='t' placeholder='JSON hier einfügen oder .json-Datei hierher ziehen …' ondragover="event.preventDefault()" ondrop="dropFile(event)"></textarea><p class='err' id='e'>${esc(msg)}</p><div class='row'><button class='btn' onclick='doImp()'>Importieren</button>${fi}<button class='btn sec' onclick="msg='';glos()">Zurück</button></div><h2>Für jeden Kurs</h2><p class='mut'>Lade deine Unterlagen in Claude hoch und kopiere diesen Auftrag dazu. Gib den Kursnamen ein, dann trägt der Auftrag ihn automatisch ein.</p><label>Kursname <input id="gcn" list="cl" oninput="gGName(this.value)" style="width:100%;margin-top:4px;background:var(--card);border:1px solid var(--bd);border-radius:6px;padding:8px"></label>${dl}<div id="ggen"></div>`;
+    $app.innerHTML=`${nav('g')}<h1>${IC.imp}<span>Glossar importieren</span></h1><p class='mut'>Füge das JSON von Claude ein, ziehe eine .json-Datei in das Feld oder wähle sie über „Datei wählen“. Gleiche Begriffe desselben Kurses werden aktualisiert.</p><textarea id='t' placeholder='JSON hier einfügen oder .json-Datei hierher ziehen …' data-dragover="_pd" data-drop="dropFile"></textarea><p class='err' id='e' role="alert">${esc(msg)}</p><div class='row'><button class='btn' data-act='doImp'>Importieren</button>${fi}<button class='btn sec' data-act="_h16">Zurück</button></div><h2>Für jeden Kurs</h2><p class='mut'>Lade deine Unterlagen in Claude hoch und kopiere diesen Auftrag dazu. Gib den Kursnamen ein, dann trägt der Auftrag ihn automatisch ein.</p><label>Kursname <input id="gcn" list="cl" data-in="gGName" data-args='[]' style="width:100%;margin-top:4px;background:var(--card);border:1px solid var(--bd);border-radius:6px;padding:8px"></label>${dl}<div id="ggen"></div>`;
     renderGGen();toTop();return;
   }
   $app.innerHTML=`${nav('q')}<h1>${IC.imp}<span>Fragen importieren</span></h1>
-  <p class="mut">Füge das JSON von Claude ein, ziehe eine .json-Datei in das Feld oder lade sie über „Datei wählen“. Mehrere Sets in einer Liste sind möglich.</p>
-  <textarea id="t" placeholder="JSON hier einfügen oder .json-Datei hierher ziehen …" ondragover="event.preventDefault()" ondrop="dropFile(event)"></textarea>
+  <p class="mut">Füge das JSON von Claude ein, ziehe eine .json-Datei in das Feld oder lade sie über „Datei wählen“. Mehrere Kapitel in einer Liste sind möglich.</p>
+  <textarea id="t" placeholder="JSON hier einfügen oder .json-Datei hierher ziehen …" data-dragover="_pd" data-drop="dropFile"></textarea>
   <p class="err" id="e">${esc(msg)}</p>
-  <div class="row"><button class="btn" onclick="doImp()">Importieren</button>
+  <div class="row"><button class="btn" data-act="doImp" data-args='[]'>Importieren</button>
   ${fi}
-  <button class="btn sec" onclick="msg='';home()">Zurück</button></div>
+  <button class="btn sec" data-act="_h17">Zurück</button></div>
   <h2>Für jeden neuen Kurs</h2>
   <p class="mut">Lade deine Unterlagen in Claude hoch und kopiere diesen Auftrag dazu. Ersetze [ANZAHL] durch die gewünschte Zahl. Gib den Kursnamen ein, dann trägt der Auftrag ihn automatisch ein.</p>
-  <label>Kursname <input id="cn" list="cl" oninput="gName(this.value)" style="width:100%;margin-top:4px;background:var(--card);border:1px solid var(--bd);border-radius:6px;padding:8px"></label>
+  <label>Kursname <input id="cn" list="cl" data-in="gName" data-args='[]' style="width:100%;margin-top:4px;background:var(--card);border:1px solid var(--bd);border-radius:6px;padding:8px"></label>
   ${dl}
   <div id="gen"></div>`;
   gen={name:'',f:KINDS.map(x=>x[0])};renderGen();toTop();
@@ -972,11 +1004,7 @@ function mergeSets(incoming){
     if(ex.course)lastCourse=ex.course;
     if(ns.cfg&&ex.course){
       const c=ex.course,cf=ns.cfg;
-      if(!opts.cqcount||typeof opts.cqcount!=='object')opts.cqcount={};
-      if(!opts.ctime||typeof opts.ctime!=='object')opts.ctime={};
-      if(!opts.cpass||typeof opts.cpass!=='object')opts.cpass={};
-      if(!opts.cmode||typeof opts.cmode!=='object')opts.cmode={};
-      if(!opts.cneg||typeof opts.cneg!=='object')opts.cneg={};
+      ensureCfgMaps();
       if(+cf.fragenAnzahl>0){opts.cqcount[c]=Math.max(1,+cf.fragenAnzahl);cfgChanged=true}
       if(+cf.zeitMinuten>0){opts.ctime[c]=Math.max(1,+cf.zeitMinuten);cfgChanged=true}
       if([50,60,70].includes(+cf.positivAb)){opts.cpass[c]=+cf.positivAb;cfgChanged=true}
@@ -1000,6 +1028,11 @@ function mergeSets(incoming){
   if(cfgChanged)saveO();
   saveSel();
 }
+function importStats(n){
+  const sig=q=>jj([q.type,!!q.fixed,q.exp||'',(q.opts||[]).map(o=>[o.t,!!o.ok,o.why||''])]);let neu=0,upd=0,same=0;
+  n.forEach(ns=>{const ex=sets.find(x=>norm(x.course)===norm(ns.course)&&norm(x.title)===norm(ns.title));
+    ns.qs.forEach(nq=>{const eq=ex&&ex.qs.find(q=>norm(q.q)===norm(nq.q));if(!eq)neu++;else if(sig(eq)!==sig(nq))upd++;else same++})});
+  return{neu,upd,same}}
 function doImp(){
   try{
     const raw=document.getElementById('t').value;
@@ -1009,9 +1042,13 @@ function doImp(){
     }
     const n=parseSets(raw);
     if(!n.length)throw new Error('Keine Fragen gefunden. Ein Glossar importierst du unter „Glossar importieren“.');
-    mergeSets(n);
-    try{const d=JSON.parse(raw.trim().replace(/^```(?:json)?|```$/g,'').trim());const gl=extractGloss(d,n[0]&&n[0].course);if(gl.length)addGloss(gl,true);saveGloss(true)}catch(e){}
-    save();msg='';home();
+    const apply=()=>{
+      mergeSets(n);
+      try{const d=JSON.parse(cleanJson(raw));const gl=extractGloss(d,n[0]&&n[0].course);if(gl.length)addGloss(gl,true);saveGloss(true)}catch(e){}
+      save();msg='';home();
+    },st=importStats(n);
+    if(st.upd)appDialog(`Import: ${st.neu} neue, ${st.upd} geänderte (lokale Änderungen daran werden überschrieben), ${st.same} unverändert. Importieren?`,apply);
+    else apply();
   }
   catch(e){document.getElementById('e').textContent=e.message}
 }
@@ -1021,12 +1058,14 @@ const getF=c=>KINDS.map(x=>x[0]);
 function promptFor(c,a){a=a||getF(c);const nm={single:'Single Choice (typ "single", genau eine richtige Antwort)',multi:'Multiple Choice (typ "multi", mehrere richtige Antworten)',tf:'Wahr/Falsch (typ "tf")'};
   let p=PROMPT.replace(/Mische Single Choice.*?\(typ "tf"\)\./s,'Verwende ausschließlich diese Fragetypen (bei mehreren gemischt): '+a.map(k=>nm[k]).join('; ')+'.');
   if(c)p=p.replace('"kurs":"Name des Kurses"','"kurs":'+JSON.stringify(c));return p}
-function clip(t,b){(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>b.textContent='Kopiert').catch(()=>{b.textContent='Kopieren nicht möglich'})}
+let liveEl=null,lastSS='idle';
+function announce(t){if(!liveEl){liveEl=document.createElement('div');liveEl.setAttribute('role','status');liveEl.setAttribute('aria-live','polite');liveEl.style.cssText='position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)';document.body.appendChild(liveEl)}liveEl.textContent='';setTimeout(()=>{liveEl.textContent=t},50)}
+function clip(t,b){(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>{b.textContent='Kopiert';announce('Kopiert')}).catch(()=>{b.textContent='Kopieren nicht möglich'})}
 function renderGen(){const el=document.getElementById('gen');if(!el)return;
-  el.innerHTML=`<button class="btn sec" onclick="copyG(this)">Auftrag kopieren</button><details><summary>Auftrag anzeigen</summary><pre>${esc(promptFor(gen.name.trim(),gen.f))}</pre></details>`}
+  el.innerHTML=`<button class="btn sec" data-act="copyG" data-el>Auftrag kopieren</button><details><summary>Auftrag anzeigen</summary><pre>${esc(promptFor(gen.name.trim(),gen.f))}</pre></details>`}
 function renderGGen(){const el=document.getElementById('ggen');if(!el)return;
   const p=gpromptFor(gen.name.trim());
-  el.innerHTML=`<button class="btn sec" onclick="clip(gpromptFor(gen.name.trim()),this)">Auftrag kopieren</button><details><summary>Auftrag anzeigen</summary><pre>${esc(p)}</pre></details>`}
+  el.innerHTML=`<button class="btn sec" data-act="_clipP" data-el>Auftrag kopieren</button><details><summary>Auftrag anzeigen</summary><pre>${esc(p)}</pre></details>`}
 function saveGen(){const n=gen.name.trim();if(n){courses[n]=gen.f.slice();saveC()}}
 function gName(v){gen.name=v;const c=courses[v.trim()];if(c)gen.f=c.slice();renderGen()}
 function gGName(v){gen.name=v;renderGGen()}
@@ -1075,7 +1114,7 @@ function startExam(){
   examMode=true;idx=0;log=[];examPicks=Q.map(()=>new Set());examMarks=new Set();examSubPend=false;examExitPend=false;examTimeUp=false;checked=false;
   examStart=Date.now();examEnd=examStart+examDurMins*60000;
   examTimer=setInterval(tickExam,1000);
-  quiz();toTop();
+  quiz();toTop();saveExam();
 }
 function tickExam(){
   if(curView!=='z'||!examMode){stopExamTimer();return}
@@ -1089,11 +1128,11 @@ function tickExam(){
 }
 function goExamQ(k){
   if(k<0||k>=Q.length)return;
-  idx=k;examSubPend=false;examExitPend=false;quiz();toTop();
+  idx=k;examSubPend=false;examExitPend=false;saveExam();quiz();toTop();
 }
 function togExamMark(){
   if(!examMode)return;
-  examMarks.has(idx)?examMarks.delete(idx):examMarks.add(idx);
+  examMarks.has(idx)?examMarks.delete(idx):examMarks.add(idx);saveExam();
   quiz();
 }
 function tryExitExam(){
@@ -1125,35 +1164,61 @@ function quiz(){curView='z';
   if(examMode){
     const curP=examPicks[idx]||new Set(),ansCnt=examPicks.filter(p=>p.size>0).length,rem=Math.max(0,Math.ceil((examEnd-Date.now())/1000)),sm=getScoreMode(examCourse),nm=getNegMode(examCourse);
     const eHint=multi?(sm==='opt'?`Mehrere Antworten können richtig sein (${q.opts.length} Pkt. – jede Option zählt inkl. Nicht-Ankreuzen${nm==='clamp'?' · −1 Pkt. je Fehler, min. 0':nm==='full'?' · −1 Pkt. je Fehler':''}).`:sm==='pos'?`Mehrere Antworten können richtig sein (+1 Pkt. je richtiger Antwort${nm==='clamp'?' · −1 Pkt. je falscher Wahl, min. 0':nm==='full'?' · −1 Pkt. je falscher Wahl':''}).`:sm==='part'?`Mehrere Antworten können richtig sein (1 Pkt. anteilig über alle Optionen${nm==='clamp'?' · mit Abzug, min. 0':nm==='full'?' · mit Abzug':''}).`:`Mehrere Antworten können richtig sein (1 Pkt. für die gesamte Frage${nm==='full'?' · −1 Pkt. bei Fehler':''}).`):(nm==='full'?'1 Punkt bei richtiger Antwort · −1 Punkt bei falscher Antwort (Offen = 0 Punkte).':'');
-    $app.className='wide';$app.innerHTML=`<div class='cols'><div class='qhead'><div class="row" style="justify-content:space-between"><span class="mut">Prüfung · Frage ${idx+1} von ${Q.length}${q._title?` · ${esc(q._title)}`:''}</span><span class="gc"><span id="etimer" class="badge${rem<=60?' bad':rem<=300?' warn':''}" style="cursor:default;font-variant-numeric:tabular-nums" title="Verbleibende Prüfungszeit">⏱ ${fmtTime(rem)}</span><button class="badge${examMarks.has(idx)?' warn':''}" title="Frage in dieser Prüfung zur Kontrolle vormerken (Taste L)" onclick="togExamMark()">⚑ ${examMarks.has(idx)?'Vorgemerkt':'Später prüfen'}</button><button class="badge${src.flagged?' warn':''}" title="Frage zum späteren Bearbeiten markieren (Taste M)" onclick="togQuizFlag()">${IC.flag}</button>${examExitPend?`<span class="mut">Prüfung abbrechen?</span><button class="btn sm" onclick="examExitPend=false;home()">Ja</button><button class="btn sec sm" onclick="examExitPend=false;quiz()">Nein</button>`:`<button class="btn sec sm" onclick="tryExitExam()">Zurück zur Übersicht</button>`}</span></div>
-    <div class="bar"><i style="width:${ansCnt/Q.length*100}%"></i></div>
+    $app.className='wide';$app.innerHTML=`<div class='cols'><div class='qhead'><div class="row" style="justify-content:space-between"><span class="mut">Prüfung · Frage ${idx+1} von ${Q.length}${q._title?` · ${esc(q._title)}`:''}</span><span class="gc"><span id="etimer" class="badge${rem<=60?' bad':rem<=300?' warn':''}" style="cursor:default;font-variant-numeric:tabular-nums" title="Verbleibende Prüfungszeit">⏱ ${fmtTime(rem)}</span><button class="badge${examMarks.has(idx)?' warn':''}" title="Frage in dieser Prüfung zur Kontrolle vormerken (Taste L)" data-act="togExamMark" data-args='[]'>⚑ ${examMarks.has(idx)?'Vorgemerkt':'Später prüfen'}</button><button class="badge${src.flagged?' warn':''}" title="Frage zum späteren Bearbeiten markieren (Taste M)" aria-label="Zum Bearbeiten markieren" data-act="togQuizFlag" data-args='[]'>${IC.flag}</button>${examExitPend?`<span class="mut">Prüfung abbrechen?</span><button class="btn sm" data-act="_h18">Ja</button><button class="btn sec sm" data-act="_h19">Nein</button>`:`<button class="btn sec sm" data-act="tryExitExam" data-args='[]'>Zurück zur Übersicht</button>`}</span></div>
+    <div class="bar" role="progressbar" aria-label="Fortschritt"><i style="width:${ansCnt/Q.length*100}%"></i></div>
     <p class="q">${esc(q.q)}</p>${eHint?`<p class="mut">${eHint}</p>`:''}</div><div class='qmain'><div class='opts${tiles?' tiles':''}'>
     ${q.opts.map((o,i)=>{
       const selOpt=curP.has(i),c='opt'+(multi?' multi':'')+(selOpt?' sel':''),mk=selOpt?(multi?'✓':'●'):'';
-      return `<button class="${c}" onclick="pick(${i})" aria-pressed="${selOpt}"><span class="m">${mk}</span><span>${esc(o.t)}</span></button>`}).join('')}
+      return `<button class="${c}" data-act="pick" data-args="${esc(JSON.stringify([i]))}" aria-pressed="${selOpt}"><span class="m">${mk}</span><span>${esc(o.t)}</span></button>`}).join('')}
     </div><div class='qfoot'>
-    <div class="row"><button class="btn sec" ${idx===0?'disabled':''} onclick="goExamQ(${idx-1})">← Zurück</button>${idx+1<Q.length?`<button class="btn" onclick="goExamQ(${idx+1})">Weiter →</button>`:`<button class="btn" onclick="tryFinishExam()">Prüfung abgeben</button>`}</div></div></div><div class='side'>${examSide()}</div></div>`;
+    <div class="row"><button class="btn sec" ${idx===0?'disabled':''} data-act="goExamQ" data-args="${esc(JSON.stringify([idx-1]))}">← Zurück</button>${idx+1<Q.length?`<button class="btn" data-act="goExamQ" data-args="${esc(JSON.stringify([idx+1]))}">Weiter →</button>`:`<button class="btn" data-act="tryFinishExam" data-args='[]'>Prüfung abgeben</button>`}</div></div></div><div class='side'>${examSide()}</div></div>`;
     return;
   }
-  $app.className='wide';$app.innerHTML=`<div class='cols'><div class='qhead'><div class="row" style="justify-content:space-between"><span class="mut">Frage ${idx+1} von ${Q.length}</span><span class="gc"><button class="badge${src.flagged?' warn':''}" title="Frage zum späteren Bearbeiten markieren (Taste M)" onclick="togQuizFlag()">${IC.flag} ${src.flagged?'Markiert':'Später bearbeiten'}</button><button class="btn sec sm" onclick="home()">Zurück zur Übersicht</button></span></div>
-  <div class="bar"><i style="width:${(idx+(checked?1:0))/Q.length*100}%"></i></div>
+  $app.className='wide';$app.innerHTML=`<div class='cols'><div class='qhead'><div class="row" style="justify-content:space-between"><span class="mut">Frage ${idx+1} von ${Q.length}</span><span class="gc"><button class="badge${src.flagged?' warn':''}" title="Frage zum späteren Bearbeiten markieren (Taste M)" data-act="togQuizFlag" data-args='[]'>${IC.flag} ${src.flagged?'Markiert':'Später bearbeiten'}</button><button class="btn sec sm" data-act="leaveQuiz" data-args='[]'>Zurück zur Übersicht</button></span></div>
+  <div class="bar" role="progressbar" aria-label="Fortschritt"><i style="width:${(idx+(checked?1:0))/Q.length*100}%"></i></div>
   <p class="q">${esc(q.q)}</p>${multi?'<p class="mut">Mehrere Antworten können richtig sein.</p>':''}</div><div class='qmain'><div class='opts${tiles?' tiles':''}'>
   ${q.opts.map((o,i)=>{
     let c='opt'+(multi?' multi':''),mk='';
     if(!checked){if(picked.has(i)){c+=' sel';mk=multi?'✓':''}}
     else{const p=picked.has(i);if(o.ok&&p){c+=' ok';mk='✓'}else if(o.ok){c+=' ok miss';mk='✓'}else if(p){c+=' bad';mk='✕'}}
-    return `<button class="${c}" ${checked?'disabled':''} onclick="pick(${i})" aria-pressed="${picked.has(i)}"><span class="m">${mk}</span><span>${esc(o.t)}${checked&&o.why?`<span class="why">${esc(o.why)}</span>`:''}</span></button>`}).join('')}
+    return `<button class="${c}" ${checked?'disabled':''} data-act="pick" data-args="${esc(JSON.stringify([i]))}" aria-pressed="${picked.has(i)}"><span class="m">${mk}</span><span>${esc(o.t)}${checked&&o.why?`<span class="why">${esc(o.why)}</span>`:''}</span></button>`}).join('')}
   </div><div class='qfoot'>
-  <div class="row">${checked?`<button class="btn" onclick="next()">${idx+1<Q.length?'Weiter':'Ergebnis anzeigen'}</button>`:`<button class="btn" ${picked.size?'':'disabled'} onclick="check()">Antwort prüfen</button>`}</div></div></div><div class='side'>${side(q)}</div></div>`;
+  <div class="row">${checked?`<button class="btn" data-act="next" data-args='[]'>${idx+1<Q.length?'Weiter':'Ergebnis anzeigen'}</button>`:`<button class="btn" ${picked.size?'':'disabled'} data-act="check" data-args='[]'>Antwort prüfen</button>`}</div></div></div><div class='side'>${side(q)}</div></div>`;
 }
+let okFlag=false,histBusy=false;
+function syncHist(){try{
+  if(curView!=='q'&&!(history.state&&history.state.v))history.pushState({v:1},'');
+  else if(curView==='q'&&history.state&&history.state.v){histBusy=true;history.back()}
+}catch(e){}}
+window.addEventListener('popstate',()=>{
+  if(histBusy){histBusy=false;return}
+  if(curView==='q')return;
+  if(curView==='z'){history.pushState({v:1},'');examMode?tryExitExam():leaveQuiz()}else home();
+});
+/* Eigener Bestätigungsdialog (window.confirm/prompt sind in eingebetteten Umgebungen oft blockiert) */
+function appDialog(msg,onYes,word){
+  const prev=document.activeElement,o=document.createElement('div');
+  o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');
+  o.style.cssText='position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:16px';
+  o.innerHTML='<div style="background:Canvas;color:CanvasText;max-width:420px;width:100%;padding:18px;border-radius:12px;border:2px solid var(--ink)"><p style="margin:0 0 12px"></p>'+(word?'<input style="width:100%;margin-bottom:12px" autocomplete="off" aria-label="Bestätigung">':'')+'<div class="row" style="justify-content:flex-end"><button class="btn sec sm" data-n>Abbrechen</button><button class="btn sm" data-y>OK</button></div></div>';
+  o.querySelector('p').textContent=msg;
+  const inp=o.querySelector('input'),close=()=>{o.remove();if(prev&&prev.focus&&document.contains(prev))prev.focus({preventScroll:true})},
+  yes=()=>{if(word&&(!inp||inp.value.trim()!==word)){inp&&inp.focus();return}close();onYes()};
+  o.querySelector('[data-n]').onclick=close;o.querySelector('[data-y]').onclick=yes;
+  o.addEventListener('click',e=>{if(e.target===o)close()});
+  o.addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Escape')close();else if(e.key==='Enter'&&e.target.tagName==='INPUT')yes()});
+  document.body.appendChild(o);(inp||o.querySelector('[data-y]')).focus();
+}
+function leaveQuiz(){if(!log.some(v=>v!==undefined))home();else appDialog('Quiz beenden? Das Ergebnis dieser Runde geht verloren.',home)}
 function pick(i){
   if(examMode){
     const curP=examPicks[idx]||(examPicks[idx]=new Set());
     if(Q[idx].type==='multi'){curP.has(i)?curP.delete(i):curP.add(i)}else{examPicks[idx]=new Set([i])}
-    examSubPend=false;examExitPend=false;quiz();return;
+    examSubPend=false;examExitPend=false;saveExam();quiz();return;
   }
   if(checked)return;
   if(Q[idx].type==='multi'){picked.has(i)?picked.delete(i):picked.add(i)}else{picked=new Set([i])}
+  if(opts.autoCheck&&Q[idx].type!=='multi'){check();return}
   quiz();
 }
 function check(){
@@ -1171,10 +1236,10 @@ function examSide(){
   return `<div class="card"><div class="row" style="justify-content:space-between"><b>Fragenübersicht</b><span class="mut">${ansCnt} / ${Q.length} beantwortet</span></div>
   <div class="enav">${Q.map((_,i)=>{
     const cl=[i===idx?'cur':'',examMarks.has(i)?'mk':examPicks[i]&&examPicks[i].size?'ans':''].filter(Boolean).join(' ');
-    return `<button class="${cl}" onclick="goExamQ(${i})" title="Frage ${i+1}${examMarks.has(i)?' (vorgemerkt)':examPicks[i]&&examPicks[i].size?' (beantwortet)':' (offen)'}">${i+1}</button>`;
+    return `<button class="${cl}" data-act="goExamQ" data-args="${esc(JSON.stringify([i]))}" title="Frage ${i+1}${examMarks.has(i)?' (vorgemerkt)':examPicks[i]&&examPicks[i].size?' (beantwortet)':' (offen)'}">${i+1}</button>`;
   }).join('')}</div>
   <p class="mut" style="font-size:.82rem;margin:4px 0 10px">Klicke auf eine Nummer, um direkt zur Frage zu springen.</p>
-  ${examSubPend?`<div class="card" style="border-color:var(--warn);padding:10px 12px;margin-top:8px"><p style="margin:0 0 8px"><b>Noch ${openCnt} ${openCnt===1?'Frage':'Fragen'} unbeantwortet.</b><br><span class="mut">Nicht beantwortete Fragen geben 0 Punkte.</span></p><div class="row"><button class="btn sm" onclick="finishExam(false)">Jetzt abgeben</button><button class="btn sec sm" onclick="examSubPend=false;quiz()">Weiterarbeiten</button></div></div>`:`<button class="btn${openCnt?' sec':''}" style="width:100%" onclick="tryFinishExam()">Prüfung abgeben (${ansCnt}/${Q.length})</button>`}</div>`;
+  ${examSubPend?`<div class="card" style="border-color:var(--warn);padding:10px 12px;margin-top:8px"><p style="margin:0 0 8px"><b>Noch ${openCnt} ${openCnt===1?'Frage':'Fragen'} unbeantwortet.</b><br><span class="mut">Nicht beantwortete Fragen geben 0 Punkte.</span></p><div class="row"><button class="btn sm" data-act="finishExam" data-args='[false]'>Jetzt abgeben</button><button class="btn sec sm" data-act="_h20">Weiterarbeiten</button></div></div>`:`<button class="btn${openCnt?' sec':''}" style="width:100%" data-act="tryFinishExam" data-args='[]'>Prüfung abgeben (${ansCnt}/${Q.length})</button>`}</div>`;
 }
 
 let rexp=new Set(),gopen=0,rgopen={};
@@ -1188,13 +1253,13 @@ function togResFlag(i){
   save(true);result();
 }
 function resQList(title,smode,nmode){
-  return `<div class="row" style="justify-content:space-between;margin:1.4em 0 .6em"><h2 style="margin:0">${title} (${Q.length})</h2><button class="btn sec sm" onclick="togAllRexp()">${rexp.size===Q.length?'Alle zuklappen':'Alle aufklappen'}</button></div>
+  return `<div class="row" style="justify-content:space-between;margin:1.4em 0 .6em"><h2 style="margin:0">${title} (${Q.length})</h2><button class="btn sec sm" data-act="togAllRexp" data-args='[]'>${rexp.size===Q.length?'Alle zuklappen':'Alle aufklappen'}</button></div>
   ${Q.map((q,i)=>{
     const p=examPicks[i]||new Set(),ok=log[i],src=q._ref||q,open=rexp.has(i),multi=q.type==='multi',sc=examMode?scoreExamQ(q,p,smode,nmode):null;
     const acCol=examMode?(sc.ok?'--ok':(sc.part||sc.open)?'--warn':'--bad'):(ok?'--ok':p.size?'--bad':'--warn');
     const bCls=examMode?(sc.ok?'ok':(sc.part||sc.open)?'warn':'bad'):(ok?'ok':p.size?'bad':'warn');
     const bTxt=examMode?`${sc.ok?'✓ Richtig':sc.part?'Teilweise':sc.open?'Offen':'✕ Falsch'} · ${fmtPts(sc.pts)} / ${fmtPts(sc.max)} Pkt.`:(ok?'✓ Richtig':p.size?'✕ Falsch':'Offen');
-    return `<div class="card" style="margin:12px 0;padding:12px 16px;border-left:4px solid var(${acCol})"><div style="display:flex;gap:10px;align-items:flex-start;justify-content:space-between"><button class="sb" style="padding:2px 0" aria-expanded="${open}" onclick="togRexp(${i})"><span>${open?'▾':'▸'}</span><span><span class="mut" style="display:block;font-size:.82rem;margin-bottom:2px">Frage ${i+1}${q._title?` · ${esc(q._title)}`:''}</span><b>${esc(q.q)}</b></span></button><span class="gc"><span class="badge ${bCls}" style="cursor:default">${bTxt}</span><button class="x${src.flagged?' warn':''}" title="${src.flagged?'Markierung aufheben':'Zum Bearbeiten markieren'}" aria-label="Markieren" onclick="togResFlag(${i})">${IC.flag}</button></span></div>${open?`<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--bd)">${!p.size?`<p class="mut" style="margin:0 0 8px;color:var(--warn)"><b>Keine Antwort ausgewählt (0 Punkte).</b></p>`:''}${q.opts.map((o,k)=>{
+    return `<div class="card" style="margin:12px 0;padding:12px 16px;border-left:4px solid var(${acCol})"><div style="display:flex;gap:10px;align-items:flex-start;justify-content:space-between"><button class="sb" style="padding:2px 0" aria-expanded="${open}" data-act="togRexp" data-args="${esc(JSON.stringify([i]))}"><span>${open?'▾':'▸'}</span><span><span class="mut" style="display:block;font-size:.82rem;margin-bottom:2px">Frage ${i+1}${q._title?` · ${esc(q._title)}`:''}</span><b>${esc(q.q)}</b></span></button><span class="gc"><span class="badge ${bCls}" style="cursor:default">${bTxt}</span><button class="x${src.flagged?' warn':''}" title="${src.flagged?'Markierung aufheben':'Zum Bearbeiten markieren'}" aria-label="Markieren" data-act="togResFlag" data-args="${esc(JSON.stringify([i]))}">${IC.flag}</button></span></div>${open?`<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--bd)">${!p.size?`<p class="mut" style="margin:0 0 8px;color:var(--warn)"><b>Keine Antwort ausgewählt (0 Punkte).</b></p>`:''}${q.opts.map((o,k)=>{
       const pk=p.has(k);let c='opt'+(multi?' multi':''),mk='',note='';
       const optStep=examMode&&multi&&!sc.open&&smode!=='all'?(smode==='part'?fmtPts(1/q.opts.length):'1'):'';
       if(o.ok&&pk){c+=' ok';mk='✓';note=optStep?`Deine Antwort (richtig · +${optStep} Pkt.)`:'Deine Antwort (richtig)'}
@@ -1202,7 +1267,7 @@ function resQList(title,smode,nmode){
       else if(pk){c+=' bad';mk='✕';note=optStep?`Deine Antwort (falsch · ${nmode==='none'?'0':'−'+optStep} Pkt.)`:'Deine Antwort (falsch)'}
       else if(optStep&&(smode==='opt'||smode==='part')){mk='✓';note=`Richtig nicht gewählt (+${optStep} Pkt.)`}
       return `<div class="${c}" style="cursor:default${!o.ok&&!pk&&!(optStep&&(smode==='opt'||smode==='part'))?';opacity:.72':''}"><span class="m">${mk}</span><span>${esc(o.t)}${note||o.why?`<span class="why">${note?`<b>${note}</b>${o.why?' · ':''}`:''}${esc(o.why||'')}</span>`:''}</span></div>`;
-    }).join('')}${q.exp?`<div class="exp" style="margin:8px 0 2px"><b style="color:var(--ac);display:block;margin-bottom:2px">Begründung</b>${esc(q.exp)}</div>`:''}${(()=>{const gt=terms(q),curG=rgopen[i]??0,ag=gt[curG];return gt.length?`<div class="card" style="margin-top:8px;padding:10px 12px;background:var(--bg)"><div class="row" style="justify-content:space-between;gap:6px"><b style="font-size:.88rem">Glossar (${gt.length})</b><span class="mut" style="font-size:.78rem">${ag?'Antippen zum Wechseln / Schließen':'Begriff antippen'}</span></div><div class="gtabs">${gt.map((g,gi)=>`<button class="gtab${curG===gi?' on':''}" style="background:var(${curG===gi?'--ac':'--card'})" aria-expanded="${curG===gi}" onclick="togRGloss(${i},${gi})">${isym(IC.book)}${esc(g.b)}</button>`).join('')}</div>${ag?`<div class="gbox" style="background:var(--card)"><b>${esc(ag.b)}</b> – ${esc(ag.i)}</div>`:''}</div>`:''})()}</div>`:''}</div>`;
+    }).join('')}${q.exp?`<div class="exp" style="margin:8px 0 2px"><b style="color:var(--ac);display:block;margin-bottom:2px">Begründung</b>${esc(q.exp)}</div>`:''}${(()=>{const gt=terms(q),curG=rgopen[i]??0,ag=gt[curG];return gt.length?`<div class="card" style="margin-top:8px;padding:10px 12px;background:var(--bg)"><div class="row" style="justify-content:space-between;gap:6px"><b style="font-size:.88rem">Glossar (${gt.length})</b><span class="mut" style="font-size:.78rem">${ag?'Antippen zum Wechseln / Schließen':'Begriff antippen'}</span></div><div class="gtabs">${gt.map((g,gi)=>`<button class="gtab${curG===gi?' on':''}" style="background:var(${curG===gi?'--ac':'--card'})" aria-expanded="${curG===gi}" data-act="togRGloss" data-args="${esc(JSON.stringify([i,gi]))}">${isym(IC.book)}${esc(g.b)}</button>`).join('')}</div>${ag?`<div class="gbox" style="background:var(--card)"><b>${esc(ag.b)}</b> – ${esc(ag.i)}</div>`:''}</div>`:''})()}</div>`:''}</div>`;
   }).join('')}`;
 }
 
@@ -1237,18 +1302,19 @@ function result(){stopExamTimer();const chg=curView!=='r';curView='r';$app.class
         <span class="badge ${gr.ok?'ok':'bad'}" style="cursor:default;font-size:.95rem;padding:6px 14px;box-shadow:0 1px 2px rgba(0,0,0,.04)">${gr.ok?'✓ Positiv (Bestanden)':'✕ Negativ (Nicht bestanden)'}</span>
       </div>
       <div style="margin-top:12px;padding-top:10px;border-top:1px solid color-mix(in srgb,var(${resCol}) 20%,var(--bd))">
+        <p class="mut" style="margin:0 0 6px;font-size:.82rem">Hinweis: Änderungen an Wertung, Minuspunkten und Notenschema gelten dauerhaft für diesen Kurs, auch für künftige Prüfungen.</p>
         <div class="row" style="gap:12px;margin-bottom:8px">
-          ${hasMC?`<label class="mut">MC-Wertung: <select class="inl" onchange="setActiveScoreMode(this.value,examCourse);result()"><option value="all" ${smode==='all'?'selected':''}>Gesamtfrage (Alles-oder-nichts)</option><option value="opt" ${smode==='opt'?'selected':''}>Einzelantworten (inkl. Nicht-Ankreuzen)</option><option value="pos" ${smode==='pos'?'selected':''}>Einzelantworten (nur richtige)</option><option value="part" ${smode==='part'?'selected':''}>Teilpunkte (1 Pkt./Frage)</option></select></label>`:''}
-          <label class="mut">Minuspunkte: <select class="inl" onchange="setActiveNegMode(this.value,examCourse);result()"><option value="none" ${nmode==='none'?'selected':''}>Keine Minuspunkte</option>${hasMC||nmode==='clamp'?`<option value="clamp" ${nmode==='clamp'?'selected':''}>Min. 0 Pkt. pro Frage</option>`:''}<option value="full" ${nmode==='full'?'selected':''}>Gesamtabzug (auch &lt; 0)</option></select></label>
+          ${hasMC?`<label class="mut">MC-Wertung: <select class="inl" data-chg="_rSM" data-args="${esc(JSON.stringify([examCourse]))}"><option value="all" ${smode==='all'?'selected':''}>Gesamtfrage (Alles-oder-nichts)</option><option value="opt" ${smode==='opt'?'selected':''}>Einzelantworten (inkl. Nicht-Ankreuzen)</option><option value="pos" ${smode==='pos'?'selected':''}>Einzelantworten (nur richtige)</option><option value="part" ${smode==='part'?'selected':''}>Teilpunkte (1 Pkt./Frage)</option></select></label>`:''}
+          <label class="mut">Minuspunkte: <select class="inl" data-chg="_rNM" data-args="${esc(JSON.stringify([examCourse]))}"><option value="none" ${nmode==='none'?'selected':''}>Keine Minuspunkte</option>${hasMC||nmode==='clamp'?`<option value="clamp" ${nmode==='clamp'?'selected':''}>Min. 0 Pkt. pro Frage</option>`:''}<option value="full" ${nmode==='full'?'selected':''}>Gesamtabzug (auch &lt; 0)</option></select></label>
         </div>
         <div class="row" style="justify-content:space-between">
-          <label class="mut">Notenschema${examCourse?` (${esc(examCourse)})`:''}: <select class="inl" onchange="setActivePass(this.value,examCourse);result()"><option value="50" ${passPct===50?'selected':''}>Positiv ab 50 %</option><option value="60" ${passPct===60?'selected':''}>Positiv ab 60 %</option><option value="70" ${passPct===70?'selected':''}>Positiv ab 70 %</option></select></label>
+          <label class="mut">Notenschema${examCourse?` (${esc(examCourse)})`:''}: <select class="inl" data-chg="_rP" data-args="${esc(JSON.stringify([examCourse]))}"><option value="50" ${passPct===50?'selected':''}>Positiv ab 50 %</option><option value="60" ${passPct===60?'selected':''}>Positiv ab 60 %</option><option value="70" ${passPct===70?'selected':''}>Positiv ab 70 %</option></select></label>
           <span class="mut" style="font-size:.84rem"><b>1:</b> ≥${fmtPct(passPct+3*st)} · <b>2:</b> ≥${fmtPct(passPct+2*st)} · <b>3:</b> ≥${fmtPct(passPct+st)} · <b>4:</b> ≥${fmtPct(passPct)} · <b>5:</b> &lt;${fmtPct(passPct)}</span>
         </div>
       </div>
     </div>
     ${chEntries.length>1?`<div class="card" style="margin-top:12px"><b>Auswertung nach Kapiteln</b><div style="margin-top:6px">${chEntries.map(([t,v])=>{const cp=v.max>0?Math.round(Math.max(0,v.pts)/v.max*100):0;return `<div class="qi" style="padding:6px 0"><span>${esc(t)}</span><span class="badge ${cp>=passPct?'ok':'bad'}" style="cursor:default">${fmtPts(Math.max(0,v.pts))} / ${fmtPts(v.max)} Pkt. (${cp} %)</span></div>`}).join('')}</div></div>`:''}
-    <div class="row act" style="margin-top:14px"><button class="btn" onclick="startExam()">Neue Prüfung starten</button>${wrong.length?`<button class="btn sec" onclick="start(wrongPool())">Falsche Fragen üben (${wrong.length})</button>`:''}<button class="btn sec" onclick="home()">Zur Übersicht</button></div>
+    <div class="row act" style="margin-top:14px"><button class="btn" data-act="startExam" data-args='[]'>Neue Prüfung starten</button>${wrong.length?`<button class="btn sec" data-act="_h21">Falsche Fragen üben (${wrong.length})</button>`:''}<button class="btn sec" data-act="home" data-args='[]'>Zur Übersicht</button></div>
     ${flaggedHtml()}
     ${resQList('Klausureinsicht',smode,nmode)}`;
     if(chg)toTop();
@@ -1267,19 +1333,21 @@ function result(){stopExamTimer();const chg=curView!=='r';curView='r';$app.class
       <span class="badge ${pct>=80?'ok':pct>=50?'':pct>0?'warn':'bad'}" style="cursor:default;font-size:1.15rem;padding:8px 16px;font-weight:700">${pct} %</span>
     </div>
   </div>
-  <div class="row act" style="margin-top:14px">${wrong.length?`<button class="btn" onclick="start(wrongPool())">Falsche Fragen wiederholen (${wrong.length})</button>`:''}<button class="btn sec" onclick="home()">Zur Übersicht</button></div>
+  <div class="row act" style="margin-top:14px">${wrong.length?`<button class="btn" data-act="_h21">Falsche Fragen wiederholen (${wrong.length})</button>`:''}<button class="btn sec" data-act="home" data-args='[]'>Zur Übersicht</button></div>
   ${flaggedHtml()}
   ${resQList('Beantwortete Fragen')}`;
   if(chg)toTop();
 }
 function has(t,w,short){let i=t.indexOf(w);while(i>=0){if(!short)return true;const a=t[i-1]||' ',b=t[i+w.length]||' ';if(!/[a-zäöüß0-9]/.test(a)&&!/[a-zäöüß0-9]/.test(b))return true;i=t.indexOf(w,i+1)}return false}
 function cntHit(t,w,short){let i=t.indexOf(w),c=0;while(i>=0){if(!short)c++;else{const a=t[i-1]||' ',b=t[i+w.length]||' ';if(!/[a-zäöüß0-9]/.test(a)&&!/[a-zäöüß0-9]/.test(b))c++}i=t.indexOf(w,i+1)}return c}
-function terms(q){
-  const opts=q.opts||[],tQ=String(q.q||'').toLowerCase();
-  const tOk=opts.filter(o=>o.ok).map(o=>o.t||'').join(' ').toLowerCase();
+let termsCache=new WeakMap();
+function terms(q){const c=termsCache.get(q);if(c&&c.g===gloss&&c.gl===gloss.length&&c.sl===sets.length)return c.r;const r=computeTerms(q);termsCache.set(q,{g:gloss,gl:gloss.length,sl:sets.length,r});return r}
+function computeTerms(q){
+  const qo=q.opts||[],tQ=String(q.q||'').toLowerCase();
+  const tOk=qo.filter(o=>o.ok).map(o=>o.t||'').join(' ').toLowerCase();
   const tExpMain=String(q.exp||'').toLowerCase(),tExpHead=tExpMain.slice(0,140);
-  const tExp=(tExpMain+' '+opts.filter(o=>o.ok).map(o=>o.why||'').join(' ')).toLowerCase();
-  const tWrong=opts.filter(o=>!o.ok).map(o=>(o.t||'')+' '+(o.why||'')).join(' ').toLowerCase();
+  const tExp=(tExpMain+' '+qo.filter(o=>o.ok).map(o=>o.why||'').join(' ')).toLowerCase();
+  const tWrong=qo.filter(o=>!o.ok).map(o=>(o.t||'')+' '+(o.why||'')).join(' ').toLowerCase();
   const crs=q._course?norm(q._course):'';
   const pool=crs?gloss.filter(g=>norm(g.course)===crs):gloss;
   const cQs=[];sets.forEach(s=>{if(!crs||norm(s.course)===crs)(s.qs||[]).forEach(x=>cQs.push(x))});
@@ -1313,7 +1381,7 @@ function terms(q){
 function side(q){
   if(!checked)return `<div class='card ph'><p class='mut' style='margin:0'>Nach dem Prüfen der Antwort erscheinen hier die Begründung und passende Begriffe aus dem Glossar.</p></div>`;
   const src=q._ref||q,st=src.streak||0,m=isMastered(src),t=terms(q),ag=t[gopen];
-  return `<div class="exp" style="margin:0"><div class="row" style="justify-content:space-between;margin-bottom:4px"><b style="color:var(--ac)">Begründung</b><span class="badge ${m?'ok':src.wrong?'bad':''}" style="cursor:default">${m?`✓ Gemeistert (${st}/${opts.mastery})`:`Lernstand: ${st} / ${opts.mastery}`}</span></div>${esc(q.exp)}</div><div class='card'><div class="row" style="justify-content:space-between;gap:6px"><b>Weiterführende Informationen</b>${t.length?`<span class="mut" style="font-size:.8rem">${ag?'Antippen zum Wechseln / Schließen':'Begriff antippen'}</span>`:''}</div>${t.length?`<div class="gtabs">${t.map((g,i)=>`<button class="gtab${gopen===i?' on':''}" aria-expanded="${gopen===i}" onclick="togQGloss(${i})">${isym(IC.book)}${esc(g.b)}</button>`).join('')}</div>${ag?`<div class="gbox"><b>${esc(ag.b)}</b> – ${esc(ag.i)}</div>`:''}`:`<p class='mut'>Zu dieser Frage ist für diesen Kurs noch kein Begriff im Glossar hinterlegt.</p>`}</div>`}
+  return `<div class="exp" style="margin:0"><div class="row" style="justify-content:space-between;margin-bottom:4px"><b style="color:var(--ac)">Begründung</b><span class="badge ${m?'ok':src.wrong?'bad':''}" style="cursor:default">${m?`✓ Gemeistert (${st}/${opts.mastery})`:`Lernstand: ${st} / ${opts.mastery}`}</span></div>${esc(q.exp)}</div><div class='card'><div class="row" style="justify-content:space-between;gap:6px"><b>Weiterführende Informationen</b>${t.length?`<span class="mut" style="font-size:.8rem">${ag?'Antippen zum Wechseln / Schließen':'Begriff antippen'}</span>`:''}</div>${t.length?`<div class="gtabs">${t.map((g,i)=>`<button class="gtab${gopen===i?' on':''}" aria-expanded="${gopen===i}" data-act="togQGloss" data-args="${esc(JSON.stringify([i]))}">${isym(IC.book)}${esc(g.b)}</button>`).join('')}</div>${ag?`<div class="gbox"><b>${esc(ag.b)}</b> – ${esc(ag.i)}</div>`:''}`:`<p class='mut'>Zu dieser Frage ist für diesen Kurs noch kein Begriff im Glossar hinterlegt.</p>`}</div>`}
 function addGloss(l,noSave){
   l.forEach(g=>{
     if(!g||!(g.begriff||g.b)||!(g.info||g.i))return;
@@ -1348,7 +1416,7 @@ async function ensureCloudRepo(tok){
   const rp=await ghReq('GET',`/repos/${login}/${SYNC_REPO}`,null,tok);
   if(rp.status===404){
     const cr=await ghReq('POST','/user/repos',{name:SYNC_REPO,private:true,auto_init:true,description:'Privater Cloud-Speicher für Quizomat'},tok);
-    if(!cr.ok)throw new Error('Privates Sync-Repository konnte nicht angelegt werden (hat der Token die „repo“-Berechtigung?).');
+    if(!cr.ok)throw new Error('Privates Sync-Repository konnte nicht angelegt werden (hat der Token die „repo“-Berechtigung? Sonst das private Repository quizomat-sync manuell anlegen).');
   }
   return login;
 }
@@ -1389,6 +1457,7 @@ function mergeCloudOpts(ro,preferRemote){
     cneg:mm(opts.cneg,ro.cneg),
     corder:Array.isArray(pick(opts.corder,ro.corder))?pick(opts.corder,ro.corder).filter(Boolean):[],
     shuffle:pick(opts.shuffle,ro.shuffle)!==false,
+    autoCheck:pick(opts.autoCheck,ro.autoCheck)===true,
     hideMastered:pick(opts.hideMastered,ro.hideMastered)!==false,
     mastery:Math.max(1,Math.min(10,+pick(opts.mastery,ro.mastery)||3)),
     theme:THEMES.includes(pick(opts.theme,ro.theme))?pick(opts.theme,ro.theme):'auto'
@@ -1436,9 +1505,37 @@ function applyCloudState(d){
   }
   enforceSingleCourse();
   exp=new Set([...exp].filter(id=>sets.some(s=>s.id===id)));
-  saveSel();saveExp();
+  saveSel();saveExp();writeBase(sets);
 }
 
+/* 3-Wege-Merge (Basis = letzter synchronisierter Stand): Änderungen und Löschungen beider Seiten bleiben erhalten */
+const jj=JSON.stringify,qk=q=>norm(q.q),sk=s=>norm(s.course)+'|'+norm(s.title);
+let m3rem=false;
+function readBase(){try{const v=localStorage.getItem('pt:base');return v?JSON.parse(v):null}catch(e){return null}}
+function writeBase(x){try{localStorage.setItem('pt:base',jj(x));localStorage.setItem('pt:gbase',jj(gloss))}catch(e){}}
+function readGBase(){try{const v=localStorage.getItem('pt:gbase');return v?JSON.parse(v):null}catch(e){return null}}
+const gk=g=>norm(g.course)+'|'+String(g.b||'').toLowerCase();
+function merge3gloss(rg,rt){m3rem=rt>localTs;gloss=m3(readGBase(),gloss,rg,gk,(L,R)=>m3rem?R:L);normGloss()}
+function m3(b,l,r,k,both){
+  const bm=new Map((b||[]).map(x=>[k(x),x])),lm=new Map(l.map(x=>[k(x),x])),rm=new Map(r.map(x=>[k(x),x])),out=[];
+  new Set([...lm.keys(),...rm.keys()]).forEach(key=>{
+    const B=bm.get(key),L=lm.get(key),R=rm.get(key);
+    if(L&&R){if(jj(L)===jj(R))out.push(L);else if(B&&jj(L)===jj(B))out.push(R);else if(B&&jj(R)===jj(B))out.push(L);else out.push(both(L,R,B))}
+    else if(L){if(!(B&&jj(L)===jj(B)))out.push(L)}
+    else if(!(B&&jj(R)===jj(B)))out.push(R);
+  });
+  return out}
+function mq(L,R){const[o,n]=m3rem?[L,R]:[R,L],st=Math.max(L.streak||0,R.streak||0);return{...o,...n,streak:st,wrong:st>0?false:n.wrong,flagged:!!(L.flagged||R.flagged)}}
+function merge3sets(rs,rt){const b=readBase();m3rem=rt>localTs;
+  sets=m3(b,sets,rs,sk,(L,R,B)=>({...(m3rem?L:R),...(m3rem?R:L),id:L.id,qs:m3(B&&B.qs,L.qs||[],R.qs||[],qk,mq)}))}
+function bothChanged(d){const b=readBase(),g=readGBase();return (!!b&&Array.isArray(d.sets)&&jj(d.sets)!==jj(b)&&jj(sets)!==jj(b))||(!!g&&Array.isArray(d.gloss)&&jj(d.gloss)!==jj(g)&&jj(gloss)!==jj(g))}
+function mergeFrom(d){const rt=d.updatedAt||0;
+  merge3sets(d.sets,rt);
+  if(d.opts)mergeCloudOpts(d.opts,rt>=localTs);
+  if(Array.isArray(d.gloss))merge3gloss(d.gloss,rt);
+  if(d.courses&&typeof d.courses==='object')courses={...d.courses,...courses};
+  localTs=Date.now();
+  try{localStorage.setItem('pt:sets',jj(sets));localStorage.setItem('pt:gloss',jj(gloss));localStorage.setItem('pt:courses',jj(courses));localStorage.setItem('pt:ts',String(localTs))}catch(e){}}
 async function pushCloudNow(retry){
   if(!gh.token)return;
   clearTimeout(syncTimer);
@@ -1460,17 +1557,17 @@ async function pushCloudNow(retry){
     if((res.status===409||res.status===422)&&!retry){
       const cur=await fetchCloudState();
       gh.sha=cur.sha;
-      if(!forceOverwrite&&cur.data){
+      if(cur.data){
         if(cur.data.opts)mergeCloudOpts(cur.data.opts,false);
-        if(Array.isArray(cur.data.sets))mergeSets(cur.data.sets);
-        if(Array.isArray(cur.data.gloss))addGloss(cur.data.gloss,true);
+        if(Array.isArray(cur.data.sets))merge3sets(cur.data.sets,cur.data.updatedAt||0);
+        if(Array.isArray(cur.data.gloss))merge3gloss(cur.data.gloss,cur.data.updatedAt||0);
         try{localStorage.setItem('pt:sets',JSON.stringify(sets));localStorage.setItem('pt:gloss',JSON.stringify(gloss))}catch(e){}
       }
       return await pushCloudNow(true);
     }
     if(!res.ok)throw new Error('Speichern in Cloud fehlgeschlagen ('+res.status+').');
     gh.sha=(res.data&&res.data.content&&res.data.content.sha)||gh.sha;
-    gh.lastSync=Date.now();forceOverwrite=false;saveGH();
+    gh.lastSync=Date.now();forceOverwrite=false;syncDirty=false;writeBase(sets);saveGH();
     syncState='ok';updSyncUI();
   }catch(e){
     syncState='err';syncErr=e.message||'Synchronisationsfehler';updSyncUI();
@@ -1487,9 +1584,9 @@ async function pullCloud(isConnect){
     if(isConnect){
       if(d&&(sets.length||gloss.length)){
         if(d.courses&&typeof d.courses==='object')courses={...d.courses,...courses};
-        if(Array.isArray(d.sets))mergeSets(d.sets);
+        if(Array.isArray(d.sets))merge3sets(d.sets,remTs);
         if(d.opts)mergeCloudOpts(d.opts,remTs>=localTs);
-        if(Array.isArray(d.gloss))addGloss(d.gloss,true);
+        if(Array.isArray(d.gloss))merge3gloss(d.gloss,remTs);
         localTs=Date.now();
         try{localStorage.setItem('pt:sets',JSON.stringify(sets));localStorage.setItem('pt:gloss',JSON.stringify(gloss));localStorage.setItem('pt:courses',JSON.stringify(courses));localStorage.setItem('pt:ts',String(localTs))}catch(e){}
         await pushCloudNow(true);
@@ -1499,6 +1596,10 @@ async function pullCloud(isConnect){
       }else{
         await pushCloudNow(true);
       }
+    }else if(d&&bothChanged(d)){
+      mergeFrom(d);
+      if(curView==='q'&&cedit===null&&sedit===null&&qedit===null&&!qsearch)home();
+      await pushCloudNow(true);return;
     }else if(d&&remTs>localTs){
       applyCloudState(d);
       gh.lastSync=Date.now();saveGH();syncState='ok';
@@ -1524,16 +1625,16 @@ function cloudHtml(){
     <p><b>Status:</b> ${syncState==='syncing'?'Synchronisiere …':syncState==='err'?`<span style="color:var(--bad)">Fehler (${esc(syncErr)})</span>`:`<span style="color:var(--ok)">✓ Verbunden${gh.user?` als @${esc(gh.user)}`:''}</span>`}</p>
     <p class="mut">Privates Repository: <code>${esc(gh.user||'…')}/${SYNC_REPO}</code><br>Letzter Abgleich: ${esc(last)}</p>
     <div class="row" style="margin-top:12px">
-      <button class="btn" ${syncState==='syncing'?'disabled':''} onclick="pullCloud(false)">Jetzt synchronisieren</button>
-      <button class="btn sec" onclick="disconnectCloud()">Verbindung trennen</button>
+      <button class="btn" ${syncState==='syncing'?'disabled':''} data-act="_h22">Jetzt synchronisieren</button>
+      <button class="btn sec" data-act="disconnectCloud" data-args='[]'>Verbindung trennen</button>
     </div>
   </div>`:`<div class="card ge" style="margin-top:12px">
     <label for="ght"><b>GitHub Personal Access Token</b></label>
-    <p class="mut" style="margin:2px 0 8px">Gib deinen GitHub-Token (<code>ghp_…</code> mit <code>repo</code>-Berechtigung) ein. Der Token wird ausschließlich lokal auf diesem Gerät gespeichert.</p>
+    <p class="mut" style="margin:2px 0 8px">Empfohlen: Fine-grained Token nur für das Repository <code>quizomat-sync</code> (Berechtigung „Contents“: Read and write); das private Repository vorher anlegen. Ein klassischer Token mit <code>repo</code> geht auch, gibt aber Zugriff auf alle deine Repositories. Der Token wird ausschließlich lokal auf diesem Gerät gespeichert.</p>
     <input id="ght" type="password" placeholder="ghp_…" autocomplete="off">
-    <p class="err">${esc(syncErr)}</p>
+    <p class="err" role="alert">${esc(syncErr)}</p>
     <div class="row" style="margin-top:8px">
-      <button class="btn" ${syncState==='syncing'?'disabled':''} onclick="connectCloud()">${syncState==='syncing'?'Verbinde …':'Verbinden & Synchronisieren'}</button>
+      <button class="btn" ${syncState==='syncing'?'disabled':''} data-act="_h23">${syncState==='syncing'?'Verbinde …':'Verbinden & Synchronisieren'}</button>
     </div>
   </div>`;
 }
@@ -1560,7 +1661,8 @@ function disconnectCloud(){
   updSyncUI();
 }
 
-const autoPull=()=>{if(document.visibilityState==='visible'&&gh.token&&syncState!=='syncing')pullCloud(false)};
+const autoPull=()=>{if(document.visibilityState==='visible'&&gh.token&&syncState!=='syncing'&&curView!=='z'&&Date.now()-lastPull>30000){lastPull=Date.now();pullCloud(false)}};
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&gh.token&&syncDirty&&syncState!=='syncing')pushCloudNow()});
 document.addEventListener('visibilitychange',autoPull);
 window.addEventListener('focus',autoPull);
 window.addEventListener('pageshow',autoPull);
@@ -1596,11 +1698,51 @@ document.addEventListener('keydown',ev=>{
   }else if((ev.key==='m'||ev.key==='M')&&!ev.metaKey&&!ev.ctrlKey&&!ev.altKey){
     ev.preventDefault();togQuizFlag();
   }else if(ev.key==='Escape'){
-    ev.preventDefault();home();
+    ev.preventDefault();leaveQuiz();
   }
 });
 
-load();home();if(gh.token)pullCloud(false);
+try{if(history.state&&history.state.v)history.replaceState(null,'')}catch(e){}
+load();const rx=readExam();home();if(rx&&rx.q)resumeExam(rx);if(gh.token&&curView!=='z')pullCloud(false);
+/* generierte Handler (vorher Inline-Anweisungen) */
+function _h1(){crpend=null;rerenderC()}
+function _h2(a0){crpend=a0;cpend=null;rpend=null;pend=null;rerenderC()}
+function _h3(){rpend=null;home()}
+function _h4(a0){rpend=a0;pend=null;cpend=null;crpend=null;home()}
+function _h5(){pq=null;home()}
+function _h6(a0,a1){pq=a0+':'+a1;home()}
+function _h7(){wp=null;home()}
+function _h8(){wp='r';home()}
+function _h9(){wp='q';home()}
+function _h10(){wp=null;qsearch='';home();toTop()}
+function _h11(){gpend=null;glosView()}
+function _h12(a0){gpend=a0;gcpend=null;glosView()}
+function _h13(){gedit=null;gdraft=null;gerr='';glosView()}
+function _h14(){wp=null;glosView()}
+function _h15(){wp='g';glosView()}
+function _h16(){msg='';glos()}
+function _h17(){msg='';home()}
+function _h18(){examExitPend=false;home()}
+function _h19(){examExitPend=false;quiz()}
+function _h20(){examSubPend=false;quiz()}
+function _h21(){start(wrongPool())}
+function _h22(){pullCloud(false)}
+function _h23(){connectCloud()}
+document.addEventListener('click',e=>{for(let t=e.target.closest('[data-act]');t;t=t.parentElement&&t.parentElement.closest('[data-act]')){const f=window[t.dataset.act];if(typeof f==='function'){const a=JSON.parse(t.dataset.args||'[]');t.hasAttribute('data-el')?f(t,...a):f(...a)}}});
+document.addEventListener('input',e=>{const t=e.target.closest&&e.target.closest('[data-in]');if(t){const f=window[t.dataset.in];if(typeof f==='function')f(t.value,...JSON.parse(t.dataset.args||'[]'))}});
+document.addEventListener('change',e=>{const el=e.target.closest&&e.target.closest('[data-chg],[data-chk]');if(!el)return;const a=JSON.parse(el.dataset.args||'[]');
+if(el.dataset.chg){const f=window[el.dataset.chg];if(typeof f==='function')el.hasAttribute('data-el')?f(el,...a):f(el.value,...a)}
+else{const f=window[el.dataset.chk];if(typeof f==='function')f(...a,el.checked)}});
+['dragstart','dragover','dragleave','drop','dragend'].forEach(n=>document.addEventListener(n,e=>{const t=e.target.closest&&e.target.closest('[data-'+n+']');if(!t)return;const f=window[t.dataset[n]];if(typeof f!=='function')return;
+const p=new Proxy(e,{get(o,k){if(k==='currentTarget')return t;const v=o[k];return typeof v==='function'?v.bind(o):v}});f(p,...JSON.parse(t.dataset.args||'[]'))}));
+document.addEventListener('keydown',e=>{if(e.key!=='Enter')return;const t=e.target.closest&&e.target.closest('[data-kd]');if(!t)return;const f=window[t.dataset.kd];if(typeof f==='function'){e.preventDefault();f(...JSON.parse(t.dataset.args||'[]'))}});
+Object.assign(window,{exportQ,exportG,exportC,exportGC});
+function _pd(ev){ev.preventDefault()}
+function _clr(el){el.value=''}
+function _clipP(b){clip(gpromptFor(gen.name.trim()),b)}
+function _rSM(v,c){setActiveScoreMode(v,c);result()}
+function _rNM(v,c){setActiveNegMode(v,c);result()}
+function _rP(v,c){setActivePass(v,c);result()}
 </script>
 </body>
 </html>
