@@ -1,2 +1,6 @@
 .DS_Store
 Quizomat 9001.html
+node_modules/
+dist/
+.env
+.env.local
