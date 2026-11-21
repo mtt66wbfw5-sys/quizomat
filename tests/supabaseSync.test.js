@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { setsToRows, rowsToSets, glossToRows, rowsToGloss } from '../src/sync/supabaseSync.js';
+import {
+  setsToRows,
+  rowsToSets,
+  glossToRows,
+  rowsToGloss,
+  attemptsToRows,
+  rowsToAttempts
+} from '../src/sync/supabaseSync.js';
 
 describe('Supabase row mappers', () => {
   it('round-trips sets with sort order and course config', () => {
@@ -25,5 +32,30 @@ describe('Supabase row mappers', () => {
       { course: 'Bio', b: 'ATP', i: 'Neu', a: ['Adenosintriphosphat'] },
       { course: 'Chemie', b: 'ATP', i: 'Chemie-Info', a: [] }
     ]);
+  });
+
+  it('round-trips exam attempts sorted newest first', () => {
+    const attempts = [
+      {
+        id: 'ex1',
+        course: 'Bio',
+        createdAt: '2026-11-20T10:00:00.000Z',
+        grade: 2,
+        passed: true,
+        scorePts: 16,
+        maxPts: 20,
+        pct: 80,
+        correctCount: 16,
+        totalCount: 20,
+        elapsedSec: 600,
+        durationMins: 30,
+        passPct: 50,
+        scoreMode: 'all',
+        negMode: 'none',
+        chapters: [{ title: 'V1', pts: 16, max: 20, pct: 80 }]
+      }
+    ];
+    const rows = attemptsToRows('user-1', attempts);
+    expect(rowsToAttempts(rows)).toEqual(attempts);
   });
 });

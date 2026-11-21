@@ -35,12 +35,21 @@ export function m3(b, l, r, k, both) {
 export function mergeQuestion(L, R, preferRemote) {
   const [o, n] = preferRemote ? [L, R] : [R, L];
   const st = Math.max(L.streak || 0, R.streak || 0);
+  const lSrs = L.srs && typeof L.srs === 'object' ? L.srs : null;
+  const rSrs = R.srs && typeof R.srs === 'object' ? R.srs : null;
+  let srs = n.srs || o.srs;
+  if (lSrs && rSrs) {
+    srs = (rSrs.lastReview || 0) >= (lSrs.lastReview || 0) ? rSrs : lSrs;
+  } else if (lSrs || rSrs) {
+    srs = lSrs || rSrs;
+  }
   return {
     ...o,
     ...n,
     streak: st,
     wrong: st > 0 ? false : n.wrong,
-    flagged: !!(L.flagged || R.flagged)
+    flagged: !!(L.flagged || R.flagged),
+    ...(srs ? { srs } : {})
   };
 }
 

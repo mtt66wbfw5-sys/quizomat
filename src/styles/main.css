@@ -98,5 +98,9 @@ pre{white-space:pre-wrap;font-size:.85rem;background:var(--card);border:1px soli
 .orow{display:grid;grid-template-columns:auto 1fr 1fr auto;gap:8px;align-items:center;margin-bottom:6px}
 .orow input:not([type=checkbox]):not([type=radio]){margin:0}
 .orow input[type=checkbox],.orow input[type=radio]{width:20px;height:20px;accent-color:var(--ac)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:10px;margin:10px 0 14px}
+.kpi{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:12px 14px}
+.kpi .kv{font-size:1.55rem;font-weight:700;line-height:1.15;color:var(--fg)}
+.kpi .kl{font-size:.82rem;color:var(--mut);margin-top:2px}
 @media (max-width:560px){.orow{grid-template-columns:auto 1fr auto}.orow .eq_ow{grid-column:2 / 4}}
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
