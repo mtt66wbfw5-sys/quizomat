@@ -403,7 +403,7 @@ function syncQDraft(){
   if(qEl)qdraft.q=qEl.value;
   if(eEl)qdraft.exp=eEl.value;
   if(tEl)qdraft.type=tEl.value;
-  if(iEl)qdraft.img=iEl.value;
+  if(iEl){const v=iEl.value.trim();if(v)qdraft.img=v;else if(!qdraft.img||!qdraft.img.startsWith('data:'))qdraft.img=''}
   if(iaEl)qdraft.imgAlt=iaEl.value;
   if(qdraft.type==='tf'){
     const r=document.querySelector('input[name="eq_tf"]:checked');
