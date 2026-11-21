@@ -529,7 +529,7 @@ function dueBannerHtml(){
   const res=collectDueQuestions(sets,sel.size?sel:null);
   if(!res.dueCount)return '';
   const cnt=res.dueCount;
-  return `<div class="card fbox" style="margin:10px 0;border-left:4px solid var(--ac)"><div class="row" style="justify-content:space-between;align-items:center"><div><b style="display:inline-flex;align-items:center;gap:6px;color:var(--ac)">${IC.clock} ${cnt} ${cnt===1?'Frage':'Fragen'} zur Wiederholung fällig</b><p class="mut" style="margin:2px 0 0;font-size:.86rem">Spaced Repetition: Diese Fragen stehen heute wieder auf dem Plan.</p></div><button class="btn sm" data-act="startDue" data-args='[]'>Fällige üben (${Math.min(cnt,getQuizCount())})</button></div></div>`;
+  return `<div class="card fbox" style="margin:10px 0;border-left:4px solid var(--ac)"><div class="row" style="justify-content:space-between;align-items:center"><div><b style="display:inline-flex;align-items:center;gap:6px;color:var(--ac)">${IC.clock} ${cnt} ${cnt===1?'Frage':'Fragen'} zur Wiederholung fällig</b><p class="mut" style="margin:2px 0 0;font-size:.86rem">Wiederholungsplan: Diese Fragen stehen heute wieder auf dem Plan.</p></div><button class="btn sm" data-act="startDue" data-args='[]'>Fällige üben (${Math.min(cnt,getQuizCount())})</button></div></div>`;
 }
 function startDue(allScope){
   const res=collectDueQuestions(sets,allScope?null:(sel.size?sel:null));
@@ -656,18 +656,18 @@ function statsView(){
   const filtered=statsCourse?examHistory.filter(a=>a.course===statsCourse):examHistory;
   const sum=summarizeHistory(filtered);
   const weak=weakestChapters(filtered).slice(0,6);
-  $app.innerHTML=`${nav('t')}<h1>${IC.chart}<span>Statistik &amp; Verlauf</span></h1><p class="mut">Lernfortschritt, Spaced-Repetition-Wiederholungen und deine bisherigen Prüfungsergebnisse.</p>
-  <h2>Lernstand &amp; Spaced Repetition</h2>
+  $app.innerHTML=`${nav('t')}<h1>${IC.chart}<span>Statistik &amp; Verlauf</span></h1><p class="mut">Lernfortschritt, Wiederholungsplan und deine bisherigen Prüfungsergebnisse.</p>
+  <h2>Lernstand &amp; Wiederholungsplan</h2>
   <div class="kpis">
     <div class="kpi"><div class="kv">${totQ}</div><div class="kl">Fragen gesamt</div></div>
     <div class="kpi"><div class="kv" style="color:var(--ok)">${mastQ}</div><div class="kl">Gemeistert${totQ?` (${Math.round(mastQ/totQ*100)} %)`:''}</div></div>
-    <div class="kpi"><div class="kv" style="color:var(${dueRes.dueCount?'--ac':'--fg'})">${dueRes.dueCount}</div><div class="kl">Heute fällig (SRS)</div></div>
+    <div class="kpi"><div class="kv" style="color:var(${dueRes.dueCount?'--ac':'--fg'})">${dueRes.dueCount}</div><div class="kl">Heute fällig</div></div>
     <div class="kpi"><div class="kv" style="color:var(${wrongQ?'--bad':'--fg'})">${wrongQ}</div><div class="kl">Zuletzt falsch</div></div>
   </div>
   <div class="card" style="margin-bottom:14px">
     <div class="row" style="justify-content:space-between;align-items:center">
       <div>
-        <b>Spaced Repetition (Wiederholungsplan)</b>
+        <b>Wiederholungsplan</b>
         <p class="mut" style="margin:2px 0 0">${dueRes.dueCount?`<b>${dueRes.dueCount}</b> ${dueRes.dueCount===1?'Frage ist':'Fragen sind'} heute zur Wiederholung fällig.`:dueRes.nextDueAt?`Alles erledigt! Nächste fällige Wiederholung: <b>${esc(formatRelativeDue(dueRes.nextDueAt))}</b>.`:'Beantworte Fragen im Quiz oder in einer Prüfung, um deinen persönlichen Wiederholungsplan zu starten.'}</p>
       </div>
       ${dueRes.dueCount?`<button class="btn sm" data-act="startDue" data-args='[true]'>Fällige jetzt üben (${Math.min(dueRes.dueCount,getQuizCount())})</button>`:''}
