@@ -33,6 +33,18 @@ import {
   mergeGloss3Way
 } from './core/merge.js';
 import { computeTerms } from './core/glossary.js';
+import {
+  updateSrs,
+  isScheduledDue,
+  collectDueQuestions,
+  formatRelativeDue
+} from './core/srs.js';
+import {
+  buildExamAttempt,
+  mergeAttempts,
+  summarizeHistory,
+  weakestChapters
+} from './core/history.js';
 import { supabase } from './sync/supabaseClient.js';
 import { fetchSupabaseState, pushSupabaseState } from './sync/supabaseSync.js';
 
@@ -48,6 +60,7 @@ let cedit=null,cdraft='',cpdraft=50,ctdraft=30,cqdraft=20,cmdraft='all',cndraft=
 let examMode=false,examPicks=[],examMarks=new Set(),examEnd=0,examStart=0,examElapsed=0,examTimer=null,examSubPend=false,examExitPend=false,examTimeUp=false,examCourse='',examDurMins=30;
 let gh={token:'',user:'',sha:'',lastSync:0},localTs=0,syncState='idle',syncErr='',syncTimer=null,forceOverwrite=false;
 let sbUser=null,sbLastSync=0,sbState='idle',sbErr='',sbMsg='',sbAuthMode='login',sbTimer=null,sbDirty=false,sbLastPull=0,sbBusy=false;
+let examHistory=[],statsCourse='',histExp=new Set(),histDelPend=null;
 const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 const toTop=()=>{window.scrollTo(0,0);document.documentElement.scrollTop=0;document.body.scrollTop=0};
 const stopExamTimer=()=>{if(examTimer){clearInterval(examTimer);examTimer=null}try{localStorage.removeItem('pt:exam')}catch(e){}};
@@ -149,8 +162,10 @@ function load(){
   applyTheme();
   try{localTs=+localStorage.getItem('pt:ts')||0}catch(e){localTs=0}
   try{const g=JSON.parse(localStorage.getItem('pt:gh')||'null');if(g&&typeof g==='object')gh={...gh,...g}}catch(e){}
+  try{const h=JSON.parse(localStorage.getItem('pt:exams')||'[]');examHistory=Array.isArray(h)?h:[]}catch(e){examHistory=[]}
 }
 function saveGH(){try{localStorage.setItem('pt:gh',JSON.stringify(gh))}catch(e){}}
+function saveHistory(ow){try{localStorage.setItem('pt:exams',JSON.stringify(examHistory))}catch(e){}touchLocal(ow)}
 let syncDirty=false,lastPull=0;
 function touchLocal(overwrite){syncDirty=true;sbDirty=true;
   localTs=Date.now();
@@ -170,6 +185,7 @@ function save(ow){termsCache=new WeakMap();try{localStorage.setItem('pt:sets',JS
 
 const isMastered=q=>(q.streak||0)>=opts.mastery;
 const qWeight=q=>{
+  if(isScheduledDue(q))return q.wrong?8:5;
   if(isMastered(q))return opts.hideMastered?0:1;
   const st=q.streak||0;
   if(st===0)return q.wrong?6:4;
@@ -182,9 +198,10 @@ const hasAnyProgress=()=>sets.some(s=>s.qs.some(q=>(q.streak||0)>0||q.wrong));
 
 function qBadge(sid,qi,q){
   const st=q.streak||0,m=isMastered(q);
-  if(m)return `<button class="badge ok" aria-label="Gemeistert, Klicken zum Zurücksetzen" title="Gemeistert (${st}× richtig in Folge) – Klicken zum Zurücksetzen" data-act="togMastery" data-args="${esc(JSON.stringify([String(sid),qi]))}">✓ Gemeistert (${st})</button>`;
+  const srsHint=q.srs&&Number.isFinite(q.srs.nextReview)?` · Wiederholung: ${formatRelativeDue(q.srs.nextReview)}`:'';
+  if(m)return `<button class="badge ok" aria-label="Gemeistert, Klicken zum Zurücksetzen" title="Gemeistert (${st}× richtig in Folge${srsHint}) – Klicken zum Zurücksetzen" data-act="togMastery" data-args="${esc(JSON.stringify([String(sid),qi]))}">✓ Gemeistert (${st})</button>`;
   const dots='●'.repeat(Math.min(st,opts.mastery))+'○'.repeat(Math.max(0,opts.mastery-st));
-  return `<button class="badge${q.wrong?' bad':''}" aria-label="Lernstand ${st} von ${opts.mastery}" title="${q.wrong?'Zuletzt falsch – ':''}Lernstand ${st}/${opts.mastery} (Klicken um als gemeistert zu markieren)" data-act="togMastery" data-args="${esc(JSON.stringify([String(sid),qi]))}">${dots}</button>`;
+  return `<button class="badge${q.wrong?' bad':''}" aria-label="Lernstand ${st} von ${opts.mastery}" title="${q.wrong?'Zuletzt falsch – ':''}Lernstand ${st}/${opts.mastery}${srsHint} (Klicken um als gemeistert zu markieren)" data-act="togMastery" data-args="${esc(JSON.stringify([String(sid),qi]))}">${dots}</button>`;
 }
 
 function togMastery(sid,qi){
@@ -508,6 +525,17 @@ function buildGroups(){
   return groups;
 }
 
+function dueBannerHtml(){
+  const res=collectDueQuestions(sets,sel.size?sel:null);
+  if(!res.dueCount)return '';
+  const cnt=res.dueCount;
+  return `<div class="card fbox" style="margin:10px 0;border-left:4px solid var(--ac)"><div class="row" style="justify-content:space-between;align-items:center"><div><b style="display:inline-flex;align-items:center;gap:6px;color:var(--ac)">${IC.clock} ${cnt} ${cnt===1?'Frage':'Fragen'} zur Wiederholung fällig</b><p class="mut" style="margin:2px 0 0;font-size:.86rem">Wiederholungsplan: Diese Fragen stehen heute wieder auf dem Plan.</p></div><button class="btn sm" data-act="startDue" data-args='[]'>Fällige üben (${Math.min(cnt,getQuizCount())})</button></div></div>`;
+}
+function startDue(allScope){
+  const res=collectDueQuestions(sets,allScope?null:(sel.size?sel:null));
+  if(!res.due.length)return;
+  start(res.due.slice(0,getQuizCount()));
+}
 function home(){stopExamTimer();enforceSingleCourse();const chg=curView!=='q';curView='q';$app.className=qsearch.trim()?'searching':'';
   const groups=buildGroups();
   const total=[...sel].reduce((a,id)=>{const s=sets.find(x=>x.id===id);return a+(s?pool1(s).length:0)},0);
@@ -517,7 +545,7 @@ function home(){stopExamTimer();enforceSingleCourse();const chg=curView!=='q';cu
   const dl=`<datalist id="cl">${allCourses().map(c=>`<option value="${esc(c)}">`).join('')}</datalist>`;
   const topNew=cedit==='__new__';
   $app.innerHTML=`${nav('q')}<div class="row" style="justify-content:space-between;align-items:center"><h1>${IC.cap}<span>Quizomat</span></h1>${sets.length?`<div class="row dstart"><button class="btn sec" ${allSelCount?'':'disabled'} data-act="startExam" data-args='[]'>Prüfung starten${eCnt?` (${eCnt})`:''}</button><button class="btn" ${total?'':'disabled'} data-act="start" data-args='[]'>Quiz starten${qCnt?` (${qCnt})`:''}</button></div>`:''}</div><p class="mut">Fragen aus deinen Vorlesungsunterlagen üben und auswerten.</p>
-  ${topBar()}${sets.length?optsHtml(total,allSelCount)+searchHtml()+flaggedHtml():''}${dl}
+  ${topBar()}${sets.length?optsHtml(total,allSelCount)+searchHtml()+dueBannerHtml()+flaggedHtml():''}${dl}
   ${topNew?`<div class="card ccard" style="margin-top:14px;border-left:4px solid var(--ac)">${cForm('__new__',false)}</div>`:''}
   ${cnames.length?cnames.map((c,gi)=>{
     const l=groups[c],inNew=sedit==='__new__'&&sdraft&&sdraft.targetC===c;
@@ -613,7 +641,70 @@ function updSyncUI(){
   const sb=document.getElementById('sbbox');if(sb)sb.innerHTML=sbCloudHtml();
   const cb=document.getElementById('cbox');if(cb)cb.innerHTML=cloudHtml();
 }
-const nav=a=>`<nav class='nav'><button class='${a==='q'?'on':''}' ${a==='q'?'aria-current="page"':''} title="Fragen" aria-label="Fragen" data-act="_h10">${IC.cap}<span class="nlbl">Fragen</span></button><button class='${a==='g'?'on':''}' ${a==='g'?'aria-current="page"':''} title="Glossar" aria-label="Glossar" data-act='glos'>${IC.book}<span class="nlbl">Glossar</span></button><button class='cnav ${a==='s'?'on':''}' ${a==='s'?'aria-current="page"':''} title="Einstellungen${activeCloudState().on?' · '+esc(syncTitle()):''}" aria-label="Einstellungen" data-act='settings'>${IC.cog}<span class="nlbl">Einstellungen</span><span id="cs">${syncBadge()}</span></button></nav>`;
+const nav=a=>`<nav class='nav'><button class='${a==='q'?'on':''}' ${a==='q'?'aria-current="page"':''} title="Fragen" aria-label="Fragen" data-act="_h10">${IC.cap}<span class="nlbl">Fragen</span></button><button class='${a==='g'?'on':''}' ${a==='g'?'aria-current="page"':''} title="Glossar" aria-label="Glossar" data-act='glos'>${IC.book}<span class="nlbl">Glossar</span></button><button class='${a==='t'?'on':''}' ${a==='t'?'aria-current="page"':''} title="Statistik &amp; Verlauf" aria-label="Statistik" data-act='stats'>${IC.chart}<span class="nlbl">Statistik</span></button><button class='cnav ${a==='s'?'on':''}' ${a==='s'?'aria-current="page"':''} title="Einstellungen${activeCloudState().on?' · '+esc(syncTitle()):''}" aria-label="Einstellungen" data-act='settings'>${IC.cog}<span class="nlbl">Einstellungen</span><span id="cs">${syncBadge()}</span></button></nav>`;
+function stats(){histDelPend=null;statsView();toTop()}
+function setStatsCourse(c){statsCourse=c||'';histDelPend=null;statsView()}
+function togHistExp(id){histExp.has(id)?histExp.delete(id):histExp.add(id);statsView()}
+function delHist(id){histDelPend=histDelPend===id?null:id;statsView()}
+function delHist2(id){examHistory=examHistory.filter(a=>a.id!==id);histExp.delete(id);histDelPend=null;saveHistory(true);statsView()}
+function statsView(){
+  stopExamTimer();curView='t';$app.className='';
+  const allQs=sets.flatMap(s=>s.qs||[]),totQ=allQs.length,mastQ=allQs.filter(isMastered).length,wrongQ=allQs.filter(q=>q.wrong).length;
+  const dueRes=collectDueQuestions(sets,null);
+  const histCourses=[...new Set(examHistory.map(a=>a.course).filter(Boolean))];
+  if(statsCourse&&!histCourses.includes(statsCourse))statsCourse='';
+  const filtered=statsCourse?examHistory.filter(a=>a.course===statsCourse):examHistory;
+  const sum=summarizeHistory(filtered);
+  const weak=weakestChapters(filtered).slice(0,6);
+  $app.innerHTML=`${nav('t')}<h1>${IC.chart}<span>Statistik &amp; Verlauf</span></h1><p class="mut">Lernfortschritt, Wiederholungsplan und deine bisherigen Prüfungsergebnisse.</p>
+  <h2>Lernstand &amp; Wiederholungsplan</h2>
+  <div class="kpis">
+    <div class="kpi"><div class="kv">${totQ}</div><div class="kl">Fragen gesamt</div></div>
+    <div class="kpi"><div class="kv" style="color:var(--ok)">${mastQ}</div><div class="kl">Gemeistert${totQ?` (${Math.round(mastQ/totQ*100)} %)`:''}</div></div>
+    <div class="kpi"><div class="kv" style="color:var(${dueRes.dueCount?'--ac':'--fg'})">${dueRes.dueCount}</div><div class="kl">Heute fällig</div></div>
+    <div class="kpi"><div class="kv" style="color:var(${wrongQ?'--bad':'--fg'})">${wrongQ}</div><div class="kl">Zuletzt falsch</div></div>
+  </div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="row" style="justify-content:space-between;align-items:center">
+      <div>
+        <b>Wiederholungsplan</b>
+        <p class="mut" style="margin:2px 0 0">${dueRes.dueCount?`<b>${dueRes.dueCount}</b> ${dueRes.dueCount===1?'Frage ist':'Fragen sind'} heute zur Wiederholung fällig.`:dueRes.nextDueAt?`Alles erledigt! Nächste fällige Wiederholung: <b>${esc(formatRelativeDue(dueRes.nextDueAt))}</b>.`:'Beantworte Fragen im Quiz oder in einer Prüfung, um deinen persönlichen Wiederholungsplan zu starten.'}</p>
+      </div>
+      ${dueRes.dueCount?`<button class="btn sm" data-act="startDue" data-args='[true]'>Fällige jetzt üben (${Math.min(dueRes.dueCount,getQuizCount())})</button>`:''}
+    </div>
+  </div>
+  <h2>Prüfungshistorie (${filtered.length})</h2>
+  ${histCourses.length>1?`<div class="gtabs" style="margin-bottom:10px"><button class="gtab${!statsCourse?' on':''}" data-act="setStatsCourse" data-args='[""]'>Alle Kurse (${examHistory.length})</button>${histCourses.map(c=>`<button class="gtab${statsCourse===c?' on':''}" data-act="setStatsCourse" data-args="${esc(JSON.stringify([c]))}">${esc(c)} (${examHistory.filter(a=>a.course===c).length})</button>`).join('')}</div>`:''}
+  ${filtered.length?`
+    <div class="kpis">
+      <div class="kpi"><div class="kv">${sum.count}</div><div class="kl">Prüfungen</div></div>
+      <div class="kpi"><div class="kv" style="color:var(${sum.passRate>=50?'--ok':'--bad'})">${sum.passRate} %</div><div class="kl">Bestanden (${sum.passedCount}/${sum.count})</div></div>
+      <div class="kpi"><div class="kv">${String(sum.avgGrade).replace('.',',')}</div><div class="kl">Ø Note</div></div>
+      <div class="kpi"><div class="kv">${fmtPct(sum.avgPct)}</div><div class="kl">Ø Punkte (Best: ${fmtPct(sum.bestPct)})</div></div>
+    </div>
+    ${weak.length?`<div class="card" style="margin-bottom:14px"><b>Schwachstellen nach Kapiteln</b><p class="mut" style="margin:2px 0 8px">Kapitel mit den niedrigsten Durchschnittswerten aus deinen bisherigen Prüfungen:</p>${weak.map(w=>`<div class="qi" style="padding:6px 0"><span>${!statsCourse?`<span class="mut">${esc(w.course)} › </span>`:''}<b>${esc(w.title)}</b> <span class="mut">(${w.runs}× geprüft)</span></span><span class="badge ${w.pct>=75?'ok':w.pct>=50?'warn':'bad'}" style="cursor:default">${w.pct} %</span></div>`).join('')}</div>`:''}
+    ${filtered.map(a=>{
+      const open=histExp.has(a.id),dt=a.createdAt?new Date(a.createdAt).toLocaleString('de-DE',{dateStyle:'short',timeStyle:'short'})+' Uhr':'';
+      const colVar=a.passed?(a.grade<=2?'--ok':a.grade===3?'--ac':'--warn'):'--bad';
+      return `<div class="card" style="margin:10px 0;padding:12px 16px;border-left:4px solid var(${colVar})">
+        <div style="display:flex;gap:10px;align-items:flex-start;justify-content:space-between">
+          <button class="sb" style="padding:2px 0" aria-expanded="${open}" data-act="togHistExp" data-args="${esc(JSON.stringify([a.id]))}">
+            <span>${open?'▾':'▸'}</span>
+            <span><span class="mut" style="display:block;font-size:.82rem;margin-bottom:1px">${esc(dt)} · ⏱ ${fmtTime(a.elapsedSec)} / ${fmtTime(a.durationMins*60)} · ${a.correctCount}/${a.totalCount} komplett richtig</span><b>${esc(a.course)}</b></span>
+          </button>
+          <span class="gc">
+            <span class="badge ${a.passed?'ok':'bad'}" style="cursor:default">Note ${a.grade} · ${fmtPct(a.pct)}</span>
+            ${histDelPend===a.id?`<span class="mut">Löschen?</span><button class="btn sm" data-act="delHist2" data-args="${esc(JSON.stringify([a.id]))}">Ja</button><button class="btn sec sm" data-act="delHist" data-args="${esc(JSON.stringify([a.id]))}">Nein</button>`:`<button class="x" title="Prüfungseintrag löschen" aria-label="Eintrag löschen" data-act="delHist" data-args="${esc(JSON.stringify([a.id]))}">${IC.del}</button>`}
+          </span>
+        </div>
+        ${open?`<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)">
+          <p class="mut" style="margin:0 0 8px"><b>${fmtPts(a.scorePts)} / ${fmtPts(a.maxPts)} Punkte</b> · Positiv ab ${a.passPct} % · ${esc(modeShort(a.scoreMode))}${a.negMode!=='none'?` · ${esc(negShort(a.negMode))}`:''}</p>
+          ${(a.chapters||[]).length?a.chapters.map(c=>`<div class="qi" style="padding:5px 0"><span>${esc(c.title)}</span><span class="badge ${c.pct>=a.passPct?'ok':'bad'}" style="cursor:default">${fmtPts(c.pts)} / ${fmtPts(c.max)} Pkt. (${c.pct} %)</span></div>`).join(''):''}
+        </div>`:''}
+      </div>`;
+    }).join('')}
+  `:`<div class="card"><p style="margin:0"><b>Noch keine Prüfungen abgeschlossen.</b></p><p class="mut" style="margin:4px 0 0">Sobald du eine Prüfung abgibst, erscheint hier automatisch dein Verlauf inkl. Notenentwicklung und Kapitel-Analyse.</p></div>`}`;
+}
 let gpend=null,qsearch='',gq='',gedit=null,gdraft=null,gerr='';
 function glos(){gpend=null;gcpend=null;gcedit=null;wp=null;gedit=null;gdraft=null;gq='';glosView();toTop()}
 function settings(){cedit=null;cpend=null;crpend=null;wp=null;settingsView();toTop()}
@@ -967,14 +1058,27 @@ function finishExam(timeUp){
   stopExamTimer();
   examTimeUp=!!timeUp;examSubPend=false;examExitPend=false;
   examElapsed=Math.min(examDurMins*60,Math.max(1,Math.round((Date.now()-examStart)/1000)));
+  const nowMs=Date.now();
   Q.forEach((q,i)=>{
     const src=q._ref||q,wasM=isMastered(src),p=examPicks[i]||new Set();
     const ok=p.size>0&&q.opts.every((o,k)=>o.ok===p.has(k));
     log[i]=ok;
-    if(ok){src.streak=(src.streak||0)+1;src.wrong=false;q._newlyMastered=!wasM&&isMastered(src)}
-    else if(p.size>0){src.streak=0;src.wrong=true;q._newlyMastered=false}
+    if(ok){src.streak=(src.streak||0)+1;src.wrong=false;q._newlyMastered=!wasM&&isMastered(src);updateSrs(src,true,nowMs)}
+    else if(p.size>0){src.streak=0;src.wrong=true;q._newlyMastered=false;updateSrs(src,false,nowMs)}
     else{q._newlyMastered=false}
   });
+  const attempt=buildExamAttempt({
+    course:examCourse,
+    questions:Q,
+    picks:examPicks,
+    elapsedSec:examElapsed,
+    durationMins:examDurMins,
+    passPct:getPass(examCourse),
+    scoreMode:getScoreMode(examCourse),
+    negMode:getNegMode(examCourse)
+  });
+  examHistory=[attempt,...examHistory].slice(0,200);
+  try{localStorage.setItem('pt:exams',JSON.stringify(examHistory))}catch(e){}
   save();result();
 }
 function quiz(){curView='z';
@@ -1045,6 +1149,7 @@ function check(){
   checked=true;gopen=0;log[idx]=ok;
   if(ok){src.streak=(src.streak||0)+1;src.wrong=false;q._newlyMastered=!wasM&&isMastered(src)}
   else{src.streak=0;src.wrong=true;q._newlyMastered=false}
+  updateSrs(src,ok);
   save();quiz();
 }
 function next(){picked=new Set();checked=false;gopen=0;idx++;idx<Q.length?quiz():result();toTop()}
@@ -1266,6 +1371,7 @@ function applyCloudState(d){
   if(d.courses&&typeof d.courses==='object')courses={...courses,...d.courses};
   if(Array.isArray(d.col))col=new Set(d.col);
   if(Array.isArray(d.gcol))gcol=new Set(d.gcol);
+  if(Array.isArray(d.examHistory))examHistory=mergeAttempts(examHistory,d.examHistory);
   mergeCloudOpts(d.opts||{},true);
   localTs=d.updatedAt||Date.now();
   try{
@@ -1275,6 +1381,7 @@ function applyCloudState(d){
     localStorage.setItem('pt:col',JSON.stringify([...col]));
     localStorage.setItem('pt:gcol',JSON.stringify([...gcol]));
     localStorage.setItem('pt:opts',JSON.stringify(opts));
+    localStorage.setItem('pt:exams',JSON.stringify(examHistory));
     localStorage.setItem('pt:ts',String(localTs));
   }catch(e){}
   sel=new Set();
@@ -1300,8 +1407,9 @@ function mergeFrom(d){const rt=d.updatedAt||0;
   if(d.opts)mergeCloudOpts(d.opts,rt>=localTs);
   if(Array.isArray(d.gloss))merge3gloss(d.gloss,rt);
   if(d.courses&&typeof d.courses==='object')courses={...d.courses,...courses};
+  if(Array.isArray(d.examHistory))examHistory=mergeAttempts(examHistory,d.examHistory);
   localTs=Date.now();
-  try{localStorage.setItem('pt:sets',jj(sets));localStorage.setItem('pt:gloss',jj(gloss));localStorage.setItem('pt:courses',jj(courses));localStorage.setItem('pt:ts',String(localTs))}catch(e){}}
+  try{localStorage.setItem('pt:sets',jj(sets));localStorage.setItem('pt:gloss',jj(gloss));localStorage.setItem('pt:courses',jj(courses));localStorage.setItem('pt:exams',jj(examHistory));localStorage.setItem('pt:ts',String(localTs))}catch(e){}}
 async function pushCloudNow(retry){
   if(!gh.token)return;
   clearTimeout(syncTimer);
@@ -1314,7 +1422,7 @@ async function pushCloudNow(retry){
     }
     if(!localTs){localTs=Date.now();try{localStorage.setItem('pt:ts',String(localTs))}catch(e){}}
     syncCourseCfg();
-    const payload={updatedAt:localTs,sets,gloss,courses,col:[...col],gcol:[...gcol],opts};
+    const payload={updatedAt:localTs,sets,gloss,courses,col:[...col],gcol:[...gcol],opts,examHistory};
     const res=await ghReq('PUT',`/repos/${gh.user}/${SYNC_REPO}/contents/${SYNC_FILE}`,{
       message:'Sync Quizomat',
       content:b64Enc(JSON.stringify(payload)),
@@ -1513,7 +1621,7 @@ async function pushSupabaseNow(){
   try{
     if(!localTs){localTs=Date.now();try{localStorage.setItem('pt:ts',String(localTs))}catch(e){}}
     syncCourseCfg();
-    const payload={updatedAt:localTs,sets,gloss,courses,col:[...col],gcol:[...gcol],opts};
+    const payload={updatedAt:localTs,sets,gloss,courses,col:[...col],gcol:[...gcol],opts,examHistory};
     await pushSupabaseState(supabase,sbUser.id,payload);
     sbLastSync=Date.now();forceOverwrite=false;sbDirty=false;writeBase(sets);
     sbState='ok';updSyncUI();
@@ -1529,16 +1637,18 @@ async function pullSupabase(isConnect){
     const d=await fetchSupabaseState(supabase,sbUser.id);
     const remTs=(d&&d.updatedAt)||0;
     if(isConnect){
-      if(d&&(sets.length||gloss.length)){
+      if(d&&(sets.length||gloss.length||examHistory.length)){
         if(d.courses&&typeof d.courses==='object')courses={...d.courses,...courses};
         if(Array.isArray(d.sets))merge3sets(d.sets,remTs);
         if(d.opts)mergeCloudOpts(d.opts,remTs>=localTs);
         if(Array.isArray(d.gloss))merge3gloss(d.gloss,remTs);
+        if(Array.isArray(d.examHistory))examHistory=mergeAttempts(examHistory,d.examHistory);
         localTs=Date.now();
-        try{localStorage.setItem('pt:sets',JSON.stringify(sets));localStorage.setItem('pt:gloss',JSON.stringify(gloss));localStorage.setItem('pt:courses',JSON.stringify(courses));localStorage.setItem('pt:ts',String(localTs))}catch(e){}
+        try{localStorage.setItem('pt:sets',JSON.stringify(sets));localStorage.setItem('pt:gloss',JSON.stringify(gloss));localStorage.setItem('pt:courses',JSON.stringify(courses));localStorage.setItem('pt:exams',JSON.stringify(examHistory));localStorage.setItem('pt:ts',String(localTs))}catch(e){}
         await pushSupabaseNow();
         if(curView==='q'&&cedit===null&&sedit===null&&qedit===null&&!qsearch)home();
         else if(curView==='g'&&gedit===null&&gcedit===null&&!gq)glosView();
+        else if(curView==='t')statsView();
         else if(curView==='s'&&cedit===null)settingsView();
         return;
       }else if(d){
@@ -1674,15 +1784,15 @@ function _h23(){connectCloud()}
 const handlers={
   _clipP,_clr,_h1,_h10,_h11,_h12,_h13,_h14,_h15,_h16,_h17,_h18,_h19,_h2,_h20,_h21,_h22,_h23,_h3,_h4,_h5,_h6,_h7,_h8,_h9,_pd,_rNM,_rP,_rSM,
   addQOpt,cancelCEdit,cancelGCEdit,cancelQEdit,cancelSEdit,changeQType,check,copyG,
-  del,del2,delC,delC2,delG,delGC,delGC2,delQ,delQOpt,disconnectCloud,doImp,
+  del,del2,delC,delC2,delG,delGC,delGC2,delHist,delHist2,delQ,delQOpt,disconnectCloud,doImp,
   dragCOver,dragCStart,dragEnd,dragLeave,dragSOver,dragSStart,dropC,dropFile,dropS,
   exportC,exportG,exportGC,exportQ,finishExam,fold,fromFile,gGName,gName,gSearch,
   gfold,glos,goExamQ,goQ,goQEdit,home,imp,leaveQuiz,moveC,moveS,next,openS,pick,
   qSearch,resetCourseProg,resetProg,saveCEdit,saveG,saveGCEdit,saveQEdit,saveSEdit,
-  sbAuthSubmit,sbSignOut,sbSyncNow,setSbMode,
+  sbAuthSubmit,sbSignOut,sbSyncNow,setSbMode,setStatsCourse,
   setAutoCheck,setHideMastered,setMastery,setQuizCount,setShuffle,setTheme,settings,
-  start,startCEdit,startCNew,startExam,startGCEdit,startGEdit,startGNew,startQEdit,
-  startQNew,startSEdit,startSNew,tog,togAllRexp,togC,togExamMark,togFlag,togMastery,
+  start,startCEdit,startCNew,startDue,startExam,startGCEdit,startGEdit,startGNew,startQEdit,
+  startQNew,startSEdit,startSNew,stats,tog,togAllRexp,togC,togExamMark,togFlag,togHistExp,togMastery,
   togQGloss,togQuizFlag,togRGloss,togResFlag,togRexp,tryExitExam,tryFinishExam,wipe
 };
 document.addEventListener('click',e=>{for(let t=e.target.closest('[data-act]');t;t=t.parentElement&&t.parentElement.closest('[data-act]')){const f=handlers[t.dataset.act];if(typeof f==='function'){const a=JSON.parse(t.dataset.args||'[]');t.hasAttribute('data-el')?f(t,...a):f(...a)}}});
