@@ -46,9 +46,11 @@ Interaktiver Prüfungs- und Vorlesungstrainer zum Üben, Auswerten und Verwalten
   - Fragen und Kurs-Glossare können per JSON-Text, Dateiauswahl oder Drag & Drop importiert werden.
   - Bereits vorhandene Kurse, Kapitel, Fragen und Glossarbegriffe werden beim Import kursbezogen zusammengeführt (keine doppelten Fragen/Begriffe pro Kurs), wobei der höhere Lernstand erhalten bleibt.
   - Export aller Fragen, einzelner Kurse (inkl. Kurs-Glossar), aller Glossare oder einzelner Kurs-Glossare als `.json`-Datei (inkl. aktuellem Lernstand `streak` / `wrong` / `flagged` sowie den Kurseinstellungen `einstellungen`).
-- **Automatischer Cloud-Sync (GitHub):**
-  - Direkt in den **Einstellungen** kann ein GitHub Personal Access Token (`repo`-Berechtigung) hinterlegt werden.
-  - Quizomat legt automatisch ein privates Repository (`quizomat-sync`) an und synchronisiert Fragen, Kurseinstellungen, Lernstand und Glossar im Hintergrund zwischen Mac, iPad und iPhone.
+- **Automatischer Cloud-Sync (Supabase & GitHub):**
+  - **Supabase (Empfohlen):** Direkt in den **Einstellungen** per E-Mail & Passwort oder Magic Link anmelden – synchronisiert Fragen, Kurseinstellungen, Lernstand und Glossar sicher per Row Level Security (RLS) zwischen Mac, iPad und iPhone, ganz ohne Personal Access Token.
+  - **GitHub (Klassisch):** Weiterhin als Alternative über ein privates Repository (`quizomat-sync`) mit Personal Access Token verfügbar.
+- **PWA & Offline-Fähigkeit:**
+  - Installierbar als Web-App auf Mac, iPad und iPhone mit Service Worker für zuverlässiges Offline-Lernen und automatischer Synchronisation, sobald wieder eine Verbindung besteht.
 - **Optimiert für Mac, iPad & iPhone:**
   - **Mac / Desktop:** Zweispaltiges Layout mit untereinanderstehenden Antworten und vollständiger Tastatursteuerung (`1`–`9` zur Antwortauswahl, `Enter` / `Leertaste` zum Prüfen & Weiterblättern, `←` / `→` und `L` im Prüfungsmodus, `M` zum Markieren, `Esc` für „Zurück zur Übersicht“).
   - **iPad / Tablet:** Übersichtliches 2×2-Kachel-Layout für kurze Antwortoptionen, vergrößerte Touch-Ziele und eine fixierte untere Aktionsleiste für bequemes Tippen im Hoch- und Querformat.
@@ -133,4 +135,13 @@ Importiert werden kann entweder ein einzelnes Kurs-Glossar (`{ ... }`) oder eine
 
 ## 🔒 Datenschutz & Speicherung
 
-Alle Fragen, Kurse, Glossareinträge, UI-Zustände und Lernstände werden ausschließlich lokal im `localStorage` des jeweiligen Browsers gespeichert (`pt:sets`, `pt:courses`, `pt:gloss`, `pt:col`, `pt:gcol`, `pt:sel`, `pt:exp`, `pt:opts`). Es werden keine Daten an externe Server übertragen (außer bei freiwillig aktiviertem privaten GitHub-Cloud-Sync).
+Alle Fragen, Kurse, Glossareinträge, UI-Zustände und Lernstände werden lokal im `localStorage` des jeweiligen Browsers gespeichert (`pt:sets`, `pt:courses`, `pt:gloss`, `pt:col`, `pt:gcol`, `pt:sel`, `pt:exp`, `pt:opts`). Bei aktiviertem Cloud-Sync werden deine Daten verschlüsselt über dein persönliches Supabase-Konto (geschützt durch Postgres Row Level Security) oder optional über dein privates GitHub-Repository synchronisiert.
+
+## 🛠 Lokale Entwicklung & Tests
+
+```bash
+npm install
+npm run dev      # Lokaler Entwicklungsserver (Vite)
+npm test         # Unit-Tests (Vitest)
+npm run build    # Produktions-Build inkl. PWA Service Worker
+```
