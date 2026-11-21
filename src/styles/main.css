@@ -67,7 +67,7 @@ select.inl{background:var(--card);border:1px solid var(--ink);border-radius:6px;
 .enav button.cur{outline:2px solid var(--ac);outline-offset:1px}
 .sm{padding:.4em .85em;font-size:.88rem}
 .ico{display:inline-grid;place-items:center;width:40px;height:40px;padding:0}
-.ico svg,.x svg,.nav svg,.badge svg{width:18px;height:18px;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;fill:none;display:block}
+.ico svg,.x svg,.nav svg,.badge svg,.fbox b svg{width:18px;height:18px;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;fill:none;display:block;flex:none}
 .badge svg{width:14px;height:14px}
 .isym{display:inline-flex;align-items:center;vertical-align:-.16em;margin:0 2px 0 1px}
 .isym svg{width:13px;height:13px;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;fill:none;display:inline-block}
