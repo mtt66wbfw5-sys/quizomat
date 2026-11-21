@@ -681,14 +681,62 @@ function syncTitle(){
   if(c.state==='err')return `Cloud-Sync (${c.label}) Fehler: `+c.err;
   return `Cloud-Sync (${c.label}) aktiv`+(c.last?' (zuletzt '+new Date(c.last).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})+' Uhr)':'');
 }
+function acctInitial(){
+  const s=(sbUser&&(sbUser.email||sbUser.id)||'').trim();
+  return s?s[0].toUpperCase():'?';
+}
+function acctBtnHtml(){
+  if(sbUser){
+    const email=sbUser.email||'Konto';
+    const shortName=email.includes('@')?email.split('@')[0]:email;
+    return `<button type="button" class="acct-btn on" title="${esc(email)} · ${esc(syncTitle())}" aria-label="Konto (${esc(email)})" aria-haspopup="dialog" data-act="openAcctMenu" data-args='[]'><span class="acct-av">${esc(acctInitial())}</span><span class="acct-name">${esc(shortName)}</span>${syncBadge()}</button>`;
+  }
+  return `<button type="button" class="acct-btn" title="Anmelden / Cloud-Sync" aria-label="Anmelden" aria-haspopup="dialog" data-act="openAcctMenu" data-args='[]'>${IC.user}<span class="acct-name">Anmelden</span></button>`;
+}
+function acctPopHtml(){
+  return `<div class="acct-hd">
+    <div class="row" style="gap:8px;flex-wrap:nowrap">
+      ${sbUser?`<span class="acct-av lg">${esc(acctInitial())}</span>`:`<span class="acct-ico">${IC.user}</span>`}
+      <b>${sbUser?'Mein Konto':'Anmelden'}</b>
+    </div>
+    <button type="button" class="x" title="Schließen" aria-label="Schließen" data-act="closeAcctMenu" data-args='[]'>${IC.x}</button>
+  </div>
+  <div id="sbbox">${sbCloudHtml()}</div>`;
+}
+let acctPrevFocus=null;
+function closeAcctMenu(){
+  const ov=document.getElementById('acctov');
+  if(ov)ov.remove();
+  if(acctPrevFocus&&acctPrevFocus.focus&&document.contains(acctPrevFocus))acctPrevFocus.focus({preventScroll:true});
+  acctPrevFocus=null;
+}
+function openAcctMenu(){
+  if(document.getElementById('acctov')){closeAcctMenu();return}
+  acctPrevFocus=document.activeElement;
+  sbErr='';sbMsg='';
+  const ov=document.createElement('div');
+  ov.id='acctov';ov.className='acct-ov';
+  ov.setAttribute('role','dialog');ov.setAttribute('aria-modal','true');ov.setAttribute('aria-label','Konto und Cloud-Sync');
+  ov.innerHTML=`<div id="acctpop" class="acct-pop">${acctPopHtml()}</div>`;
+  ov.addEventListener('click',e=>{if(e.target===ov)closeAcctMenu()});
+  ov.addEventListener('keydown',e=>{if(e.key==='Escape'){e.stopPropagation();closeAcctMenu()}});
+  document.body.appendChild(ov);
+  const focusEl=ov.querySelector('#sb_email')||ov.querySelector('button');
+  if(focusEl)focusEl.focus();
+}
 function updSyncUI(){
   const c=activeCloudState();
   if(c.state!==lastSS){if(c.state==='err')announce('Synchronisierung fehlgeschlagen');else if(lastSS==='syncing'&&c.state==='ok')announce('Synchronisiert');lastSS=c.state}
-  const el=document.getElementById('cs');if(el)el.innerHTML=syncBadge();
-  const b=document.querySelector('.cnav');if(b)b.title='Einstellungen'+(c.on?' · '+syncTitle():'');
-  const sb=document.getElementById('sbbox');if(sb)sb.innerHTML=sbCloudHtml();
+  const slot=document.getElementById('acctslot');if(slot)slot.innerHTML=acctBtnHtml();
+  const pop=document.getElementById('acctpop');
+  if(pop){
+    const prevEmail=document.getElementById('sb_email')?.value||'';
+    pop.innerHTML=acctPopHtml();
+    const em=document.getElementById('sb_email');
+    if(em&&prevEmail&&!em.value)em.value=prevEmail;
+  }
 }
-const nav=a=>`<nav class='nav'><button class='${a==='q'?'on':''}' ${a==='q'?'aria-current="page"':''} title="Fragen" aria-label="Fragen" data-act="_h10">${IC.cap}<span class="nlbl">Fragen</span></button><button class='${a==='g'?'on':''}' ${a==='g'?'aria-current="page"':''} title="Glossar" aria-label="Glossar" data-act='glos'>${IC.book}<span class="nlbl">Glossar</span></button><button class='${a==='t'?'on':''}' ${a==='t'?'aria-current="page"':''} title="Statistik &amp; Verlauf" aria-label="Statistik" data-act='stats'>${IC.chart}<span class="nlbl">Statistik</span></button><button class='cnav ${a==='s'?'on':''}' ${a==='s'?'aria-current="page"':''} title="Einstellungen${activeCloudState().on?' · '+esc(syncTitle()):''}" aria-label="Einstellungen" data-act='settings'>${IC.cog}<span class="nlbl">Einstellungen</span><span id="cs">${syncBadge()}</span></button></nav>`;
+const nav=a=>`<nav class='nav'><button class='${a==='q'?'on':''}' ${a==='q'?'aria-current="page"':''} title="Fragen" aria-label="Fragen" data-act="_h10">${IC.cap}<span class="nlbl">Fragen</span></button><button class='${a==='g'?'on':''}' ${a==='g'?'aria-current="page"':''} title="Glossar" aria-label="Glossar" data-act='glos'>${IC.book}<span class="nlbl">Glossar</span></button><button class='${a==='t'?'on':''}' ${a==='t'?'aria-current="page"':''} title="Statistik &amp; Verlauf" aria-label="Statistik" data-act='stats'>${IC.chart}<span class="nlbl">Statistik</span></button><button class='${a==='s'?'on':''}' ${a==='s'?'aria-current="page"':''} title="Einstellungen" aria-label="Einstellungen" data-act='settings'>${IC.cog}<span class="nlbl">Einstellungen</span></button><span id="acctslot" class="acct-slot">${acctBtnHtml()}</span></nav>`;
 function stats(){histDelPend=null;statsView();toTop()}
 function setStatsCourse(c){statsCourse=c||'';histDelPend=null;statsView()}
 function togHistExp(id){histExp.has(id)?histExp.delete(id):histExp.add(id);statsView()}
@@ -759,7 +807,7 @@ function settingsView(){
   stopExamTimer();curView='s';$app.className='';
   const groups=buildGroups();
   const qn=getQuizCount(),ms=Math.max(1,Math.min(10,+opts.mastery||3)),th=THEMES.includes(opts.theme)?opts.theme:'auto';
-  $app.innerHTML=`${nav('s')}<h1>${IC.cog}<span>Einstellungen</span></h1><p class="mut">Übungsumfang für das Quiz, Darstellung, Kurseinstellungen und Cloud-Sync verwalten.</p>
+  $app.innerHTML=`${nav('s')}<h1>${IC.cog}<span>Einstellungen</span></h1><p class="mut">Übungsumfang für das Quiz, Darstellung und Kurseinstellungen verwalten.</p>
   <h2>Übungsmodus (Quiz) &amp; Darstellung</h2>
   <div class="card">
     <div class="srow">
@@ -814,9 +862,6 @@ function settingsView(){
   <h2>Vorhandene Kurse (${cnames.length})</h2>
   <p class="mut">Alle Kurse im Überblick (ohne Kapitel und Fragen). Über das Stift-Symbol lassen sich Kursname, Prüfungsfragen-Anzahl, Prüfungszeit, Notenschema, Multiple-Choice-Wertung und Minuspunkte pro Kurs anpassen.</p>
   ${cnames.length?cnames.map((c,gi)=>courseCardHtml(c,groups[c],gi,true)).join(''):`<div class="card" style="margin-top:12px"><p class="mut">Noch keine Kurse vorhanden. Importiere zuerst ein Fragenset unter „Fragen“.</p></div>`}
-  <h2>Cloud-Sync (Supabase)</h2>
-  <p class="mut">Synchronisiert deine Fragen, Kurseinstellungen, deinen Lernstand und dein Glossar sicher über dein Supabase-Konto zwischen Mac, iPad und iPhone.</p>
-  <div id="sbbox">${sbCloudHtml()}</div>
   <h2>Tastaturkürzel</h2>
   <div class="card"><p class="mut" style="margin:0"><b>Quiz:</b> 1–9 Antwort wählen · Enter oder Leertaste prüfen/weiter · M zum Bearbeiten markieren · Esc zurück.<br><b>Prüfung:</b> ←/→ Frage wechseln · L für später markieren · M zum Bearbeiten markieren · Esc abbrechen.</p></div>
   <h2>Gefahrenzone</h2>
@@ -1416,32 +1461,34 @@ function mergeFrom(d){const rt=d.updatedAt||0;
   try{localStorage.setItem('pt:sets',jj(sets));localStorage.setItem('pt:gloss',jj(gloss));localStorage.setItem('pt:courses',jj(courses));localStorage.setItem('pt:exams',jj(examHistory));localStorage.setItem('pt:ts',String(localTs))}catch(e){}}
 
 function sbCloudHtml(){
-  if(!supabase)return `<div class="card" style="margin-top:12px"><p class="mut" style="margin:0">Supabase ist in dieser Umgebung nicht konfiguriert.</p></div>`;
+  if(!supabase)return `<p class="mut" style="margin:0">Supabase ist in dieser Umgebung nicht konfiguriert.</p>`;
   if(sbUser){
     const last=sbLastSync?new Date(sbLastSync).toLocaleString('de-DE',{dateStyle:'short',timeStyle:'short'})+' Uhr':'Noch nicht synchronisiert';
-    return `<div class="card" style="margin-top:12px">
-      <p><b>Status:</b> ${sbState==='syncing'?'Synchronisiere …':sbState==='err'?`<span style="color:var(--bad)">Fehler (${esc(sbErr)})</span>`:`<span style="color:var(--ok)">✓ Verbunden als ${esc(sbUser.email||sbUser.id)}</span>`}</p>
-      <p class="mut">Letzter Abgleich: ${esc(last)}</p>
-      <div class="row" style="margin-top:12px">
-        <button class="btn" ${sbState==='syncing'?'disabled':''} data-act="sbSyncNow" data-args='[]'>Jetzt synchronisieren</button>
-        <button class="btn sec" data-act="sbSignOut" data-args='[]'>Abmelden</button>
+    return `<div>
+      <p style="margin:0 0 4px;font-weight:700;word-break:break-all">${esc(sbUser.email||sbUser.id)}</p>
+      <p style="margin:0 0 4px;font-size:.92rem">${sbState==='syncing'?'Synchronisiere …':sbState==='err'?`<span style="color:var(--bad)">Fehler: ${esc(sbErr)}</span>`:`<span style="color:var(--ok)">✓ Cloud-Sync aktiv</span>`}</p>
+      <p class="mut" style="margin:0">Letzter Abgleich: ${esc(last)}</p>
+      <div class="row" style="margin-top:14px">
+        <button class="btn sm" style="flex:1" ${sbState==='syncing'?'disabled':''} data-act="sbSyncNow" data-args='[]'>Jetzt synchronisieren</button>
+        <button class="btn sec sm" data-act="sbSignOut" data-args='[]'>Abmelden</button>
       </div>
     </div>`;
   }
   const m=sbAuthMode;
-  return `<div class="card ge" style="margin-top:12px">
+  return `<div class="ge">
+    <p class="mut" style="margin:0 0 10px">Synchronisiert Fragen, Lernstand und Glossar sicher auf allen Geräten.</p>
     <div class="gtabs" style="margin-top:0;margin-bottom:10px">
       <button type="button" class="gtab${m==='login'?' on':''}" data-act="setSbMode" data-args='["login"]'>Anmelden</button>
-      <button type="button" class="gtab${m==='signup'?' on':''}" data-act="setSbMode" data-args='["signup"]'>Konto erstellen</button>
+      <button type="button" class="gtab${m==='signup'?' on':''}" data-act="setSbMode" data-args='["signup"]'>Registrieren</button>
       <button type="button" class="gtab${m==='magic'?' on':''}" data-act="setSbMode" data-args='["magic"]'>Magic Link</button>
     </div>
     <label for="sb_email"><b>E-Mail-Adresse</b></label>
     <input id="sb_email" type="email" placeholder="name@beispiel.de" autocomplete="email" data-kd="sbAuthSubmit" data-args='[]'>
     ${m==='magic'?'':`<label for="sb_pw"><b>Passwort</b></label><input id="sb_pw" type="password" placeholder="${m==='signup'?'Mindestens 6 Zeichen':'Passwort'}" autocomplete="${m==='signup'?'new-password':'current-password'}" data-kd="sbAuthSubmit" data-args='[]'>`}
-    ${sbErr?`<p class="err" role="alert">${esc(sbErr)}</p>`:''}
-    ${sbMsg?`<p style="color:var(--ok);font-weight:700" role="status">${esc(sbMsg)}</p>`:''}
-    <div class="row" style="margin-top:8px">
-      <button class="btn" ${sbBusy?'disabled':''} data-act="sbAuthSubmit" data-args='[]'>${sbBusy?'Bitte warten …':m==='login'?'Anmelden & Synchronisieren':m==='signup'?'Registrieren':'Magic Link senden'}</button>
+    ${sbErr?`<p class="err" role="alert" style="margin:4px 0 0">${esc(sbErr)}</p>`:''}
+    ${sbMsg?`<p style="color:var(--ok);font-weight:700;margin:4px 0 0" role="status">${esc(sbMsg)}</p>`:''}
+    <div class="row" style="margin-top:10px">
+      <button class="btn" style="width:100%" ${sbBusy?'disabled':''} data-act="sbAuthSubmit" data-args='[]'>${sbBusy?'Bitte warten …':m==='login'?'Anmelden':m==='signup'?'Konto erstellen':'Magic Link senden'}</button>
     </div>
   </div>`;
 }
@@ -1659,11 +1706,11 @@ function _h20(){examSubPend=false;quiz()}
 function _h21(){start(wrongPool())}
 const handlers={
   _clipP,_clr,_h1,_h10,_h11,_h12,_h13,_h14,_h15,_h16,_h17,_h18,_h19,_h2,_h20,_h21,_h3,_h4,_h5,_h6,_h7,_h8,_h9,_pd,_rNM,_rP,_rSM,
-  addQOpt,cancelCEdit,cancelGCEdit,cancelQEdit,cancelSEdit,changeQType,check,clearQImg,copyG,
+  addQOpt,cancelCEdit,cancelGCEdit,cancelQEdit,cancelSEdit,changeQType,check,clearQImg,closeAcctMenu,copyG,
   del,del2,delC,delC2,delG,delGC,delGC2,delHist,delHist2,delQ,delQOpt,doImp,
   dragCOver,dragCStart,dragEnd,dragLeave,dragSOver,dragSStart,dropC,dropFile,dropS,
   exportC,exportG,exportGC,exportQ,finishExam,fold,fromFile,gGName,gName,gSearch,
-  gfold,glos,goExamQ,goQ,goQEdit,home,imp,leaveQuiz,moveC,moveS,next,openImgZoom,openS,pick,
+  gfold,glos,goExamQ,goQ,goQEdit,home,imp,leaveQuiz,moveC,moveS,next,openAcctMenu,openImgZoom,openS,pick,
   qSearch,resetCourseProg,resetProg,saveCEdit,saveG,saveGCEdit,saveQEdit,saveSEdit,
   sbAuthSubmit,sbSignOut,sbSyncNow,setSbMode,setStatsCourse,
   setAutoCheck,setHideMastered,setMastery,setQuizCount,setShuffle,setTheme,settings,

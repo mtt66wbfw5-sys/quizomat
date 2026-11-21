@@ -20,7 +20,7 @@ Interaktiver Prüfungs- und Vorlesungstrainer zum Üben, Auswerten und Verwalten
   - **Intelligente Gewichtung & Kurs-Fokus:** Zuletzt falsch beantwortete und noch unbekannte Fragen werden bei der Quiz-Zusammenstellung bevorzugt gezogen; für Quiz und Prüfung sind immer nur Kapitel eines einzelnen Kurses gleichzeitig auswählbar (kein Vermischen mehrerer Kurse).
   - Der Lernstand lässt sich jederzeit pro Frage per Klick umschalten sowie pro Kapitel, pro Kurs oder global zurücksetzen.
 - **Einstellungsseite & Kursübersicht:**
-  - Eigener Reiter **Einstellungen** zum Festlegen von Quiz-Fragenanzahl, Gemeistert-Schwelle, Ausblenden gemeisterter Fragen, Antwort-Mischung, Erscheinungsbild (*System / Hell / Dunkel*) und **Cloud-Sync**.
+  - Eigener Reiter **Einstellungen** zum Festlegen von Quiz-Fragenanzahl, Gemeistert-Schwelle, Ausblenden gemeisterter Fragen, Antwort-Mischung und Erscheinungsbild (*System / Hell / Dunkel*).
   - Kompakte Übersicht aller vorhandenen Kurse (ohne Kapitel und Einzelfragen) inklusive direkter Bearbeitung aller Kurseinstellungen, Export, Lernstand-Reset und Löschen.
 - **Prüfungsmodus & Notenschemata:**
   - **Fragenanzahl & Countdown-Timer pro Kurs:** Anzahl der Prüfungsfragen und Prüfungszeit in Minuten lassen sich pro Kurs individuell einstellen; mit visueller Warnung (ab 5 Min. gelb, ab 1 Min. rot), Schutzabfrage gegen versehentliches Abbrechen und automatischer Abgabe bei Zeitablauf.
@@ -47,7 +47,7 @@ Interaktiver Prüfungs- und Vorlesungstrainer zum Üben, Auswerten und Verwalten
   - Bereits vorhandene Kurse, Kapitel, Fragen und Glossarbegriffe werden beim Import kursbezogen zusammengeführt (keine doppelten Fragen/Begriffe pro Kurs), wobei der höhere Lernstand erhalten bleibt.
   - Export aller Fragen, einzelner Kurse (inkl. Kurs-Glossar), aller Glossare oder einzelner Kurs-Glossare als `.json`-Datei (inkl. aktuellem Lernstand `streak` / `wrong` / `flagged` sowie den Kurseinstellungen `einstellungen`).
 - **Automatischer Cloud-Sync (Supabase):**
-  - Direkt in den **Einstellungen** per E-Mail & Passwort oder Magic Link anmelden – synchronisiert Fragen, Kurseinstellungen, Lernstand und Glossar sicher per Row Level Security (RLS) zwischen Mac, iPad und iPhone.
+  - Direkt oben rechts über das **Konto-/Anmelden-Menü** per E-Mail & Passwort oder Magic Link anmelden – synchronisiert Fragen, Kurseinstellungen, Lernstand und Glossar sicher per Row Level Security (RLS) zwischen Mac, iPad und iPhone.
 - **PWA & Offline-Fähigkeit:**
   - Installierbar als Web-App auf Mac, iPad und iPhone mit Service Worker für zuverlässiges Offline-Lernen und automatischer Synchronisation, sobald wieder eine Verbindung besteht.
 - **Optimiert für Mac, iPad & iPhone:**
