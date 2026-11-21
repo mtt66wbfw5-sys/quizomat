@@ -53,6 +53,9 @@ export function parseSets(txt) {
       const st = Math.max(0, parseInt(f.streak, 10) || 0);
       const wr = !!f.wrong;
       const fl = !!(f.flagged || f.markiert);
+      const img = String(f.bild || f.img || '').trim();
+      const imgAlt = String(f.bildText || f.imgAlt || '').trim();
+      const imgFields = img ? { img, ...(imgAlt ? { imgAlt } : {}) } : {};
       if (f.typ === 'tf') {
         let rv = Array.isArray(f.richtig) ? f.richtig[0] : f.richtig;
         if (typeof rv === 'string') {
@@ -74,7 +77,8 @@ export function parseSets(txt) {
           fixed: true,
           streak: st,
           wrong: wr,
-          flagged: fl
+          flagged: fl,
+          ...imgFields
         };
       }
       if (!Array.isArray(f.optionen) || f.optionen.length < 2) {
@@ -94,6 +98,7 @@ export function parseSets(txt) {
         streak: st,
         wrong: wr,
         flagged: fl,
+        ...imgFields,
         opts: f.optionen.map((t, k) => ({
           t: String(t),
           ok: r.includes(k),
