@@ -45,6 +45,11 @@ import {
   summarizeHistory,
   weakestChapters
 } from './core/history.js';
+import {
+  isValidImageUrl,
+  uploadQuestionImage,
+  deleteQuestionImage
+} from './core/media.js';
 import { supabase } from './sync/supabaseClient.js';
 import { fetchSupabaseState, pushSupabaseState } from './sync/supabaseSync.js';
 
@@ -349,6 +354,23 @@ function sForm(sid){
   return `<div class="ge"${isNew?'':' style="margin-top:8px;padding-top:8px;border-top:1px solid var(--bd)"'}>${isNew?'<b style="display:block;margin-bottom:6px;color:var(--ac)">Neues Kapitel hinzufügen</b>':`<label class="mut" for="esc_c">Kurs</label><input id="esc_c" list="cl" value="${esc(d.course)}" placeholder="Name des Kurses" ${kd}>`}<label class="mut" for="esc_t">Thema / Kapitel</label><input id="esc_t" value="${esc(d.title)}" placeholder="z. B. Vorlesung 1 – Grundlagen" ${kd}><p class="err" role="alert">${esc(serr)}</p><div class="row act"><button class="btn sm" type="button" data-act="saveSEdit" data-args="${esc(JSON.stringify([String(sid)]))}">${isNew?'Anlegen':'Speichern'}</button><button class="btn sec sm" type="button" data-act="cancelSEdit" data-args='[]'>Abbrechen</button></div></div>`;
 }
 
+let qImgBusy=false,qImgNote='';
+function qImgHtml(q){
+  if(!q||!isValidImageUrl(q.img))return '';
+  const alt=q.imgAlt||'Abbildung zur Frage';
+  return `<figure class="qimg"><img src="${esc(q.img)}" alt="${esc(alt)}" loading="lazy" title="Zum Vergrößern antippen" data-act="openImgZoom" data-args="${esc(JSON.stringify([q.img,alt]))}">${q.imgAlt?`<figcaption>${esc(q.imgAlt)}</figcaption>`:''}</figure>`;
+}
+function openImgZoom(url,alt){
+  if(!isValidImageUrl(url))return;
+  const prev=document.activeElement,o=document.createElement('div');
+  o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-label',alt||'Bildansicht');
+  o.style.cssText='position:fixed;inset:0;z-index:110;background:rgba(0,0,0,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;gap:12px;cursor:zoom-out';
+  o.innerHTML=`<img src="${esc(url)}" alt="${esc(alt||'')}" style="max-width:95vw;max-height:84vh;object-fit:contain;border-radius:8px;background:#fff"><div class="row">${alt?`<span style="color:#fff;font-size:.92rem">${esc(alt)}</span>`:''}<button class="btn sec sm" type="button" data-c>Schließen</button></div>`;
+  const close=()=>{o.remove();if(prev&&prev.focus&&document.contains(prev))prev.focus({preventScroll:true})};
+  o.addEventListener('click',e=>{if(e.target===o||e.target.hasAttribute('data-c')||e.target.tagName==='IMG')close()});
+  o.addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Escape')close()});
+  document.body.appendChild(o);o.querySelector('[data-c]').focus();
+}
 function startQEdit(sid,qi){
   const s=sets.find(x=>x.id===sid);if(!s||!s.qs[qi])return;
   const q=s.qs[qi];
@@ -357,27 +379,32 @@ function startQEdit(sid,qi){
     type:q.fixed?'tf':q.type,
     q:q.q,
     exp:q.exp||'',
+    img:q.img||'',
+    imgAlt:q.imgAlt||'',
+    imgPath:q.imgPath||'',
     tfOk:q.fixed?!!(q.opts[0]&&q.opts[0].ok):true,
     tfWhy:q.fixed?[(q.opts[0]&&q.opts[0].why)||'',(q.opts[1]&&q.opts[1].why)||'']:['',''],
     opts:q.fixed?[{t:'',ok:true,why:''},{t:'',ok:false,why:''}]:q.opts.map(o=>({t:o.t,ok:!!o.ok,why:o.why||''}))
   };
-  qerr='';cedit=null;sedit=null;pq=null;home();
+  qerr='';qImgNote='';qImgBusy=false;cedit=null;sedit=null;pq=null;home();
 }
 function startQNew(sid){
   const s=sets.find(x=>x.id===sid);if(!s)return;
   exp.add(sid);saveExp();if(col.has(s.course)){col.delete(s.course);saveCol()}
   qedit=sid+':new';
-  qdraft={type:'single',q:'',exp:'',tfOk:true,tfWhy:['',''],opts:[{t:'',ok:true,why:''},{t:'',ok:false,why:''},{t:'',ok:false,why:''},{t:'',ok:false,why:''}]};
-  qerr='';cedit=null;sedit=null;pq=null;home();
+  qdraft={type:'single',q:'',exp:'',img:'',imgAlt:'',imgPath:'',tfOk:true,tfWhy:['',''],opts:[{t:'',ok:true,why:''},{t:'',ok:false,why:''},{t:'',ok:false,why:''},{t:'',ok:false,why:''}]};
+  qerr='';qImgNote='';qImgBusy=false;cedit=null;sedit=null;pq=null;home();
   setTimeout(()=>{const el=document.getElementById('eq_q');if(el){el.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth',block:'center'});el.focus()}},30);
 }
-function cancelQEdit(){qedit=null;qdraft=null;qerr='';home()}
+function cancelQEdit(){qedit=null;qdraft=null;qerr='';qImgNote='';qImgBusy=false;home()}
 function syncQDraft(){
   if(!qdraft)return;
-  const qEl=document.getElementById('eq_q'),eEl=document.getElementById('eq_exp'),tEl=document.getElementById('eq_type');
+  const qEl=document.getElementById('eq_q'),eEl=document.getElementById('eq_exp'),tEl=document.getElementById('eq_type'),iEl=document.getElementById('eq_img'),iaEl=document.getElementById('eq_imgalt');
   if(qEl)qdraft.q=qEl.value;
   if(eEl)qdraft.exp=eEl.value;
   if(tEl)qdraft.type=tEl.value;
+  if(iEl){const v=iEl.value.trim();if(v)qdraft.img=v;else if(!qdraft.img||!qdraft.img.startsWith('data:'))qdraft.img=''}
+  if(iaEl)qdraft.imgAlt=iaEl.value;
   if(qdraft.type==='tf'){
     const r=document.querySelector('input[name="eq_tf"]:checked');
     if(r)qdraft.tfOk=r.value==='true';
@@ -389,6 +416,28 @@ function syncQDraft(){
       qdraft.opts=ots.map((el,k)=>({t:el.value,ok:!!(oks[k]&&oks[k].checked),why:ows[k]?ows[k].value:''}));
     }
   }
+}
+async function uploadQImg(el){
+  const f=el&&el.files&&el.files[0];if(!f||!qdraft)return;
+  syncQDraft();
+  qImgBusy=true;qerr='';qImgNote='Bild wird verarbeitet …';home();
+  try{
+    const res=await uploadQuestionImage(supabase,sbUser&&sbUser.id,f);
+    if(qdraft.imgPath&&qdraft.imgPath!==res.storagePath)deleteQuestionImage(supabase,qdraft.imgPath);
+    qdraft.img=res.url;
+    qdraft.imgPath=res.storagePath||'';
+    qImgNote=res.localOnly?'Lokal komprimiert gespeichert (mit Supabase-Login wird es automatisch in der Cloud gespeichert).':'In Supabase Storage gespeichert.';
+  }catch(e){
+    qerr=e.message||'Bild konnte nicht geladen werden.';qImgNote='';
+  }finally{
+    qImgBusy=false;if(el)el.value='';home();
+  }
+}
+function clearQImg(){
+  if(!qdraft)return;
+  syncQDraft();
+  if(qdraft.imgPath)deleteQuestionImage(supabase,qdraft.imgPath);
+  qdraft.img='';qdraft.imgAlt='';qdraft.imgPath='';qImgNote='';qerr='';home();
 }
 function changeQType(nt){
   syncQDraft();
@@ -405,12 +454,15 @@ function delQOpt(k){syncQDraft();if(qdraft.opts.length>2){qdraft.opts.splice(k,1
 function saveQEdit(sid,qi){
   syncQDraft();
   const s=sets.find(x=>x.id===sid);if(!s||(qi>=0&&!s.qs[qi]))return;
-  const orig=qi>=0?s.qs[qi]:{streak:0,wrong:false},qTxt=qdraft.q.trim(),expTxt=qdraft.exp.trim();
+  const orig=qi>=0?s.qs[qi]:{streak:0,wrong:false},qTxt=qdraft.q.trim(),expTxt=qdraft.exp.trim(),imgUrl=(qdraft.img||'').trim(),imgAlt=(qdraft.imgAlt||'').trim(),imgPath=(qdraft.imgPath||'').trim();
   if(!qTxt){qerr='Der Fragetext darf nicht leer sein.';home();return}
+  if(imgUrl&&!isValidImageUrl(imgUrl)){qerr='Ungültige Bild-URL (erlaubt sind https://, http:// oder hochgeladene Bilder).';home();return}
+  const imgFields=imgUrl?{img:imgUrl,...(imgAlt?{imgAlt}:{}),...(imgPath?{imgPath}:{})}:{};
+  const srsFields=orig.srs?{srs:orig.srs}:{};
   let nq;
   if(qdraft.type==='tf'){
     const tw=qdraft.tfWhy||['',''];
-    nq={q:qTxt,type:'single',fixed:true,exp:expTxt,streak:orig.streak||0,wrong:!!orig.wrong,flagged:false,
+    nq={q:qTxt,type:'single',fixed:true,exp:expTxt,streak:orig.streak||0,wrong:!!orig.wrong,flagged:false,...srsFields,...imgFields,
       opts:[{t:'Wahr',ok:!!qdraft.tfOk,why:(tw[0]||'').trim()},{t:'Falsch',ok:!qdraft.tfOk,why:(tw[1]||'').trim()}]};
   }else{
     if(qdraft.opts.length<2){qerr='Mindestens 2 Antwortoptionen sind nötig.';home();return}
@@ -418,16 +470,16 @@ function saveQEdit(sid,qi){
     const okCnt=qdraft.opts.filter(o=>o.ok).length;
     if(!okCnt){qerr='Bitte mindestens eine richtige Antwort markieren.';home();return}
     if(qdraft.type==='single'&&okCnt>1){qerr='Bei Single Choice darf nur genau eine Antwort richtig sein.';home();return}
-    nq={q:qTxt,type:qdraft.type,exp:expTxt,streak:orig.streak||0,wrong:!!orig.wrong,flagged:false,
+    nq={q:qTxt,type:qdraft.type,exp:expTxt,streak:orig.streak||0,wrong:!!orig.wrong,flagged:false,...srsFields,...imgFields,
       opts:qdraft.opts.map(o=>({t:o.t.trim(),ok:!!o.ok,why:o.why.trim()}))};
   }
   if(qi>=0)s.qs[qi]=nq;else s.qs.push(nq);
-  qedit=null;qdraft=null;qerr='';save(true);home();
+  qedit=null;qdraft=null;qerr='';qImgNote='';qImgBusy=false;save(true);home();
 }
 
 function qForm(sid,qi){
-  const d=qdraft,isTf=d.type==='tf',isSingle=d.type==='single',tw=d.tfWhy||['',''];
-  return `<div class="qi"><div class="ge">${qi<0?'<b style="display:block;margin-bottom:6px;color:var(--ac)">Neue Frage hinzufügen</b>':''}<label class="mut" for="eq_type">Fragetyp</label><select id="eq_type" data-chg="changeQType" data-args='[]'><option value="single" ${d.type==='single'?'selected':''}>Single Choice</option><option value="multi" ${d.type==='multi'?'selected':''}>Multiple Choice</option><option value="tf" ${isTf?'selected':''}>Wahr / Falsch</option></select><label class="mut" for="eq_q">Frage</label><textarea id="eq_q" style="min-height:64px">${esc(d.q)}</textarea>${isTf?`<label class="mut" style="margin-bottom:4px">Richtige Antwort &amp; optionale Begründungen</label><div class="orow" style="grid-template-columns:auto auto 1fr"><input type="radio" name="eq_tf" value="true" ${d.tfOk?'checked':''}><span style="min-width:52px;font-weight:700">Wahr</span><input id="eq_tfw0" placeholder="Begründung zu Wahr (optional)" value="${esc(tw[0]||'')}"></div><div class="orow" style="grid-template-columns:auto auto 1fr;margin-bottom:10px"><input type="radio" name="eq_tf" value="false" ${!d.tfOk?'checked':''}><span style="min-width:52px;font-weight:700">Falsch</span><input id="eq_tfw1" placeholder="Begründung zu Falsch (optional)" value="${esc(tw[1]||'')}"></div>`:`<label class="mut" style="margin-bottom:4px">Antwortoptionen (Häkchen = richtig, optional Begründung)</label>${d.opts.map((o,k)=>`<div class="orow"><input class="eq_ok" type="${isSingle?'radio':'checkbox'}" name="eq_ok_grp" title="Als richtige Antwort markieren" ${o.ok?'checked':''}><input class="eq_ot" placeholder="Antwort ${k+1}" value="${esc(o.t)}"><input class="eq_ow" placeholder="Begründung (optional)" value="${esc(o.why)}"><button class="x" type="button" title="Option entfernen" aria-label="Option entfernen" ${d.opts.length<=2?'disabled':''} data-act="delQOpt" data-args="${esc(JSON.stringify([k]))}">${IC.x}</button></div>`).join('')}<button class="btn sec sm" type="button" style="margin:2px 0 10px" data-act="addQOpt" data-args='[]'>+ Option hinzufügen</button>`}<label class="mut" for="eq_exp">Erklärung</label><textarea id="eq_exp" style="min-height:64px">${esc(d.exp)}</textarea><p class="err" role="alert">${esc(qerr)}</p><div class="row act"><button class="btn sm" type="button" data-act="saveQEdit" data-args="${esc(JSON.stringify([String(sid),qi]))}">${qi<0?'Anlegen':'Speichern'}</button><button class="btn sec sm" type="button" data-act="cancelQEdit" data-args='[]'>Abbrechen</button></div></div></div>`;
+  const d=qdraft,isTf=d.type==='tf',isSingle=d.type==='single',tw=d.tfWhy||['',''],hasImg=isValidImageUrl(d.img);
+  return `<div class="qi"><div class="ge">${qi<0?'<b style="display:block;margin-bottom:6px;color:var(--ac)">Neue Frage hinzufügen</b>':''}<label class="mut" for="eq_type">Fragetyp</label><select id="eq_type" data-chg="changeQType" data-args='[]'><option value="single" ${d.type==='single'?'selected':''}>Single Choice</option><option value="multi" ${d.type==='multi'?'selected':''}>Multiple Choice</option><option value="tf" ${isTf?'selected':''}>Wahr / Falsch</option></select><label class="mut" for="eq_q">Frage</label><textarea id="eq_q" style="min-height:64px">${esc(d.q)}</textarea><label class="mut" for="eq_img">Bild / Diagramm (optional)</label><div class="row" style="margin:2px 0 6px"><label class="btn sec sm" style="position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:6px;cursor:pointer">${IC.img}<span>${qImgBusy?'Lade hoch …':'Bild hochladen'}</span><input type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer" ${qImgBusy?'disabled':''} data-act="_clr" data-el data-chg="uploadQImg" data-el></label>${hasImg?`<button class="btn sec sm" type="button" data-act="clearQImg" data-args='[]'>Bild entfernen</button>`:''}</div><input id="eq_img" placeholder="Oder Bild-URL einfügen (https://…)" value="${esc(d.img&&d.img.startsWith('data:')?'':(d.img||''))}"><input id="eq_imgalt" placeholder="Bildbeschreibung / Beschriftung (optional)" value="${esc(d.imgAlt||'')}">${qImgNote?`<p class="mut" style="margin:0 0 6px;font-size:.84rem">${esc(qImgNote)}</p>`:''}${hasImg?`<div class="qimg-prev"><img src="${esc(d.img)}" alt="${esc(d.imgAlt||'Vorschau')}"><span class="mut" style="font-size:.84rem">Vorschau – im Quiz per Klick vergrößerbar.</span></div>`:''}${isTf?`<label class="mut" style="margin-bottom:4px">Richtige Antwort &amp; optionale Begründungen</label><div class="orow" style="grid-template-columns:auto auto 1fr"><input type="radio" name="eq_tf" value="true" ${d.tfOk?'checked':''}><span style="min-width:52px;font-weight:700">Wahr</span><input id="eq_tfw0" placeholder="Begründung zu Wahr (optional)" value="${esc(tw[0]||'')}"></div><div class="orow" style="grid-template-columns:auto auto 1fr;margin-bottom:10px"><input type="radio" name="eq_tf" value="false" ${!d.tfOk?'checked':''}><span style="min-width:52px;font-weight:700">Falsch</span><input id="eq_tfw1" placeholder="Begründung zu Falsch (optional)" value="${esc(tw[1]||'')}"></div>`:`<label class="mut" style="margin-bottom:4px">Antwortoptionen (Häkchen = richtig, optional Begründung)</label>${d.opts.map((o,k)=>`<div class="orow"><input class="eq_ok" type="${isSingle?'radio':'checkbox'}" name="eq_ok_grp" title="Als richtige Antwort markieren" ${o.ok?'checked':''}><input class="eq_ot" placeholder="Antwort ${k+1}" value="${esc(o.t)}"><input class="eq_ow" placeholder="Begründung (optional)" value="${esc(o.why)}"><button class="x" type="button" title="Option entfernen" aria-label="Option entfernen" ${d.opts.length<=2?'disabled':''} data-act="delQOpt" data-args="${esc(JSON.stringify([k]))}">${IC.x}</button></div>`).join('')}<button class="btn sec sm" type="button" style="margin:2px 0 10px" data-act="addQOpt" data-args='[]'>+ Option hinzufügen</button>`}<label class="mut" for="eq_exp">Erklärung</label><textarea id="eq_exp" style="min-height:64px">${esc(d.exp)}</textarea><p class="err" role="alert">${esc(qerr)}</p><div class="row act"><button class="btn sm" type="button" ${qImgBusy?'disabled':''} data-act="saveQEdit" data-args="${esc(JSON.stringify([String(sid),qi]))}">${qi<0?'Anlegen':'Speichern'}</button><button class="btn sec sm" type="button" data-act="cancelQEdit" data-args='[]'>Abbrechen</button></div></div></div>`;
 }
 
 let dragItem=null;
@@ -551,7 +603,7 @@ function home(){stopExamTimer();enforceSingleCourse();const chg=curView!=='q';cu
     const l=groups[c],inNew=sedit==='__new__'&&sdraft&&sdraft.targetC===c;
     return courseCardHtml(c,l,gi,false)+(col.has(c)?'':`<div class="grp" style="margin:0 0 16px 12px">${l.map((s,si)=>{
       const mS=masteredInSet(s),hasP=s.qs.some(q=>(q.streak||0)>0||q.wrong),sCol=mS===s.qs.length&&s.qs.length?'--ok':sel.has(s.id)?'--ac':'--ink',canDragS=l.length>1&&sedit!==s.id;
-      return `<div class="set" style="border-left:4px solid var(${sCol})" ${canDragS?`draggable="true" data-dragstart="dragSStart" data-dragover="dragSOver" data-dragleave="dragLeave" data-drop="dropS" data-dragend="dragEnd" data-args="${esc(JSON.stringify([String(s.id),c]))}"`:''}><input type="checkbox" aria-label="${esc(s.title)} auswählen" ${sel.has(s.id)?'checked':''} data-chk="tog" data-args="${esc(JSON.stringify([String(s.id)]))}"><button class="sb" style="padding:2px 0" aria-expanded="${exp.has(s.id)}" data-act="openS" data-args="${esc(JSON.stringify([String(s.id)]))}"><span>${exp.has(s.id)?'▾':'▸'}</span><span><span class="mut" style="display:block;font-size:.82rem;margin-bottom:1px">Kapitel ${si+1} · ${s.qs.length} Fragen${mS?` · ${mS} ✓ gemeistert`:''}</span><b>${esc(s.title)}</b></span></button><span class="gc"><button class="x" title="Neue Frage hinzufügen" aria-label="Neue Frage hinzufügen" data-act="startQNew" data-args="${esc(JSON.stringify([String(s.id)]))}">${IC.plus}</button>${rpend===s.id?`<span class="mut">Zurücksetzen?</span><button class="btn sm" data-act="resetProg" data-args="${esc(JSON.stringify([String(s.id)]))}">Ja</button><button class="btn sec sm" data-act="_h3">Nein</button>`:hasP?`<button class="x" title="Lernstand dieses Kapitels zurücksetzen" aria-label="Lernstand zurücksetzen" data-act="_h4" data-args="${esc(JSON.stringify([String(s.id)]))}">${IC.res}</button>`:''}${canDragS?`<button class="x" aria-label="Kapitel ${esc(s.title)} nach oben" title="Nach oben" ${l.indexOf(s)===0?'disabled':''} data-act="moveS" data-args="${esc(JSON.stringify([String(s.id),-1]))}">↑</button><button class="x" aria-label="Kapitel ${esc(s.title)} nach unten" title="Nach unten" ${l.indexOf(s)===l.length-1?'disabled':''} data-act="moveS" data-args="${esc(JSON.stringify([String(s.id),1]))}">↓</button>`:''}<button class="x" title="Kapitel bearbeiten" aria-label="Kapitel bearbeiten" data-act="startSEdit" data-args="${esc(JSON.stringify([String(s.id)]))}">${IC.edit}</button>${pend===s.id?`<span class="mut">Löschen?</span><button class="btn sm" data-act="del2" data-args="${esc(JSON.stringify([String(s.id)]))}">Ja</button><button class="btn sec sm" data-act="del" data-args="${esc(JSON.stringify([String(s.id)]))}">Nein</button>`:`<button class="x" title="Kapitel löschen" aria-label="Kapitel löschen" data-act="del" data-args="${esc(JSON.stringify([String(s.id)]))}">${IC.del}</button>`}</span>${sedit===s.id?sForm(s.id):''}</div>${exp.has(s.id)?`<div class="ql">${s.qs.map((q,i)=>qedit===s.id+':'+i?qForm(s.id,i):`<div class="qi"><span>${esc(q.q)}</span><span class="gc">${qBadge(s.id,i,q)}<button class="x${q.flagged?' warn':''}" title="${q.flagged?'Markierung aufheben':'Zum Bearbeiten markieren'}" aria-label="Markieren" data-act="togFlag" data-args="${esc(JSON.stringify([String(s.id),i]))}">${IC.flag}</button><button class="x" title="Frage bearbeiten" aria-label="Frage bearbeiten" data-act="startQEdit" data-args="${esc(JSON.stringify([String(s.id),i]))}">${IC.edit}</button>${pq===s.id+':'+i?`<button class="btn sm" data-act="delQ" data-args="${esc(JSON.stringify([String(s.id),i]))}">Löschen</button><button class="btn sec sm" data-act="_h5">Nein</button>`:`<button class="x" title="Frage löschen" aria-label="Frage löschen" data-act="_h6" data-args="${esc(JSON.stringify([s.id,i]))}">${IC.del}</button>`}</span></div>`).join('')}${qedit===s.id+':new'?qForm(s.id,-1):`<div class="qi" style="padding:10px 0 6px"><button class="btn sec sm" type="button" data-act="startQNew" data-args="${esc(JSON.stringify([String(s.id)]))}">+ Neue Frage hinzufügen</button></div>`}</div>`:''}`}).join('')}${inNew?`<div class="set" style="border-left:4px solid var(--ac)">${sForm('__new__')}</div>`:(!l.length?`<div class="set" style="padding:10px 14px"><button class="btn sec sm" type="button" data-act="startSNew" data-args="${esc(JSON.stringify([gi]))}">+ Neues Kapitel hinzufügen</button></div>`:'')}</div>`);
+      return `<div class="set" style="border-left:4px solid var(${sCol})" ${canDragS?`draggable="true" data-dragstart="dragSStart" data-dragover="dragSOver" data-dragleave="dragLeave" data-drop="dropS" data-dragend="dragEnd" data-args="${esc(JSON.stringify([String(s.id),c]))}"`:''}><input type="checkbox" aria-label="${esc(s.title)} auswählen" ${sel.has(s.id)?'checked':''} data-chk="tog" data-args="${esc(JSON.stringify([String(s.id)]))}"><button class="sb" style="padding:2px 0" aria-expanded="${exp.has(s.id)}" data-act="openS" data-args="${esc(JSON.stringify([String(s.id)]))}"><span>${exp.has(s.id)?'▾':'▸'}</span><span><span class="mut" style="display:block;font-size:.82rem;margin-bottom:1px">Kapitel ${si+1} · ${s.qs.length} Fragen${mS?` · ${mS} ✓ gemeistert`:''}</span><b>${esc(s.title)}</b></span></button><span class="gc"><button class="x" title="Neue Frage hinzufügen" aria-label="Neue Frage hinzufügen" data-act="startQNew" data-args="${esc(JSON.stringify([String(s.id)]))}">${IC.plus}</button>${rpend===s.id?`<span class="mut">Zurücksetzen?</span><button class="btn sm" data-act="resetProg" data-args="${esc(JSON.stringify([String(s.id)]))}">Ja</button><button class="btn sec sm" data-act="_h3">Nein</button>`:hasP?`<button class="x" title="Lernstand dieses Kapitels zurücksetzen" aria-label="Lernstand zurücksetzen" data-act="_h4" data-args="${esc(JSON.stringify([String(s.id)]))}">${IC.res}</button>`:''}${canDragS?`<button class="x" aria-label="Kapitel ${esc(s.title)} nach oben" title="Nach oben" ${l.indexOf(s)===0?'disabled':''} data-act="moveS" data-args="${esc(JSON.stringify([String(s.id),-1]))}">↑</button><button class="x" aria-label="Kapitel ${esc(s.title)} nach unten" title="Nach unten" ${l.indexOf(s)===l.length-1?'disabled':''} data-act="moveS" data-args="${esc(JSON.stringify([String(s.id),1]))}">↓</button>`:''}<button class="x" title="Kapitel bearbeiten" aria-label="Kapitel bearbeiten" data-act="startSEdit" data-args="${esc(JSON.stringify([String(s.id)]))}">${IC.edit}</button>${pend===s.id?`<span class="mut">Löschen?</span><button class="btn sm" data-act="del2" data-args="${esc(JSON.stringify([String(s.id)]))}">Ja</button><button class="btn sec sm" data-act="del" data-args="${esc(JSON.stringify([String(s.id)]))}">Nein</button>`:`<button class="x" title="Kapitel löschen" aria-label="Kapitel löschen" data-act="del" data-args="${esc(JSON.stringify([String(s.id)]))}">${IC.del}</button>`}</span>${sedit===s.id?sForm(s.id):''}</div>${exp.has(s.id)?`<div class="ql">${s.qs.map((q,i)=>qedit===s.id+':'+i?qForm(s.id,i):`<div class="qi"><span>${q.img?isym(IC.img,'Enthält Bild / Diagramm')+' ':''}${esc(q.q)}</span><span class="gc">${qBadge(s.id,i,q)}<button class="x${q.flagged?' warn':''}" title="${q.flagged?'Markierung aufheben':'Zum Bearbeiten markieren'}" aria-label="Markieren" data-act="togFlag" data-args="${esc(JSON.stringify([String(s.id),i]))}">${IC.flag}</button><button class="x" title="Frage bearbeiten" aria-label="Frage bearbeiten" data-act="startQEdit" data-args="${esc(JSON.stringify([String(s.id),i]))}">${IC.edit}</button>${pq===s.id+':'+i?`<button class="btn sm" data-act="delQ" data-args="${esc(JSON.stringify([String(s.id),i]))}">Löschen</button><button class="btn sec sm" data-act="_h5">Nein</button>`:`<button class="x" title="Frage löschen" aria-label="Frage löschen" data-act="_h6" data-args="${esc(JSON.stringify([s.id,i]))}">${IC.del}</button>`}</span></div>`).join('')}${qedit===s.id+':new'?qForm(s.id,-1):`<div class="qi" style="padding:10px 0 6px"><button class="btn sec sm" type="button" data-act="startQNew" data-args="${esc(JSON.stringify([String(s.id)]))}">+ Neue Frage hinzufügen</button></div>`}</div>`:''}`}).join('')}${inNew?`<div class="set" style="border-left:4px solid var(--ac)">${sForm('__new__')}</div>`:(!l.length?`<div class="set" style="padding:10px 14px"><button class="btn sec sm" type="button" data-act="startSNew" data-args="${esc(JSON.stringify([gi]))}">+ Neues Kapitel hinzufügen</button></div>`:'')}</div>`);
   }).join('')+(sets.length?`<div class="mstart"><div class="row"><button class="btn sec" ${allSelCount?'':'disabled'} data-act="startExam" data-args='[]'>Prüfung${eCnt?` (${eCnt})`:''}</button><button class="btn" ${total?'':'disabled'} data-act="start" data-args='[]'>Quiz${qCnt?` (${qCnt})`:''}</button></div></div>`:'')
   :(topNew?'':`<div class="card" style="margin-top:18px"><p><b>Noch keine Kurse oder Fragen vorhanden.</b></p><p class="mut">Lege oben über „+ Neuer Kurs“ einen neuen Kurs an oder lass dir in Claude aus deinen Unterlagen ein Fragenset als JSON erstellen und füge es hier ein.</p></div>`)}
 `;if(chg)toTop();
@@ -585,7 +637,7 @@ function exportData(b,kind,crs){const h0=b.innerHTML;
     }
   }else{
     const list=kind==='kurs'?sets.filter(s=>s.course===crs):sets;
-    out=list.map(s=>({kurs:s.course,titel:s.title,einstellungen:{fragenAnzahl:getExamCount(s.course),zeitMinuten:getExamMins(s.course),positivAb:getPass(s.course),mcWertung:getScoreMode(s.course),minuspunkte:getNegMode(s.course)},fragen:s.qs.map(q=>({...(q.fixed?{typ:'tf',frage:q.q,richtig:q.opts[0].ok,erklaerung:q.exp}:{typ:q.type,frage:q.q,optionen:q.opts.map(o=>o.t),richtig:q.opts.map((o,i)=>o.ok?i:-1).filter(i=>i>=0),erklaerung:q.exp}),...(q.opts.some(o=>o.why)?{begruendungen:q.opts.map(o=>o.why||'')}:{}),...(q.streak?{streak:q.streak}:{}),...(q.wrong?{wrong:true}:{}),...(q.flagged?{flagged:true}:{})}))}));
+    out=list.map(s=>({kurs:s.course,titel:s.title,einstellungen:{fragenAnzahl:getExamCount(s.course),zeitMinuten:getExamMins(s.course),positivAb:getPass(s.course),mcWertung:getScoreMode(s.course),minuspunkte:getNegMode(s.course)},fragen:s.qs.map(q=>({...(q.fixed?{typ:'tf',frage:q.q,richtig:q.opts[0].ok,erklaerung:q.exp}:{typ:q.type,frage:q.q,optionen:q.opts.map(o=>o.t),richtig:q.opts.map((o,i)=>o.ok?i:-1).filter(i=>i>=0),erklaerung:q.exp}),...(q.img?{bild:q.img}:{}),...(q.imgAlt?{bildText:q.imgAlt}:{}),...(q.opts.some(o=>o.why)?{begruendungen:q.opts.map(o=>o.why||'')}:{}),...(q.streak?{streak:q.streak}:{}),...(q.wrong?{wrong:true}:{}),...(q.flagged?{flagged:true}:{})}))}));
     if(kind==='kurs'&&crs){
       const cg=gloss.filter(g=>norm(g.course)===norm(crs));
       if(cg.length)out.push({kurs:crs,glossar:cg.map(g=>({begriff:g.b,info:g.i,...(g.a.length?{alias:g.a}:{})}))});
@@ -1088,7 +1140,7 @@ function quiz(){curView='z';
     const eHint=multi?(sm==='opt'?`Mehrere Antworten können richtig sein (${q.opts.length} Pkt. – jede Option zählt inkl. Nicht-Ankreuzen${nm==='clamp'?' · −1 Pkt. je Fehler, min. 0':nm==='full'?' · −1 Pkt. je Fehler':''}).`:sm==='pos'?`Mehrere Antworten können richtig sein (+1 Pkt. je richtiger Antwort${nm==='clamp'?' · −1 Pkt. je falscher Wahl, min. 0':nm==='full'?' · −1 Pkt. je falscher Wahl':''}).`:sm==='part'?`Mehrere Antworten können richtig sein (1 Pkt. anteilig über alle Optionen${nm==='clamp'?' · mit Abzug, min. 0':nm==='full'?' · mit Abzug':''}).`:`Mehrere Antworten können richtig sein (1 Pkt. für die gesamte Frage${nm==='full'?' · −1 Pkt. bei Fehler':''}).`):(nm==='full'?'1 Punkt bei richtiger Antwort · −1 Punkt bei falscher Antwort (Offen = 0 Punkte).':'');
     $app.className='wide';$app.innerHTML=`<div class='cols'><div class='qhead'><div class="row" style="justify-content:space-between"><span class="mut">Prüfung · Frage ${idx+1} von ${Q.length}${q._title?` · ${esc(q._title)}`:''}</span><span class="gc"><span id="etimer" class="badge${rem<=60?' bad':rem<=300?' warn':''}" style="cursor:default;font-variant-numeric:tabular-nums" title="Verbleibende Prüfungszeit">⏱ ${fmtTime(rem)}</span><button class="badge${examMarks.has(idx)?' warn':''}" title="Frage in dieser Prüfung zur Kontrolle vormerken (Taste L)" data-act="togExamMark" data-args='[]'>⚑ ${examMarks.has(idx)?'Vorgemerkt':'Später prüfen'}</button><button class="badge${src.flagged?' warn':''}" title="Frage zum späteren Bearbeiten markieren (Taste M)" aria-label="Zum Bearbeiten markieren" data-act="togQuizFlag" data-args='[]'>${IC.flag}</button>${examExitPend?`<span class="mut">Prüfung abbrechen?</span><button class="btn sm" data-act="_h18">Ja</button><button class="btn sec sm" data-act="_h19">Nein</button>`:`<button class="btn sec sm" data-act="tryExitExam" data-args='[]'>Zurück zur Übersicht</button>`}</span></div>
     <div class="bar" role="progressbar" aria-label="Fortschritt"><i style="width:${ansCnt/Q.length*100}%"></i></div>
-    <p class="q">${esc(q.q)}</p>${eHint?`<p class="mut">${eHint}</p>`:''}</div><div class='qmain'><div class='opts${tiles?' tiles':''}'>
+    <p class="q">${esc(q.q)}</p>${eHint?`<p class="mut">${eHint}</p>`:''}</div><div class='qmain'>${qImgHtml(q)}<div class='opts${tiles?' tiles':''}'>
     ${q.opts.map((o,i)=>{
       const selOpt=curP.has(i),c='opt'+(multi?' multi':'')+(selOpt?' sel':''),mk=selOpt?(multi?'✓':'●'):'';
       return `<button class="${c}" data-act="pick" data-args="${esc(JSON.stringify([i]))}" aria-pressed="${selOpt}"><span class="m">${mk}</span><span>${esc(o.t)}</span></button>`}).join('')}
@@ -1098,7 +1150,7 @@ function quiz(){curView='z';
   }
   $app.className='wide';$app.innerHTML=`<div class='cols'><div class='qhead'><div class="row" style="justify-content:space-between"><span class="mut">Frage ${idx+1} von ${Q.length}</span><span class="gc"><button class="badge${src.flagged?' warn':''}" title="Frage zum späteren Bearbeiten markieren (Taste M)" data-act="togQuizFlag" data-args='[]'>${IC.flag} ${src.flagged?'Markiert':'Später bearbeiten'}</button><button class="btn sec sm" data-act="leaveQuiz" data-args='[]'>Zurück zur Übersicht</button></span></div>
   <div class="bar" role="progressbar" aria-label="Fortschritt"><i style="width:${(idx+(checked?1:0))/Q.length*100}%"></i></div>
-  <p class="q">${esc(q.q)}</p>${multi?'<p class="mut">Mehrere Antworten können richtig sein.</p>':''}</div><div class='qmain'><div class='opts${tiles?' tiles':''}'>
+  <p class="q">${esc(q.q)}</p>${multi?'<p class="mut">Mehrere Antworten können richtig sein.</p>':''}</div><div class='qmain'>${qImgHtml(q)}<div class='opts${tiles?' tiles':''}'>
   ${q.opts.map((o,i)=>{
     let c='opt'+(multi?' multi':''),mk='';
     if(!checked){if(picked.has(i)){c+=' sel';mk=multi?'✓':''}}
@@ -1182,7 +1234,7 @@ function resQList(title,smode,nmode){
     const acCol=examMode?(sc.ok?'--ok':(sc.part||sc.open)?'--warn':'--bad'):(ok?'--ok':p.size?'--bad':'--warn');
     const bCls=examMode?(sc.ok?'ok':(sc.part||sc.open)?'warn':'bad'):(ok?'ok':p.size?'bad':'warn');
     const bTxt=examMode?`${sc.ok?'✓ Richtig':sc.part?'Teilweise':sc.open?'Offen':'✕ Falsch'} · ${fmtPts(sc.pts)} / ${fmtPts(sc.max)} Pkt.`:(ok?'✓ Richtig':p.size?'✕ Falsch':'Offen');
-    return `<div class="card" style="margin:12px 0;padding:12px 16px;border-left:4px solid var(${acCol})"><div style="display:flex;gap:10px;align-items:flex-start;justify-content:space-between"><button class="sb" style="padding:2px 0" aria-expanded="${open}" data-act="togRexp" data-args="${esc(JSON.stringify([i]))}"><span>${open?'▾':'▸'}</span><span><span class="mut" style="display:block;font-size:.82rem;margin-bottom:2px">Frage ${i+1}${q._title?` · ${esc(q._title)}`:''}</span><b>${esc(q.q)}</b></span></button><span class="gc"><span class="badge ${bCls}" style="cursor:default">${bTxt}</span><button class="x${src.flagged?' warn':''}" title="${src.flagged?'Markierung aufheben':'Zum Bearbeiten markieren'}" aria-label="Markieren" data-act="togResFlag" data-args="${esc(JSON.stringify([i]))}">${IC.flag}</button></span></div>${open?`<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--bd)">${!p.size?`<p class="mut" style="margin:0 0 8px;color:var(--warn)"><b>Keine Antwort ausgewählt (0 Punkte).</b></p>`:''}${q.opts.map((o,k)=>{
+    return `<div class="card" style="margin:12px 0;padding:12px 16px;border-left:4px solid var(${acCol})"><div style="display:flex;gap:10px;align-items:flex-start;justify-content:space-between"><button class="sb" style="padding:2px 0" aria-expanded="${open}" data-act="togRexp" data-args="${esc(JSON.stringify([i]))}"><span>${open?'▾':'▸'}</span><span><span class="mut" style="display:block;font-size:.82rem;margin-bottom:2px">Frage ${i+1}${q._title?` · ${esc(q._title)}`:''}</span><b>${esc(q.q)}</b></span></button><span class="gc"><span class="badge ${bCls}" style="cursor:default">${bTxt}</span><button class="x${src.flagged?' warn':''}" title="${src.flagged?'Markierung aufheben':'Zum Bearbeiten markieren'}" aria-label="Markieren" data-act="togResFlag" data-args="${esc(JSON.stringify([i]))}">${IC.flag}</button></span></div>${open?`<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--bd)">${qImgHtml(q)}${!p.size?`<p class="mut" style="margin:0 0 8px;color:var(--warn)"><b>Keine Antwort ausgewählt (0 Punkte).</b></p>`:''}${q.opts.map((o,k)=>{
       const pk=p.has(k);let c='opt'+(multi?' multi':''),mk='',note='';
       const optStep=examMode&&multi&&!sc.open&&smode!=='all'?(smode==='part'?fmtPts(1/q.opts.length):'1'):'';
       if(o.ok&&pk){c+=' ok';mk='✓';note=optStep?`Deine Antwort (richtig · +${optStep} Pkt.)`:'Deine Antwort (richtig)'}
@@ -1783,17 +1835,17 @@ function _h22(){pullCloud(false)}
 function _h23(){connectCloud()}
 const handlers={
   _clipP,_clr,_h1,_h10,_h11,_h12,_h13,_h14,_h15,_h16,_h17,_h18,_h19,_h2,_h20,_h21,_h22,_h23,_h3,_h4,_h5,_h6,_h7,_h8,_h9,_pd,_rNM,_rP,_rSM,
-  addQOpt,cancelCEdit,cancelGCEdit,cancelQEdit,cancelSEdit,changeQType,check,copyG,
+  addQOpt,cancelCEdit,cancelGCEdit,cancelQEdit,cancelSEdit,changeQType,check,clearQImg,copyG,
   del,del2,delC,delC2,delG,delGC,delGC2,delHist,delHist2,delQ,delQOpt,disconnectCloud,doImp,
   dragCOver,dragCStart,dragEnd,dragLeave,dragSOver,dragSStart,dropC,dropFile,dropS,
   exportC,exportG,exportGC,exportQ,finishExam,fold,fromFile,gGName,gName,gSearch,
-  gfold,glos,goExamQ,goQ,goQEdit,home,imp,leaveQuiz,moveC,moveS,next,openS,pick,
+  gfold,glos,goExamQ,goQ,goQEdit,home,imp,leaveQuiz,moveC,moveS,next,openImgZoom,openS,pick,
   qSearch,resetCourseProg,resetProg,saveCEdit,saveG,saveGCEdit,saveQEdit,saveSEdit,
   sbAuthSubmit,sbSignOut,sbSyncNow,setSbMode,setStatsCourse,
   setAutoCheck,setHideMastered,setMastery,setQuizCount,setShuffle,setTheme,settings,
   start,startCEdit,startCNew,startDue,startExam,startGCEdit,startGEdit,startGNew,startQEdit,
   startQNew,startSEdit,startSNew,stats,tog,togAllRexp,togC,togExamMark,togFlag,togHistExp,togMastery,
-  togQGloss,togQuizFlag,togRGloss,togResFlag,togRexp,tryExitExam,tryFinishExam,wipe
+  togQGloss,togQuizFlag,togRGloss,togResFlag,togRexp,tryExitExam,tryFinishExam,uploadQImg,wipe
 };
 document.addEventListener('click',e=>{for(let t=e.target.closest('[data-act]');t;t=t.parentElement&&t.parentElement.closest('[data-act]')){const f=handlers[t.dataset.act];if(typeof f==='function'){const a=JSON.parse(t.dataset.args||'[]');t.hasAttribute('data-el')?f(t,...a):f(...a)}}});
 document.addEventListener('input',e=>{const t=e.target.closest&&e.target.closest('[data-in]');if(t){const f=handlers[t.dataset.in];if(typeof f==='function')f(t.value,...JSON.parse(t.dataset.args||'[]'))}});

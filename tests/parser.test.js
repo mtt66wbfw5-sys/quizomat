@@ -21,6 +21,8 @@ describe('parseSets', () => {
           richtig: [1],
           erklaerung: 'Mathe',
           begruendungen: ['Falsch', 'Richtig'],
+          bild: 'https://example.com/grafik.png',
+          bildText: 'Rechenbeispiel',
           streak: 2,
           flagged: true
         },
@@ -43,7 +45,13 @@ describe('parseSets', () => {
     expect(sets).toHaveLength(1);
     expect(sets[0].course).toBe('Informatik');
     expect(sets[0].qs).toHaveLength(3);
-    expect(sets[0].qs[0]).toMatchObject({ type: 'single', streak: 2, flagged: true });
+    expect(sets[0].qs[0]).toMatchObject({
+      type: 'single',
+      streak: 2,
+      flagged: true,
+      img: 'https://example.com/grafik.png',
+      imgAlt: 'Rechenbeispiel'
+    });
     expect(sets[0].qs[1]).toMatchObject({ type: 'multi' });
     expect(sets[0].qs[2]).toMatchObject({ fixed: true, type: 'single' });
     expect(sets[0].qs[2].opts[0]).toMatchObject({ t: 'Wahr', ok: true, why: 'Stimmt' });
