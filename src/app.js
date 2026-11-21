@@ -63,7 +63,7 @@ if(k){const c=[...this.querySelectorAll(t)].filter(x=>key(x)===k)[n];if(c&&!c.di
 let exp=new Set(),pq=null,col=new Set(),gcol=new Set(),pend=null,rpend=null,cpend=null,crpend=null,gcpend=null,gloss=[],courses={},cnames=[],gcnames=[],gen={name:'',f:['single','multi','tf']},sets=[],sel=new Set(),opts={n:20,shuffle:true,hideMastered:true,mastery:3,theme:'auto',examMins:30,pass:50,scoreMode:'all',negMode:'none',cpass:{},ctime:{},cqcount:{},cmode:{},cneg:{},corder:[]},Q=[],idx=0,picked=new Set(),checked=false,log=[],msg='';
 let cedit=null,cdraft='',cpdraft=50,ctdraft=30,cqdraft=20,cmdraft='all',cndraft='none',cerr='',gcedit=null,gcdraft='',gcerr='',sedit=null,sdraft=null,serr='',qedit=null,qdraft=null,qerr='',curView='q';
 let examMode=false,examPicks=[],examMarks=new Set(),examEnd=0,examStart=0,examElapsed=0,examTimer=null,examSubPend=false,examExitPend=false,examTimeUp=false,examCourse='',examDurMins=30;
-let gh={token:'',user:'',sha:'',lastSync:0},localTs=0,syncState='idle',syncErr='',syncTimer=null,forceOverwrite=false;
+let localTs=0,forceOverwrite=false;
 let sbUser=null,sbLastSync=0,sbState='idle',sbErr='',sbMsg='',sbAuthMode='login',sbTimer=null,sbDirty=false,sbLastPull=0,sbBusy=false;
 let examHistory=[],statsCourse='',histExp=new Set(),histDelPend=null;
 const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
@@ -166,18 +166,15 @@ function load(){
   try{const o=JSON.parse(localStorage.getItem('pt:opts')||'null');if(o&&typeof o==='object')opts={...opts,...o,n:Math.max(1,+o.n||20),examMins:Math.max(1,+o.examMins||30),pass:[50,60,70].includes(+o.pass)?+o.pass:50,scoreMode:SCORE_MODES.includes(o.scoreMode)?o.scoreMode:'all',negMode:NEG_MODES.includes(o.negMode)?o.negMode:'none',cpass:(o.cpass&&typeof o.cpass==='object')?o.cpass:{},ctime:(o.ctime&&typeof o.ctime==='object')?o.ctime:{},cqcount:(o.cqcount&&typeof o.cqcount==='object')?o.cqcount:{},cmode:(o.cmode&&typeof o.cmode==='object')?o.cmode:{},cneg:(o.cneg&&typeof o.cneg==='object')?o.cneg:{},corder:Array.isArray(o.corder)?o.corder.filter(Boolean):[],shuffle:o.shuffle!==false,hideMastered:o.hideMastered!==false,mastery:Math.max(1,Math.min(10,+o.mastery||3)),theme:THEMES.includes(o.theme)?o.theme:'auto'}}catch(e){}
   applyTheme();
   try{localTs=+localStorage.getItem('pt:ts')||0}catch(e){localTs=0}
-  try{const g=JSON.parse(localStorage.getItem('pt:gh')||'null');if(g&&typeof g==='object')gh={...gh,...g}}catch(e){}
+  try{localStorage.removeItem('pt:gh')}catch(e){}
   try{const h=JSON.parse(localStorage.getItem('pt:exams')||'[]');examHistory=Array.isArray(h)?h:[]}catch(e){examHistory=[]}
 }
-function saveGH(){try{localStorage.setItem('pt:gh',JSON.stringify(gh))}catch(e){}}
 function saveHistory(ow){try{localStorage.setItem('pt:exams',JSON.stringify(examHistory))}catch(e){}touchLocal(ow)}
-let syncDirty=false,lastPull=0;
-function touchLocal(overwrite){syncDirty=true;sbDirty=true;
+function touchLocal(overwrite){sbDirty=true;
   localTs=Date.now();
   if(overwrite)forceOverwrite=true;
   try{localStorage.setItem('pt:ts',String(localTs))}catch(e){}
   if(sbUser){clearTimeout(sbTimer);sbTimer=setTimeout(()=>pushSupabaseNow(),3000)}
-  if(gh.token){clearTimeout(syncTimer);syncTimer=setTimeout(()=>pushCloudNow(),15000)}
 }
 function saveO(ow){try{localStorage.setItem('pt:opts',JSON.stringify(opts))}catch(e){}touchLocal(ow!==false)}
 function saveC(){try{localStorage.setItem('pt:courses',JSON.stringify(courses))}catch(e){}touchLocal()}
@@ -667,7 +664,6 @@ function delC2(gi){
 
 function activeCloudState(){
   if(sbUser)return{on:true,state:sbState,err:sbErr,last:sbLastSync,label:'Supabase'};
-  if(gh.token)return{on:true,state:syncState,err:syncErr,last:gh.lastSync,label:'GitHub'};
   return{on:false,state:'idle',err:'',last:0,label:''};
 }
 function syncBadge(){
@@ -691,7 +687,6 @@ function updSyncUI(){
   const el=document.getElementById('cs');if(el)el.innerHTML=syncBadge();
   const b=document.querySelector('.cnav');if(b)b.title='Einstellungen'+(c.on?' · '+syncTitle():'');
   const sb=document.getElementById('sbbox');if(sb)sb.innerHTML=sbCloudHtml();
-  const cb=document.getElementById('cbox');if(cb)cb.innerHTML=cloudHtml();
 }
 const nav=a=>`<nav class='nav'><button class='${a==='q'?'on':''}' ${a==='q'?'aria-current="page"':''} title="Fragen" aria-label="Fragen" data-act="_h10">${IC.cap}<span class="nlbl">Fragen</span></button><button class='${a==='g'?'on':''}' ${a==='g'?'aria-current="page"':''} title="Glossar" aria-label="Glossar" data-act='glos'>${IC.book}<span class="nlbl">Glossar</span></button><button class='${a==='t'?'on':''}' ${a==='t'?'aria-current="page"':''} title="Statistik &amp; Verlauf" aria-label="Statistik" data-act='stats'>${IC.chart}<span class="nlbl">Statistik</span></button><button class='cnav ${a==='s'?'on':''}' ${a==='s'?'aria-current="page"':''} title="Einstellungen${activeCloudState().on?' · '+esc(syncTitle()):''}" aria-label="Einstellungen" data-act='settings'>${IC.cog}<span class="nlbl">Einstellungen</span><span id="cs">${syncBadge()}</span></button></nav>`;
 function stats(){histDelPend=null;statsView();toTop()}
@@ -820,11 +815,8 @@ function settingsView(){
   <p class="mut">Alle Kurse im Überblick (ohne Kapitel und Fragen). Über das Stift-Symbol lassen sich Kursname, Prüfungsfragen-Anzahl, Prüfungszeit, Notenschema, Multiple-Choice-Wertung und Minuspunkte pro Kurs anpassen.</p>
   ${cnames.length?cnames.map((c,gi)=>courseCardHtml(c,groups[c],gi,true)).join(''):`<div class="card" style="margin-top:12px"><p class="mut">Noch keine Kurse vorhanden. Importiere zuerst ein Fragenset unter „Fragen“.</p></div>`}
   <h2>Cloud-Sync (Supabase)</h2>
-  <p class="mut">Synchronisiert deine Fragen, Kurseinstellungen, deinen Lernstand und dein Glossar sicher über dein Supabase-Konto zwischen Mac, iPad und iPhone – ganz ohne Access-Token.</p>
+  <p class="mut">Synchronisiert deine Fragen, Kurseinstellungen, deinen Lernstand und dein Glossar sicher über dein Supabase-Konto zwischen Mac, iPad und iPhone.</p>
   <div id="sbbox">${sbCloudHtml()}</div>
-  <details style="margin-top:16px"${gh.token?' open':''}><summary class="mut">Alternativ: Klassischer GitHub-Sync (PAT)</summary>
-  <p class="mut">Synchronisiert über ein privates GitHub-Repository (<b>${SYNC_REPO}</b>).</p>
-  <div id="cbox">${cloudHtml()}</div></details>
   <h2>Tastaturkürzel</h2>
   <div class="card"><p class="mut" style="margin:0"><b>Quiz:</b> 1–9 Antwort wählen · Enter oder Leertaste prüfen/weiter · M zum Bearbeiten markieren · Esc zurück.<br><b>Prüfung:</b> ←/→ Frage wechseln · L für später markieren · M zum Bearbeiten markieren · Esc abbrechen.</p></div>
   <h2>Gefahrenzone</h2>
@@ -1332,46 +1324,6 @@ function addGloss(l,noSave){
 }
 function wrongPool(){return Q.filter((_,i)=>!log[i])}
 
-const b64Enc=s=>{let b='';const u=new TextEncoder().encode(s);for(let i=0;i<u.length;i++)b+=String.fromCharCode(u[i]);return btoa(b)};
-const b64Dec=s=>new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\s+/g,'')),c=>c.charCodeAt(0)));
-const SYNC_REPO='quizomat-sync',SYNC_FILE='state.json';
-
-async function ghReq(method,path,body,tok){
-  const r=await fetch('https://api.github.com'+path,{
-    method,cache:'no-store',
-    headers:{Authorization:'Bearer '+(tok||gh.token),Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28',...(body?{'Content-Type':'application/json'}:{})},
-    body:body?JSON.stringify(body):undefined
-  });
-  const txt=await r.text();let j=null;try{j=txt?JSON.parse(txt):null}catch(e){}
-  return{status:r.status,ok:r.ok,data:j};
-}
-
-async function ensureCloudRepo(tok){
-  const u=await ghReq('GET','/user',null,tok);
-  if(!u.ok||!u.data||!u.data.login)throw new Error('Ungültiger GitHub-Token oder fehlende Berechtigung.');
-  const login=u.data.login;
-  const rp=await ghReq('GET',`/repos/${login}/${SYNC_REPO}`,null,tok);
-  if(rp.status===404){
-    const cr=await ghReq('POST','/user/repos',{name:SYNC_REPO,private:true,auto_init:true,description:'Privater Cloud-Speicher für Quizomat'},tok);
-    if(!cr.ok)throw new Error('Privates Sync-Repository konnte nicht angelegt werden (hat der Token die „repo“-Berechtigung? Sonst das private Repository quizomat-sync manuell anlegen).');
-  }
-  return login;
-}
-
-async function fetchCloudState(){
-  if(!gh.user)gh.user=await ensureCloudRepo(gh.token);
-  const r=await ghReq('GET',`/repos/${gh.user}/${SYNC_REPO}/contents/${SYNC_FILE}`);
-  if(r.status===404)return{sha:'',data:null};
-  if(!r.ok)throw new Error('Fehler beim Laden aus der Cloud ('+r.status+').');
-  let raw=r.data.content||'';
-  if(!raw&&r.data.sha){
-    const bl=await ghReq('GET',`/repos/${gh.user}/${SYNC_REPO}/git/blobs/${r.data.sha}`);
-    if(bl.ok&&bl.data)raw=bl.data.content||'';
-  }
-  const parsed=raw?JSON.parse(b64Dec(raw)):null;
-  return{sha:r.data.sha||'',data:parsed};
-}
-
 function mergeCloudOpts(ro,preferRemote){
   if(!ro||typeof ro!=='object')return;
   const mm=(loc,rem)=>{
@@ -1462,130 +1414,6 @@ function mergeFrom(d){const rt=d.updatedAt||0;
   if(Array.isArray(d.examHistory))examHistory=mergeAttempts(examHistory,d.examHistory);
   localTs=Date.now();
   try{localStorage.setItem('pt:sets',jj(sets));localStorage.setItem('pt:gloss',jj(gloss));localStorage.setItem('pt:courses',jj(courses));localStorage.setItem('pt:exams',jj(examHistory));localStorage.setItem('pt:ts',String(localTs))}catch(e){}}
-async function pushCloudNow(retry){
-  if(!gh.token)return;
-  clearTimeout(syncTimer);
-  syncState='syncing';syncErr='';updSyncUI();
-  try{
-    if(!gh.user)gh.user=await ensureCloudRepo(gh.token);
-    if(!gh.sha&&!retry){
-      const cur=await fetchCloudState();
-      gh.sha=cur.sha;
-    }
-    if(!localTs){localTs=Date.now();try{localStorage.setItem('pt:ts',String(localTs))}catch(e){}}
-    syncCourseCfg();
-    const payload={updatedAt:localTs,sets,gloss,courses,col:[...col],gcol:[...gcol],opts,examHistory};
-    const res=await ghReq('PUT',`/repos/${gh.user}/${SYNC_REPO}/contents/${SYNC_FILE}`,{
-      message:'Sync Quizomat',
-      content:b64Enc(JSON.stringify(payload)),
-      ...(gh.sha?{sha:gh.sha}:{})
-    });
-    if((res.status===409||res.status===422)&&!retry){
-      const cur=await fetchCloudState();
-      gh.sha=cur.sha;
-      if(cur.data){
-        if(cur.data.opts)mergeCloudOpts(cur.data.opts,false);
-        if(Array.isArray(cur.data.sets))merge3sets(cur.data.sets,cur.data.updatedAt||0);
-        if(Array.isArray(cur.data.gloss))merge3gloss(cur.data.gloss,cur.data.updatedAt||0);
-        try{localStorage.setItem('pt:sets',JSON.stringify(sets));localStorage.setItem('pt:gloss',JSON.stringify(gloss))}catch(e){}
-      }
-      return await pushCloudNow(true);
-    }
-    if(!res.ok)throw new Error('Speichern in Cloud fehlgeschlagen ('+res.status+').');
-    gh.sha=(res.data&&res.data.content&&res.data.content.sha)||gh.sha;
-    gh.lastSync=Date.now();forceOverwrite=false;syncDirty=false;writeBase(sets);saveGH();
-    syncState='ok';updSyncUI();
-  }catch(e){
-    syncState='err';syncErr=e.message||'Synchronisationsfehler';updSyncUI();
-  }
-}
-
-async function pullCloud(isConnect){
-  if(!gh.token)return;
-  syncState='syncing';syncErr='';updSyncUI();
-  try{
-    const rem=await fetchCloudState();
-    gh.sha=rem.sha;
-    const d=rem.data,remTs=(d&&d.updatedAt)||0;
-    if(isConnect){
-      if(d&&(sets.length||gloss.length)){
-        if(d.courses&&typeof d.courses==='object')courses={...d.courses,...courses};
-        if(Array.isArray(d.sets))merge3sets(d.sets,remTs);
-        if(d.opts)mergeCloudOpts(d.opts,remTs>=localTs);
-        if(Array.isArray(d.gloss))merge3gloss(d.gloss,remTs);
-        localTs=Date.now();
-        try{localStorage.setItem('pt:sets',JSON.stringify(sets));localStorage.setItem('pt:gloss',JSON.stringify(gloss));localStorage.setItem('pt:courses',JSON.stringify(courses));localStorage.setItem('pt:ts',String(localTs))}catch(e){}
-        await pushCloudNow(true);
-      }else if(d){
-        applyCloudState(d);
-        gh.lastSync=Date.now();saveGH();syncState='ok';
-      }else{
-        await pushCloudNow(true);
-      }
-    }else if(d&&bothChanged(d)){
-      mergeFrom(d);
-      if(curView==='q'&&cedit===null&&sedit===null&&qedit===null&&!qsearch)home();
-      await pushCloudNow(true);return;
-    }else if(d&&remTs>localTs){
-      applyCloudState(d);
-      gh.lastSync=Date.now();saveGH();syncState='ok';
-    }else if(localTs>remTs&&(sets.length||gloss.length||forceOverwrite)){
-      await pushCloudNow(true);
-      return;
-    }else{
-      if(d&&d.opts)mergeCloudOpts(d.opts,true);
-      gh.lastSync=Date.now();saveGH();syncState='ok';
-    }
-    updSyncUI();
-    if(curView==='q'&&cedit===null&&sedit===null&&qedit===null&&!qsearch)home();
-    else if(curView==='g'&&gedit===null&&gcedit===null&&!gq)glosView();
-    else if(curView==='s'&&cedit===null)settingsView();
-  }catch(e){
-    syncState='err';syncErr=e.message||'Synchronisationsfehler';updSyncUI();
-  }
-}
-
-function cloudHtml(){
-  const last=gh.lastSync?new Date(gh.lastSync).toLocaleString('de-DE',{dateStyle:'short',timeStyle:'short'})+' Uhr':'Noch nicht synchronisiert';
-  return gh.token?`<div class="card" style="margin-top:12px">
-    <p><b>Status:</b> ${syncState==='syncing'?'Synchronisiere …':syncState==='err'?`<span style="color:var(--bad)">Fehler (${esc(syncErr)})</span>`:`<span style="color:var(--ok)">✓ Verbunden${gh.user?` als @${esc(gh.user)}`:''}</span>`}</p>
-    <p class="mut">Privates Repository: <code>${esc(gh.user||'…')}/${SYNC_REPO}</code><br>Letzter Abgleich: ${esc(last)}</p>
-    <div class="row" style="margin-top:12px">
-      <button class="btn" ${syncState==='syncing'?'disabled':''} data-act="_h22">Jetzt synchronisieren</button>
-      <button class="btn sec" data-act="disconnectCloud" data-args='[]'>Verbindung trennen</button>
-    </div>
-  </div>`:`<div class="card ge" style="margin-top:12px">
-    <label for="ght"><b>GitHub Personal Access Token</b></label>
-    <p class="mut" style="margin:2px 0 8px">Empfohlen: Fine-grained Token nur für das Repository <code>quizomat-sync</code> (Berechtigung „Contents“: Read and write); das private Repository vorher anlegen. Ein klassischer Token mit <code>repo</code> geht auch, gibt aber Zugriff auf alle deine Repositories. Der Token wird ausschließlich lokal auf diesem Gerät gespeichert.</p>
-    <input id="ght" type="password" placeholder="ghp_…" autocomplete="off">
-    <p class="err" role="alert">${esc(syncErr)}</p>
-    <div class="row" style="margin-top:8px">
-      <button class="btn" ${syncState==='syncing'?'disabled':''} data-act="_h23">${syncState==='syncing'?'Verbinde …':'Verbinden & Synchronisieren'}</button>
-    </div>
-  </div>`;
-}
-
-async function connectCloud(){
-  const el=document.getElementById('ght'),tok=(el?el.value:'').trim();
-  if(!tok){syncErr='Bitte gib einen GitHub-Token ein.';updSyncUI();return}
-  syncState='syncing';syncErr='';updSyncUI();
-  try{
-    const user=await ensureCloudRepo(tok);
-    gh={token:tok,user,sha:'',lastSync:0};
-    saveGH();
-    await pullCloud(true);
-  }catch(e){
-    gh={token:'',user:'',sha:'',lastSync:0};saveGH();
-    syncState='err';syncErr=e.message||'Verbindung fehlgeschlagen.';updSyncUI();
-  }
-}
-
-function disconnectCloud(){
-  clearTimeout(syncTimer);
-  gh={token:'',user:'',sha:'',lastSync:0};syncState='idle';syncErr='';
-  try{localStorage.removeItem('pt:gh')}catch(e){}
-  updSyncUI();
-}
 
 function sbCloudHtml(){
   if(!supabase)return `<div class="card" style="margin-top:12px"><p class="mut" style="margin:0">Supabase ist in dieser Umgebung nicht konfiguriert.</p></div>`;
@@ -1760,12 +1588,10 @@ async function initSupabaseAuth(){
 const autoPull=()=>{
   if(document.visibilityState!=='visible'||curView==='z')return;
   if(sbUser&&sbState!=='syncing'&&Date.now()-sbLastPull>15000){sbLastPull=Date.now();pullSupabase(false)}
-  if(gh.token&&syncState!=='syncing'&&Date.now()-lastPull>30000){lastPull=Date.now();pullCloud(false)}
 };
 document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='hidden'){
     if(sbUser&&sbDirty&&sbState!=='syncing')pushSupabaseNow();
-    if(gh.token&&syncDirty&&syncState!=='syncing')pushCloudNow();
   }
 });
 document.addEventListener('visibilitychange',autoPull);
@@ -1808,7 +1634,7 @@ document.addEventListener('keydown',ev=>{
 });
 
 try{if(history.state&&history.state.v)history.replaceState(null,'')}catch(e){}
-load();const rx=readExam();home();if(rx&&rx.q)resumeExam(rx);if(gh.token&&curView!=='z')pullCloud(false);initSupabaseAuth();
+load();const rx=readExam();home();if(rx&&rx.q)resumeExam(rx);initSupabaseAuth();
 /* generierte Handler (vorher Inline-Anweisungen) */
 function _h1(){crpend=null;rerenderC()}
 function _h2(a0){crpend=a0;cpend=null;rpend=null;pend=null;rerenderC()}
@@ -1831,12 +1657,10 @@ function _h18(){examExitPend=false;home()}
 function _h19(){examExitPend=false;quiz()}
 function _h20(){examSubPend=false;quiz()}
 function _h21(){start(wrongPool())}
-function _h22(){pullCloud(false)}
-function _h23(){connectCloud()}
 const handlers={
-  _clipP,_clr,_h1,_h10,_h11,_h12,_h13,_h14,_h15,_h16,_h17,_h18,_h19,_h2,_h20,_h21,_h22,_h23,_h3,_h4,_h5,_h6,_h7,_h8,_h9,_pd,_rNM,_rP,_rSM,
+  _clipP,_clr,_h1,_h10,_h11,_h12,_h13,_h14,_h15,_h16,_h17,_h18,_h19,_h2,_h20,_h21,_h3,_h4,_h5,_h6,_h7,_h8,_h9,_pd,_rNM,_rP,_rSM,
   addQOpt,cancelCEdit,cancelGCEdit,cancelQEdit,cancelSEdit,changeQType,check,clearQImg,copyG,
-  del,del2,delC,delC2,delG,delGC,delGC2,delHist,delHist2,delQ,delQOpt,disconnectCloud,doImp,
+  del,del2,delC,delC2,delG,delGC,delGC2,delHist,delHist2,delQ,delQOpt,doImp,
   dragCOver,dragCStart,dragEnd,dragLeave,dragSOver,dragSStart,dropC,dropFile,dropS,
   exportC,exportG,exportGC,exportQ,finishExam,fold,fromFile,gGName,gName,gSearch,
   gfold,glos,goExamQ,goQ,goQEdit,home,imp,leaveQuiz,moveC,moveS,next,openImgZoom,openS,pick,

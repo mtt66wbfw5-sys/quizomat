@@ -46,9 +46,8 @@ Interaktiver Prüfungs- und Vorlesungstrainer zum Üben, Auswerten und Verwalten
   - Fragen und Kurs-Glossare können per JSON-Text, Dateiauswahl oder Drag & Drop importiert werden.
   - Bereits vorhandene Kurse, Kapitel, Fragen und Glossarbegriffe werden beim Import kursbezogen zusammengeführt (keine doppelten Fragen/Begriffe pro Kurs), wobei der höhere Lernstand erhalten bleibt.
   - Export aller Fragen, einzelner Kurse (inkl. Kurs-Glossar), aller Glossare oder einzelner Kurs-Glossare als `.json`-Datei (inkl. aktuellem Lernstand `streak` / `wrong` / `flagged` sowie den Kurseinstellungen `einstellungen`).
-- **Automatischer Cloud-Sync (Supabase & GitHub):**
-  - **Supabase (Empfohlen):** Direkt in den **Einstellungen** per E-Mail & Passwort oder Magic Link anmelden – synchronisiert Fragen, Kurseinstellungen, Lernstand und Glossar sicher per Row Level Security (RLS) zwischen Mac, iPad und iPhone, ganz ohne Personal Access Token.
-  - **GitHub (Klassisch):** Weiterhin als Alternative über ein privates Repository (`quizomat-sync`) mit Personal Access Token verfügbar.
+- **Automatischer Cloud-Sync (Supabase):**
+  - Direkt in den **Einstellungen** per E-Mail & Passwort oder Magic Link anmelden – synchronisiert Fragen, Kurseinstellungen, Lernstand und Glossar sicher per Row Level Security (RLS) zwischen Mac, iPad und iPhone.
 - **PWA & Offline-Fähigkeit:**
   - Installierbar als Web-App auf Mac, iPad und iPhone mit Service Worker für zuverlässiges Offline-Lernen und automatischer Synchronisation, sobald wieder eine Verbindung besteht.
 - **Optimiert für Mac, iPad & iPhone:**
@@ -135,7 +134,7 @@ Importiert werden kann entweder ein einzelnes Kurs-Glossar (`{ ... }`) oder eine
 
 ## 🔒 Datenschutz & Speicherung
 
-Alle Fragen, Kurse, Glossareinträge, UI-Zustände und Lernstände werden lokal im `localStorage` des jeweiligen Browsers gespeichert (`pt:sets`, `pt:courses`, `pt:gloss`, `pt:col`, `pt:gcol`, `pt:sel`, `pt:exp`, `pt:opts`). Bei aktiviertem Cloud-Sync werden deine Daten verschlüsselt über dein persönliches Supabase-Konto (geschützt durch Postgres Row Level Security) oder optional über dein privates GitHub-Repository synchronisiert.
+Alle Fragen, Kurse, Glossareinträge, UI-Zustände und Lernstände werden lokal im `localStorage` des jeweiligen Browsers gespeichert (`pt:sets`, `pt:courses`, `pt:gloss`, `pt:col`, `pt:gcol`, `pt:sel`, `pt:exp`, `pt:opts`). Bei aktiviertem Cloud-Sync werden deine Daten verschlüsselt über dein persönliches Supabase-Konto (geschützt durch Postgres Row Level Security) synchronisiert.
 
 ## 🛠 Lokale Entwicklung & Tests
 
