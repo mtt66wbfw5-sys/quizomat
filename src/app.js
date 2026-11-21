@@ -33,6 +33,8 @@ import {
   mergeGloss3Way
 } from './core/merge.js';
 import { computeTerms } from './core/glossary.js';
+import { supabase } from './sync/supabaseClient.js';
+import { fetchSupabaseState, pushSupabaseState } from './sync/supabaseSync.js';
 
 const $app=document.getElementById('app');
 (()=>{const d=Object.getOwnPropertyDescriptor(Element.prototype,'innerHTML'),key=e=>e.id||e.dataset.act||e.dataset.chg||e.dataset.chk||e.getAttribute('onclick')||e.getAttribute('onchange')||e.getAttribute('aria-label')||e.getAttribute('title')||'';
@@ -45,6 +47,7 @@ let exp=new Set(),pq=null,col=new Set(),gcol=new Set(),pend=null,rpend=null,cpen
 let cedit=null,cdraft='',cpdraft=50,ctdraft=30,cqdraft=20,cmdraft='all',cndraft='none',cerr='',gcedit=null,gcdraft='',gcerr='',sedit=null,sdraft=null,serr='',qedit=null,qdraft=null,qerr='',curView='q';
 let examMode=false,examPicks=[],examMarks=new Set(),examEnd=0,examStart=0,examElapsed=0,examTimer=null,examSubPend=false,examExitPend=false,examTimeUp=false,examCourse='',examDurMins=30;
 let gh={token:'',user:'',sha:'',lastSync:0},localTs=0,syncState='idle',syncErr='',syncTimer=null,forceOverwrite=false;
+let sbUser=null,sbLastSync=0,sbState='idle',sbErr='',sbMsg='',sbAuthMode='login',sbTimer=null,sbDirty=false,sbLastPull=0,sbBusy=false;
 const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 const toTop=()=>{window.scrollTo(0,0);document.documentElement.scrollTop=0;document.body.scrollTop=0};
 const stopExamTimer=()=>{if(examTimer){clearInterval(examTimer);examTimer=null}try{localStorage.removeItem('pt:exam')}catch(e){}};
@@ -149,10 +152,11 @@ function load(){
 }
 function saveGH(){try{localStorage.setItem('pt:gh',JSON.stringify(gh))}catch(e){}}
 let syncDirty=false,lastPull=0;
-function touchLocal(overwrite){syncDirty=true;
+function touchLocal(overwrite){syncDirty=true;sbDirty=true;
   localTs=Date.now();
   if(overwrite)forceOverwrite=true;
   try{localStorage.setItem('pt:ts',String(localTs))}catch(e){}
+  if(sbUser){clearTimeout(sbTimer);sbTimer=setTimeout(()=>pushSupabaseNow(),3000)}
   if(gh.token){clearTimeout(syncTimer);syncTimer=setTimeout(()=>pushCloudNow(),15000)}
 }
 function saveO(ow){try{localStorage.setItem('pt:opts',JSON.stringify(opts))}catch(e){}touchLocal(ow!==false)}
@@ -581,26 +585,35 @@ function delC2(gi){
   cpend=null;crpend=null;rpend=null;pend=null;rerenderC();
 }
 
+function activeCloudState(){
+  if(sbUser)return{on:true,state:sbState,err:sbErr,last:sbLastSync,label:'Supabase'};
+  if(gh.token)return{on:true,state:syncState,err:syncErr,last:gh.lastSync,label:'GitHub'};
+  return{on:false,state:'idle',err:'',last:0,label:''};
+}
 function syncBadge(){
-  if(!gh.token)return '';
-  if(syncState==='syncing')return `<span class="sdot">…</span>`;
-  if(syncState==='err')return `<span class="sdot bad">!</span>`;
-  if(syncState==='ok'||gh.lastSync)return `<span class="sdot ok">✓</span>`;
+  const c=activeCloudState();
+  if(!c.on)return '';
+  if(c.state==='syncing')return `<span class="sdot">…</span>`;
+  if(c.state==='err')return `<span class="sdot bad">!</span>`;
+  if(c.state==='ok'||c.last)return `<span class="sdot ok">✓</span>`;
   return '';
 }
 function syncTitle(){
-  if(!gh.token)return 'Cloud-Sync einrichten';
-  if(syncState==='syncing')return 'Cloud-Sync läuft …';
-  if(syncState==='err')return 'Cloud-Sync Fehler: '+syncErr;
-  return 'Cloud-Sync aktiv'+(gh.lastSync?' (zuletzt '+new Date(gh.lastSync).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})+' Uhr)':'');
+  const c=activeCloudState();
+  if(!c.on)return 'Cloud-Sync einrichten';
+  if(c.state==='syncing')return `Cloud-Sync (${c.label}) läuft …`;
+  if(c.state==='err')return `Cloud-Sync (${c.label}) Fehler: `+c.err;
+  return `Cloud-Sync (${c.label}) aktiv`+(c.last?' (zuletzt '+new Date(c.last).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})+' Uhr)':'');
 }
 function updSyncUI(){
-  if(syncState!==lastSS){if(syncState==='err')announce('Synchronisierung fehlgeschlagen');else if(lastSS==='syncing'&&syncState==='ok')announce('Synchronisiert');lastSS=syncState}
+  const c=activeCloudState();
+  if(c.state!==lastSS){if(c.state==='err')announce('Synchronisierung fehlgeschlagen');else if(lastSS==='syncing'&&c.state==='ok')announce('Synchronisiert');lastSS=c.state}
   const el=document.getElementById('cs');if(el)el.innerHTML=syncBadge();
-  const b=document.querySelector('.cnav');if(b)b.title='Einstellungen'+(gh.token?' · '+syncTitle():'');
+  const b=document.querySelector('.cnav');if(b)b.title='Einstellungen'+(c.on?' · '+syncTitle():'');
+  const sb=document.getElementById('sbbox');if(sb)sb.innerHTML=sbCloudHtml();
   const cb=document.getElementById('cbox');if(cb)cb.innerHTML=cloudHtml();
 }
-const nav=a=>`<nav class='nav'><button class='${a==='q'?'on':''}' ${a==='q'?'aria-current="page"':''} title="Fragen" aria-label="Fragen" data-act="_h10">${IC.cap}<span class="nlbl">Fragen</span></button><button class='${a==='g'?'on':''}' ${a==='g'?'aria-current="page"':''} title="Glossar" aria-label="Glossar" data-act='glos'>${IC.book}<span class="nlbl">Glossar</span></button><button class='cnav ${a==='s'?'on':''}' ${a==='s'?'aria-current="page"':''} title="Einstellungen${gh.token?' · '+esc(syncTitle()):''}" aria-label="Einstellungen" data-act='settings'>${IC.cog}<span class="nlbl">Einstellungen</span><span id="cs">${syncBadge()}</span></button></nav>`;
+const nav=a=>`<nav class='nav'><button class='${a==='q'?'on':''}' ${a==='q'?'aria-current="page"':''} title="Fragen" aria-label="Fragen" data-act="_h10">${IC.cap}<span class="nlbl">Fragen</span></button><button class='${a==='g'?'on':''}' ${a==='g'?'aria-current="page"':''} title="Glossar" aria-label="Glossar" data-act='glos'>${IC.book}<span class="nlbl">Glossar</span></button><button class='cnav ${a==='s'?'on':''}' ${a==='s'?'aria-current="page"':''} title="Einstellungen${activeCloudState().on?' · '+esc(syncTitle()):''}" aria-label="Einstellungen" data-act='settings'>${IC.cog}<span class="nlbl">Einstellungen</span><span id="cs">${syncBadge()}</span></button></nav>`;
 let gpend=null,qsearch='',gq='',gedit=null,gdraft=null,gerr='';
 function glos(){gpend=null;gcpend=null;gcedit=null;wp=null;gedit=null;gdraft=null;gq='';glosView();toTop()}
 function settings(){cedit=null;cpend=null;crpend=null;wp=null;settingsView();toTop()}
@@ -663,9 +676,12 @@ function settingsView(){
   <h2>Vorhandene Kurse (${cnames.length})</h2>
   <p class="mut">Alle Kurse im Überblick (ohne Kapitel und Fragen). Über das Stift-Symbol lassen sich Kursname, Prüfungsfragen-Anzahl, Prüfungszeit, Notenschema, Multiple-Choice-Wertung und Minuspunkte pro Kurs anpassen.</p>
   ${cnames.length?cnames.map((c,gi)=>courseCardHtml(c,groups[c],gi,true)).join(''):`<div class="card" style="margin-top:12px"><p class="mut">Noch keine Kurse vorhanden. Importiere zuerst ein Fragenset unter „Fragen“.</p></div>`}
-  <h2>Cloud-Sync (GitHub)</h2>
-  <p class="mut">Synchronisiert deine Fragen, Kurseinstellungen, deinen Lernstand und dein Glossar automatisch über ein privates GitHub-Repository (<b>${SYNC_REPO}</b>) zwischen Mac, iPad und iPhone.</p>
-  <div id="cbox">${cloudHtml()}</div>
+  <h2>Cloud-Sync (Supabase)</h2>
+  <p class="mut">Synchronisiert deine Fragen, Kurseinstellungen, deinen Lernstand und dein Glossar sicher über dein Supabase-Konto zwischen Mac, iPad und iPhone – ganz ohne Access-Token.</p>
+  <div id="sbbox">${sbCloudHtml()}</div>
+  <details style="margin-top:16px"${gh.token?' open':''}><summary class="mut">Alternativ: Klassischer GitHub-Sync (PAT)</summary>
+  <p class="mut">Synchronisiert über ein privates GitHub-Repository (<b>${SYNC_REPO}</b>).</p>
+  <div id="cbox">${cloudHtml()}</div></details>
   <h2>Tastaturkürzel</h2>
   <div class="card"><p class="mut" style="margin:0"><b>Quiz:</b> 1–9 Antwort wählen · Enter oder Leertaste prüfen/weiter · M zum Bearbeiten markieren · Esc zurück.<br><b>Prüfung:</b> ←/→ Frage wechseln · L für später markieren · M zum Bearbeiten markieren · Esc abbrechen.</p></div>
   <h2>Gefahrenzone</h2>
@@ -1411,8 +1427,185 @@ function disconnectCloud(){
   updSyncUI();
 }
 
-const autoPull=()=>{if(document.visibilityState==='visible'&&gh.token&&syncState!=='syncing'&&curView!=='z'&&Date.now()-lastPull>30000){lastPull=Date.now();pullCloud(false)}};
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&gh.token&&syncDirty&&syncState!=='syncing')pushCloudNow()});
+function sbCloudHtml(){
+  if(!supabase)return `<div class="card" style="margin-top:12px"><p class="mut" style="margin:0">Supabase ist in dieser Umgebung nicht konfiguriert.</p></div>`;
+  if(sbUser){
+    const last=sbLastSync?new Date(sbLastSync).toLocaleString('de-DE',{dateStyle:'short',timeStyle:'short'})+' Uhr':'Noch nicht synchronisiert';
+    return `<div class="card" style="margin-top:12px">
+      <p><b>Status:</b> ${sbState==='syncing'?'Synchronisiere …':sbState==='err'?`<span style="color:var(--bad)">Fehler (${esc(sbErr)})</span>`:`<span style="color:var(--ok)">✓ Verbunden als ${esc(sbUser.email||sbUser.id)}</span>`}</p>
+      <p class="mut">Letzter Abgleich: ${esc(last)}</p>
+      <div class="row" style="margin-top:12px">
+        <button class="btn" ${sbState==='syncing'?'disabled':''} data-act="sbSyncNow" data-args='[]'>Jetzt synchronisieren</button>
+        <button class="btn sec" data-act="sbSignOut" data-args='[]'>Abmelden</button>
+      </div>
+    </div>`;
+  }
+  const m=sbAuthMode;
+  return `<div class="card ge" style="margin-top:12px">
+    <div class="gtabs" style="margin-top:0;margin-bottom:10px">
+      <button type="button" class="gtab${m==='login'?' on':''}" data-act="setSbMode" data-args='["login"]'>Anmelden</button>
+      <button type="button" class="gtab${m==='signup'?' on':''}" data-act="setSbMode" data-args='["signup"]'>Konto erstellen</button>
+      <button type="button" class="gtab${m==='magic'?' on':''}" data-act="setSbMode" data-args='["magic"]'>Magic Link</button>
+    </div>
+    <label for="sb_email"><b>E-Mail-Adresse</b></label>
+    <input id="sb_email" type="email" placeholder="name@beispiel.de" autocomplete="email" data-kd="sbAuthSubmit" data-args='[]'>
+    ${m==='magic'?'':`<label for="sb_pw"><b>Passwort</b></label><input id="sb_pw" type="password" placeholder="${m==='signup'?'Mindestens 6 Zeichen':'Passwort'}" autocomplete="${m==='signup'?'new-password':'current-password'}" data-kd="sbAuthSubmit" data-args='[]'>`}
+    ${sbErr?`<p class="err" role="alert">${esc(sbErr)}</p>`:''}
+    ${sbMsg?`<p style="color:var(--ok);font-weight:700" role="status">${esc(sbMsg)}</p>`:''}
+    <div class="row" style="margin-top:8px">
+      <button class="btn" ${sbBusy?'disabled':''} data-act="sbAuthSubmit" data-args='[]'>${sbBusy?'Bitte warten …':m==='login'?'Anmelden & Synchronisieren':m==='signup'?'Registrieren':'Magic Link senden'}</button>
+    </div>
+  </div>`;
+}
+
+function setSbMode(m){sbAuthMode=m;sbErr='';sbMsg='';updSyncUI()}
+
+async function sbAuthSubmit(){
+  if(!supabase||sbBusy)return;
+  const email=(document.getElementById('sb_email')?.value||'').trim();
+  const pw=document.getElementById('sb_pw')?.value||'';
+  if(!email){sbErr='Bitte gib eine E-Mail-Adresse ein.';sbMsg='';updSyncUI();return}
+  if(sbAuthMode!=='magic'&&pw.length<6){sbErr='Das Passwort muss mindestens 6 Zeichen lang sein.';sbMsg='';updSyncUI();return}
+  sbBusy=true;sbErr='';sbMsg='';updSyncUI();
+  try{
+    if(sbAuthMode==='magic'){
+      const redirectTo=window.location.origin+window.location.pathname;
+      const {error}=await supabase.auth.signInWithOtp({email,options:{emailRedirectTo:redirectTo}});
+      if(error)throw error;
+      sbMsg='Anmeldelink wurde per E-Mail gesendet. Öffne den Link auf diesem Gerät.';
+    }else if(sbAuthMode==='signup'){
+      const redirectTo=window.location.origin+window.location.pathname;
+      const {data,error}=await supabase.auth.signUp({email,password:pw,options:{emailRedirectTo:redirectTo}});
+      if(error)throw error;
+      if(data&&data.session&&data.user){
+        sbUser=data.user;
+        await pullSupabase(true);
+      }else{
+        sbMsg='Konto erstellt! Bitte bestätige ggf. deine E-Mail-Adresse und melde dich an.';
+      }
+    }else{
+      const {data,error}=await supabase.auth.signInWithPassword({email,password:pw});
+      if(error)throw error;
+      if(data&&data.user){
+        sbUser=data.user;
+        await pullSupabase(true);
+      }
+    }
+  }catch(e){
+    sbErr=e.message||'Anmeldung fehlgeschlagen.';
+  }finally{
+    sbBusy=false;updSyncUI();
+  }
+}
+
+async function sbSignOut(){
+  if(!supabase)return;
+  clearTimeout(sbTimer);
+  try{await supabase.auth.signOut()}catch(e){}
+  sbUser=null;sbState='idle';sbErr='';sbMsg='';sbLastSync=0;sbDirty=false;
+  updSyncUI();
+}
+
+async function pushSupabaseNow(){
+  if(!supabase||!sbUser)return;
+  clearTimeout(sbTimer);
+  sbState='syncing';sbErr='';updSyncUI();
+  try{
+    if(!localTs){localTs=Date.now();try{localStorage.setItem('pt:ts',String(localTs))}catch(e){}}
+    syncCourseCfg();
+    const payload={updatedAt:localTs,sets,gloss,courses,col:[...col],gcol:[...gcol],opts};
+    await pushSupabaseState(supabase,sbUser.id,payload);
+    sbLastSync=Date.now();forceOverwrite=false;sbDirty=false;writeBase(sets);
+    sbState='ok';updSyncUI();
+  }catch(e){
+    sbState='err';sbErr=e.message||'Speichern fehlgeschlagen.';updSyncUI();
+  }
+}
+
+async function pullSupabase(isConnect){
+  if(!supabase||!sbUser)return;
+  sbState='syncing';sbErr='';updSyncUI();
+  try{
+    const d=await fetchSupabaseState(supabase,sbUser.id);
+    const remTs=(d&&d.updatedAt)||0;
+    if(isConnect){
+      if(d&&(sets.length||gloss.length)){
+        if(d.courses&&typeof d.courses==='object')courses={...d.courses,...courses};
+        if(Array.isArray(d.sets))merge3sets(d.sets,remTs);
+        if(d.opts)mergeCloudOpts(d.opts,remTs>=localTs);
+        if(Array.isArray(d.gloss))merge3gloss(d.gloss,remTs);
+        localTs=Date.now();
+        try{localStorage.setItem('pt:sets',JSON.stringify(sets));localStorage.setItem('pt:gloss',JSON.stringify(gloss));localStorage.setItem('pt:courses',JSON.stringify(courses));localStorage.setItem('pt:ts',String(localTs))}catch(e){}
+        await pushSupabaseNow();
+        if(curView==='q'&&cedit===null&&sedit===null&&qedit===null&&!qsearch)home();
+        else if(curView==='g'&&gedit===null&&gcedit===null&&!gq)glosView();
+        else if(curView==='s'&&cedit===null)settingsView();
+        return;
+      }else if(d){
+        applyCloudState(d);
+        sbLastSync=Date.now();sbState='ok';
+      }else{
+        await pushSupabaseNow();
+        return;
+      }
+    }else if(d&&bothChanged(d)){
+      mergeFrom(d);
+      if(curView==='q'&&cedit===null&&sedit===null&&qedit===null&&!qsearch)home();
+      await pushSupabaseNow();return;
+    }else if(d&&remTs>localTs){
+      applyCloudState(d);
+      sbLastSync=Date.now();sbState='ok';
+    }else if(localTs>remTs&&(sets.length||gloss.length||forceOverwrite)){
+      await pushSupabaseNow();
+      return;
+    }else{
+      if(d&&d.opts)mergeCloudOpts(d.opts,true);
+      sbLastSync=Date.now();sbState='ok';
+    }
+    updSyncUI();
+    if(curView==='q'&&cedit===null&&sedit===null&&qedit===null&&!qsearch)home();
+    else if(curView==='g'&&gedit===null&&gcedit===null&&!gq)glosView();
+    else if(curView==='s'&&cedit===null)settingsView();
+  }catch(e){
+    sbState='err';sbErr=e.message||'Synchronisationsfehler';updSyncUI();
+  }
+}
+
+function sbSyncNow(){pullSupabase(false)}
+
+async function initSupabaseAuth(){
+  if(!supabase)return;
+  try{
+    const {data}=await supabase.auth.getSession();
+    if(data&&data.session&&data.session.user){
+      sbUser=data.session.user;
+      updSyncUI();
+      if(curView!=='z')pullSupabase(false);
+    }
+  }catch(e){}
+  supabase.auth.onAuthStateChange((event,session)=>{
+    const prevId=sbUser&&sbUser.id;
+    sbUser=(session&&session.user)||null;
+    if(sbUser&&sbUser.id!==prevId&&event==='SIGNED_IN'){
+      updSyncUI();
+      if(curView!=='z')pullSupabase(true);
+    }else if(!sbUser&&prevId){
+      sbState='idle';sbLastSync=0;updSyncUI();
+    }
+  });
+}
+
+const autoPull=()=>{
+  if(document.visibilityState!=='visible'||curView==='z')return;
+  if(sbUser&&sbState!=='syncing'&&Date.now()-sbLastPull>15000){sbLastPull=Date.now();pullSupabase(false)}
+  if(gh.token&&syncState!=='syncing'&&Date.now()-lastPull>30000){lastPull=Date.now();pullCloud(false)}
+};
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='hidden'){
+    if(sbUser&&sbDirty&&sbState!=='syncing')pushSupabaseNow();
+    if(gh.token&&syncDirty&&syncState!=='syncing')pushCloudNow();
+  }
+});
 document.addEventListener('visibilitychange',autoPull);
 window.addEventListener('focus',autoPull);
 window.addEventListener('pageshow',autoPull);
@@ -1453,7 +1646,7 @@ document.addEventListener('keydown',ev=>{
 });
 
 try{if(history.state&&history.state.v)history.replaceState(null,'')}catch(e){}
-load();const rx=readExam();home();if(rx&&rx.q)resumeExam(rx);if(gh.token&&curView!=='z')pullCloud(false);
+load();const rx=readExam();home();if(rx&&rx.q)resumeExam(rx);if(gh.token&&curView!=='z')pullCloud(false);initSupabaseAuth();
 /* generierte Handler (vorher Inline-Anweisungen) */
 function _h1(){crpend=null;rerenderC()}
 function _h2(a0){crpend=a0;cpend=null;rpend=null;pend=null;rerenderC()}
@@ -1486,6 +1679,7 @@ const handlers={
   exportC,exportG,exportGC,exportQ,finishExam,fold,fromFile,gGName,gName,gSearch,
   gfold,glos,goExamQ,goQ,goQEdit,home,imp,leaveQuiz,moveC,moveS,next,openS,pick,
   qSearch,resetCourseProg,resetProg,saveCEdit,saveG,saveGCEdit,saveQEdit,saveSEdit,
+  sbAuthSubmit,sbSignOut,sbSyncNow,setSbMode,
   setAutoCheck,setHideMastered,setMastery,setQuizCount,setShuffle,setTheme,settings,
   start,startCEdit,startCNew,startExam,startGCEdit,startGEdit,startGNew,startQEdit,
   startQNew,startSEdit,startSNew,tog,togAllRexp,togC,togExamMark,togFlag,togMastery,
