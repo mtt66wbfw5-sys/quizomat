@@ -593,7 +593,7 @@ function home(){stopExamTimer();enforceSingleCourse();const chg=curView!=='q';cu
   const eCnt=Math.min(examMax,allSelCount),qCnt=Math.min(getQuizCount(),total);
   const dl=`<datalist id="cl">${allCourses().map(c=>`<option value="${esc(c)}">`).join('')}</datalist>`;
   const topNew=cedit==='__new__';
-  $app.innerHTML=`${nav('q')}<div class="row" style="justify-content:space-between;align-items:center"><h1>${IC.cap}<span>Quizomat</span></h1>${sets.length?`<div class="row dstart"><button class="btn sec" ${allSelCount?'':'disabled'} data-act="startExam" data-args='[]'>Prüfung starten${eCnt?` (${eCnt})`:''}</button><button class="btn" ${total?'':'disabled'} data-act="start" data-args='[]'>Quiz starten${qCnt?` (${qCnt})`:''}</button></div>`:''}</div><p class="mut">Fragen aus deinen Vorlesungsunterlagen üben und auswerten.</p>
+  $app.innerHTML=`${nav('q')}${pageHead(`<h1>${IC.cap}<span>Quizomat</span></h1>`,sets.length?`<div class="row dstart"><button class="btn sec" ${allSelCount?'':'disabled'} data-act="startExam" data-args='[]'>Prüfung starten${eCnt?` (${eCnt})`:''}</button><button class="btn" ${total?'':'disabled'} data-act="start" data-args='[]'>Quiz starten${qCnt?` (${qCnt})`:''}</button></div>`:'')}<p class="mut">Fragen aus deinen Vorlesungsunterlagen üben und auswerten.</p>
   ${topBar()}${sets.length?optsHtml(total,allSelCount)+searchHtml()+dueBannerHtml()+flaggedHtml():''}${dl}
   ${topNew?`<div class="card ccard" style="margin-top:14px;border-left:4px solid var(--ac)">${cForm('__new__',false)}</div>`:''}
   ${cnames.length?cnames.map((c,gi)=>{
@@ -727,7 +727,8 @@ function openAcctMenu(){
 function updSyncUI(){
   const c=activeCloudState();
   if(c.state!==lastSS){if(c.state==='err')announce('Synchronisierung fehlgeschlagen');else if(lastSS==='syncing'&&c.state==='ok')announce('Synchronisiert');lastSS=c.state}
-  const slot=document.getElementById('acctslot');if(slot)slot.innerHTML=acctBtnHtml();
+  const html=acctBtnHtml();
+  document.querySelectorAll('.acct-slot').forEach(slot=>{slot.innerHTML=html});
   const pop=document.getElementById('acctpop');
   if(pop){
     const prevEmail=document.getElementById('sb_email')?.value||'';
@@ -736,7 +737,8 @@ function updSyncUI(){
     if(em&&prevEmail&&!em.value)em.value=prevEmail;
   }
 }
-const nav=a=>`<nav class='nav'><button class='${a==='q'?'on':''}' ${a==='q'?'aria-current="page"':''} title="Fragen" aria-label="Fragen" data-act="_h10">${IC.cap}<span class="nlbl">Fragen</span></button><button class='${a==='g'?'on':''}' ${a==='g'?'aria-current="page"':''} title="Glossar" aria-label="Glossar" data-act='glos'>${IC.book}<span class="nlbl">Glossar</span></button><button class='${a==='t'?'on':''}' ${a==='t'?'aria-current="page"':''} title="Statistik &amp; Verlauf" aria-label="Statistik" data-act='stats'>${IC.chart}<span class="nlbl">Statistik</span></button><button class='${a==='s'?'on':''}' ${a==='s'?'aria-current="page"':''} title="Einstellungen" aria-label="Einstellungen" data-act='settings'>${IC.cog}<span class="nlbl">Einstellungen</span></button><span id="acctslot" class="acct-slot">${acctBtnHtml()}</span></nav>`;
+const nav=a=>`<nav class='nav'><button class='${a==='q'?'on':''}' ${a==='q'?'aria-current="page"':''} title="Fragen" aria-label="Fragen" data-act="_h10">${IC.cap}<span class="nlbl">Fragen</span></button><button class='${a==='g'?'on':''}' ${a==='g'?'aria-current="page"':''} title="Glossar" aria-label="Glossar" data-act='glos'>${IC.book}<span class="nlbl">Glossar</span></button><button class='${a==='t'?'on':''}' ${a==='t'?'aria-current="page"':''} title="Statistik &amp; Verlauf" aria-label="Statistik" data-act='stats'>${IC.chart}<span class="nlbl">Statistik</span></button><button class='${a==='s'?'on':''}' ${a==='s'?'aria-current="page"':''} title="Einstellungen" aria-label="Einstellungen" data-act='settings'>${IC.cog}<span class="nlbl">Einstellungen</span></button><span class="acct-slot acct-desk">${acctBtnHtml()}</span></nav>`;
+const pageHead=(h,extra='')=>`<div class="page-hd">${h}${extra}<span class="acct-slot acct-mob">${acctBtnHtml()}</span></div>`;
 function stats(){histDelPend=null;statsView();toTop()}
 function setStatsCourse(c){statsCourse=c||'';histDelPend=null;statsView()}
 function togHistExp(id){histExp.has(id)?histExp.delete(id):histExp.add(id);statsView()}
@@ -751,7 +753,7 @@ function statsView(){
   const filtered=statsCourse?examHistory.filter(a=>a.course===statsCourse):examHistory;
   const sum=summarizeHistory(filtered);
   const weak=weakestChapters(filtered).slice(0,6);
-  $app.innerHTML=`${nav('t')}<h1>${IC.chart}<span>Statistik &amp; Verlauf</span></h1><p class="mut">Lernfortschritt, Wiederholungsplan und deine bisherigen Prüfungsergebnisse.</p>
+  $app.innerHTML=`${nav('t')}${pageHead(`<h1>${IC.chart}<span>Statistik &amp; Verlauf</span></h1>`)}<p class="mut">Lernfortschritt, Wiederholungsplan und deine bisherigen Prüfungsergebnisse.</p>
   <h2>Lernstand &amp; Wiederholungsplan</h2>
   <div class="kpis">
     <div class="kpi"><div class="kv">${totQ}</div><div class="kl">Fragen gesamt</div></div>
@@ -807,7 +809,7 @@ function settingsView(){
   stopExamTimer();curView='s';$app.className='';
   const groups=buildGroups();
   const qn=getQuizCount(),ms=Math.max(1,Math.min(10,+opts.mastery||3)),th=THEMES.includes(opts.theme)?opts.theme:'auto';
-  $app.innerHTML=`${nav('s')}<h1>${IC.cog}<span>Einstellungen</span></h1><p class="mut">Übungsumfang für das Quiz, Darstellung und Kurseinstellungen verwalten.</p>
+  $app.innerHTML=`${nav('s')}${pageHead(`<h1>${IC.cog}<span>Einstellungen</span></h1>`)}<p class="mut">Übungsumfang für das Quiz, Darstellung und Kurseinstellungen verwalten.</p>
   <h2>Übungsmodus (Quiz) &amp; Darstellung</h2>
   <div class="card">
     <div class="srow">
@@ -942,7 +944,7 @@ function glosView(){
   const sPh=gcnames.length===1?`Glossar im Kurs „${esc(gcnames[0])}“ durchsuchen …`:`Glossar in allen ${gcnames.length} Kursen durchsuchen${actC?` (aktiv: ${esc(actC)})`:''} …`;
   const dl=`<datalist id="cl">${allCourses().map(c=>`<option value="${esc(c)}">`).join('')}</datalist>`;
   const topNew=gedit==='__new__'&&(!gdraft||!gdraft.targetC||!ggroups[gdraft.targetC]);
-  $app.innerHTML=`${nav('g')}<h1>${IC.book}<span>Glossar</span></h1><p class="mut">Fachbegriffe aus deinen Vorlesungsunterlagen pro Kurs verwalten und nachschlagen.</p>
+  $app.innerHTML=`${nav('g')}${pageHead(`<h1>${IC.book}<span>Glossar</span></h1>`)}<p class="mut">Fachbegriffe aus deinen Vorlesungsunterlagen pro Kurs verwalten und nachschlagen.</p>
   <div class="row act" style="margin:12px 0 6px"><button class="btn sec ico" title="Glossar importieren" aria-label="Glossar importieren" data-act="imp" data-args='["glossar"]'>${IC.imp}</button><button class="btn sec sm" style="min-height:40px" data-act="startGNew" data-args='[]'>+ Begriff hinzufügen</button>${gloss.length?`<button class="btn sec ico" title="Alle Glossare exportieren" aria-label="Glossar exportieren" data-act="exportG" data-el>${IC.exp}</button><span class="gc" style="gap:8px">${wp==='g'?`<span class="mut">Löschen?</span><button class="btn sm" data-act="wipe" data-args='["g"]'>Ja</button><button class="btn sec sm" data-act="_h14">Nein</button>`:`<button class="btn sec ico" title="Gesamtes Glossar löschen" aria-label="Gesamtes Glossar löschen" data-act="_h15">${IC.del}</button>`}</span>`:''}</div>
   ${gloss.length?`<p class="mut" style="margin:8px 0 4px">${actC?`<b>${actCnt}</b> ${actCnt===1?'Begriff':'Begriffe'} für den ausgewählten Kurs „<b>${esc(actC)}</b>“ aktiv · `:''}Insgesamt <b>${gloss.length}</b> ${gloss.length===1?'Begriff':'Begriffe'} in <b>${gcnames.length}</b> ${gcnames.length===1?'Kurs':'Kursen'}.</p><input id="gs" type="search" class="srch" placeholder="${sPh}" value="${esc(gq)}" data-in="gSearch" data-args='[]'><div id="gres">${gResHtml()}</div>`:''}${dl}
   ${topNew?`<div class="card" style="margin-top:14px">${gForm({course:(gdraft&&gdraft.c)||'',b:'__new__',i:'',a:[]},'__new__')}</div>`:''}
@@ -973,10 +975,10 @@ function imp(m){curView='i';impMode=m||'fragen';$app.className='';
   const fi=`<label class="btn sec" style="position:relative;overflow:hidden;display:inline-flex;align-items:center;cursor:pointer">Datei wählen<input id="fi" type="file" accept=".json,application/json,text/plain" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer" data-act="_clr" data-el data-chg="fromFile" data-el></label>`;
   if(impMode==='glossar'){
     gen={name:'',f:KINDS.map(x=>x[0])};
-    $app.innerHTML=`${nav('g')}<h1>${IC.imp}<span>Glossar importieren</span></h1><p class='mut'>Füge das JSON von Claude ein, ziehe eine .json-Datei in das Feld oder wähle sie über „Datei wählen“. Gleiche Begriffe desselben Kurses werden aktualisiert.</p><textarea id='t' placeholder='JSON hier einfügen oder .json-Datei hierher ziehen …' data-dragover="_pd" data-drop="dropFile"></textarea><p class='err' id='e' role="alert">${esc(msg)}</p><div class='row'><button class='btn' data-act='doImp'>Importieren</button>${fi}<button class='btn sec' data-act="_h16">Zurück</button></div><h2>Für jeden Kurs</h2><p class='mut'>Lade deine Unterlagen in Claude hoch und kopiere diesen Auftrag dazu. Gib den Kursnamen ein, dann trägt der Auftrag ihn automatisch ein.</p><label>Kursname <input id="gcn" list="cl" data-in="gGName" data-args='[]' style="width:100%;margin-top:4px;background:var(--card);border:1px solid var(--bd);border-radius:6px;padding:8px"></label>${dl}<div id="ggen"></div>`;
+    $app.innerHTML=`${nav('g')}${pageHead(`<h1>${IC.imp}<span>Glossar importieren</span></h1>`)}<p class='mut'>Füge das JSON von Claude ein, ziehe eine .json-Datei in das Feld oder wähle sie über „Datei wählen“. Gleiche Begriffe desselben Kurses werden aktualisiert.</p><textarea id='t' placeholder='JSON hier einfügen oder .json-Datei hierher ziehen …' data-dragover="_pd" data-drop="dropFile"></textarea><p class='err' id='e' role="alert">${esc(msg)}</p><div class='row'><button class='btn' data-act='doImp'>Importieren</button>${fi}<button class='btn sec' data-act="_h16">Zurück</button></div><h2>Für jeden Kurs</h2><p class='mut'>Lade deine Unterlagen in Claude hoch und kopiere diesen Auftrag dazu. Gib den Kursnamen ein, dann trägt der Auftrag ihn automatisch ein.</p><label>Kursname <input id="gcn" list="cl" data-in="gGName" data-args='[]' style="width:100%;margin-top:4px;background:var(--card);border:1px solid var(--bd);border-radius:6px;padding:8px"></label>${dl}<div id="ggen"></div>`;
     renderGGen();toTop();return;
   }
-  $app.innerHTML=`${nav('q')}<h1>${IC.imp}<span>Fragen importieren</span></h1>
+  $app.innerHTML=`${nav('q')}${pageHead(`<h1>${IC.imp}<span>Fragen importieren</span></h1>`)}
   <p class="mut">Füge das JSON von Claude ein, ziehe eine .json-Datei in das Feld oder lade sie über „Datei wählen“. Mehrere Kapitel in einer Liste sind möglich.</p>
   <textarea id="t" placeholder="JSON hier einfügen oder .json-Datei hierher ziehen …" data-dragover="_pd" data-drop="dropFile"></textarea>
   <p class="err" id="e">${esc(msg)}</p>
@@ -1295,7 +1297,7 @@ function result(){stopExamTimer();const chg=curView!=='r';curView='r';$app.class
     const resCol=gr.ok?(gr.g<=2?'--ok':gr.g===3?'--ac':'--warn'):'--bad';
     const chMap={};Q.forEach((q,i)=>{const k=q._title||'Allgemein';if(!chMap[k])chMap[k]={pts:0,max:0};chMap[k].pts+=scores[i].pts;chMap[k].max+=scores[i].max});
     const chEntries=Object.entries(chMap);
-    $app.innerHTML=`${nav('q')}<h1 style="color:var(${resCol})">${IC.award}<span>Prüfungsergebnis</span></h1>
+    $app.innerHTML=`${nav('q')}${pageHead(`<h1 style="color:var(${resCol})">${IC.award}<span>Prüfungs&shy;ergebnis</span></h1>`)}
     <div class="card" style="border-left:5px solid var(${resCol});background:color-mix(in srgb,var(${resCol}) 6%,var(--card))">
       <div class="row" style="justify-content:space-between;align-items:flex-start">
         <div>
@@ -1334,7 +1336,7 @@ function result(){stopExamTimer();const chg=curView!=='r';curView='r';$app.class
   }
   const qCol=pct>=80?'--ok':pct>=50?'--ac':pct>0?'--warn':'--bad';
   const qLabel=pct===100?'Perfekt! Alle richtig':pct>=80?'Sehr gutes Ergebnis':pct>=50?'Gut geübt':pct>0?'Weiter üben':'Noch kein Treffer';
-  $app.innerHTML=`${nav('q')}<h1 style="color:var(${qCol})">${IC.star}<span>Ergebnis</span></h1>
+  $app.innerHTML=`${nav('q')}${pageHead(`<h1 style="color:var(${qCol})">${IC.star}<span>Ergebnis</span></h1>`)}
   <div class="card" style="border-left:5px solid var(${qCol});background:color-mix(in srgb,var(${qCol}) 6%,var(--card))">
     <div class="row" style="justify-content:space-between;align-items:center">
       <div>
