@@ -60,7 +60,7 @@ if(a&&a!==document.body&&this.contains(a)&&!/^(INPUT|TEXTAREA|SELECT)$/.test(a.t
 d.set.call(this,h);syncHist();
 if(k){const c=[...this.querySelectorAll(t)].filter(x=>key(x)===k)[n];if(c&&!c.disabled)c.focus({preventScroll:true})}}})})();
 (()=>{const si=Storage.prototype.setItem;let shown=0;Storage.prototype.setItem=function(k,v){try{return si.call(this,k,v)}catch(e){if(!shown){shown=1;const b=document.createElement('div');b.setAttribute('role','alert');b.style.cssText='position:fixed;left:12px;right:12px;top:12px;z-index:99;padding:12px 14px;border-radius:8px;background:var(--badbg);color:var(--bad);border:1px solid var(--bad);font-weight:700';b.textContent='Speichern fehlgeschlagen (Speicher voll?). Bitte jetzt exportieren, sonst gehen Änderungen verloren.';b.onclick=()=>b.remove();document.body.appendChild(b)}throw e}}})();
-let exp=new Set(),pq=null,col=new Set(),gcol=new Set(),pend=null,rpend=null,cpend=null,crpend=null,gcpend=null,gloss=[],courses={},cnames=[],gcnames=[],gen={name:'',f:['single','multi','tf']},sets=[],sel=new Set(),opts={n:20,shuffle:true,hideMastered:true,mastery:3,theme:'auto',examMins:30,pass:50,scoreMode:'all',negMode:'none',cpass:{},ctime:{},cqcount:{},cmode:{},cneg:{},corder:[]},Q=[],idx=0,picked=new Set(),checked=false,log=[],msg='';
+let exp=new Set(),pq=null,col=new Set(),gcol=new Set(),pend=null,rpend=null,cpend=null,crpend=null,gcpend=null,openMenu=null,startObs=null,gloss=[],courses={},cnames=[],gcnames=[],gen={name:'',f:['single','multi','tf']},sets=[],sel=new Set(),opts={n:20,shuffle:true,hideMastered:true,mastery:3,theme:'auto',examMins:30,pass:50,scoreMode:'all',negMode:'none',cpass:{},ctime:{},cqcount:{},cmode:{},cneg:{},corder:[]},Q=[],idx=0,picked=new Set(),checked=false,log=[],msg='';
 let cedit=null,cdraft='',cpdraft=50,ctdraft=30,cqdraft=20,cmdraft='all',cndraft='none',cerr='',gcedit=null,gcdraft='',gcerr='',sedit=null,sdraft=null,serr='',qedit=null,qdraft=null,qerr='',curView='q';
 let examMode=false,examPicks=[],examMarks=new Set(),examEnd=0,examStart=0,examElapsed=0,examTimer=null,examSubPend=false,examExitPend=false,examTimeUp=false,examCourse='',examDurMins=30;
 let localTs=0,forceOverwrite=false;
@@ -236,16 +236,34 @@ function flaggedHtml(){
 function resetProg(sid){
   if(sid){const s=sets.find(x=>x.id===sid);if(s)s.qs.forEach(q=>{q.streak=0;q.wrong=false})}
   else{sets.forEach(s=>s.qs.forEach(q=>{q.streak=0;q.wrong=false}))}
-  rpend=null;crpend=null;wp=null;save(true);home();
+  rpend=null;crpend=null;wp=null;openMenu=null;save(true);home();
 }
 const rerenderC=()=>curView==='s'?settingsView():home();
+function rerenderMenu(){if(curView==='s')settingsView();else if(curView==='g')glosView();else home()}
+function togMenu(key){openMenu=openMenu===key?null:key;pend=null;rpend=null;cpend=null;crpend=null;gcpend=null;rerenderMenu()}
+function closeMenuDom(){openMenu=null;pend=null;rpend=null;cpend=null;crpend=null;gcpend=null;document.querySelectorAll('.menu-pop').forEach(el=>el.remove());document.querySelectorAll('.menu-wrap>[aria-expanded="true"]').forEach(el=>el.setAttribute('aria-expanded','false'))}
+function stopStartObs(){if(startObs){startObs.disconnect();startObs=null}}
+function syncFloatStart(){
+  stopStartObs();
+  const ds=$app.querySelector('.dstart'),ms=$app.querySelector('.mstart');
+  if(!ds||!ms)return;
+  const upd=()=>{if(getComputedStyle(ds).display!=='none')ms.classList.toggle('show',ds.getBoundingClientRect().bottom<0);else ms.classList.remove('show')};
+  upd();
+  if(typeof IntersectionObserver==='function'){
+    startObs=new IntersectionObserver(entries=>{
+      if(getComputedStyle(ds).display==='none'){ms.classList.remove('show');return}
+      ms.classList.toggle('show',!entries[0].isIntersecting);
+    },{threshold:0});
+    startObs.observe(ds);
+  }
+}
 function resetCourseProg(gi){
   const c=cnames[gi];
   if(c){
     sets.filter(s=>s.course===c).forEach(s=>s.qs.forEach(q=>{q.streak=0;q.wrong=false}));
     save(true);
   }
-  crpend=null;rpend=null;wp=null;rerenderC();
+  crpend=null;rpend=null;wp=null;openMenu=null;rerenderC();
 }
 
 function dedupGloss(){
@@ -258,10 +276,10 @@ function dedupGloss(){
 }
 function startCNew(){
   qsearch='';cedit='__new__';cdraft='';cpdraft=getPass('');ctdraft=getExamMins('');cqdraft=getExamCount('');cmdraft=getScoreMode('');cndraft=getNegMode('');cerr='';
-  cpend=null;crpend=null;sedit=null;qedit=null;rpend=null;pend=null;pq=null;wp=null;rerenderC();
+  cpend=null;crpend=null;sedit=null;qedit=null;rpend=null;pend=null;pq=null;wp=null;openMenu=null;rerenderC();
   setTimeout(()=>{const el=document.getElementById('ecn');if(el){el.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth',block:'center'});el.focus()}},30);
 }
-function startCEdit(gi){cedit=gi;cdraft=cnames[gi]||'';cpdraft=getPass(cdraft);ctdraft=getExamMins(cdraft);cqdraft=getExamCount(cdraft);cmdraft=getScoreMode(cdraft);cndraft=getNegMode(cdraft);cerr='';cpend=null;crpend=null;sedit=null;qedit=null;rpend=null;pend=null;pq=null;wp=null;rerenderC()}
+function startCEdit(gi){cedit=gi;cdraft=cnames[gi]||'';cpdraft=getPass(cdraft);ctdraft=getExamMins(cdraft);cqdraft=getExamCount(cdraft);cmdraft=getScoreMode(cdraft);cndraft=getNegMode(cdraft);cerr='';cpend=null;crpend=null;sedit=null;qedit=null;rpend=null;pend=null;pq=null;wp=null;openMenu=null;rerenderC()}
 function cancelCEdit(){cedit=null;cdraft='';cerr='';rerenderC()}
 function saveCEdit(gi){
   const isNew=gi==='__new__',old=isNew?'':cnames[gi],el=document.getElementById('ecn'),pEl=document.getElementById('ecp'),tEl=document.getElementById('ect'),qEl=document.getElementById('ecq'),mEl=document.getElementById('ecm'),nEl=document.getElementById('ecnm'),nw=(el?el.value:cdraft).trim(),np=pEl?+pEl.value:cpdraft,nt=tEl?Math.max(1,+tEl.value||30):ctdraft,nq=qEl?Math.max(1,+qEl.value||20):cqdraft,nm=mEl?mEl.value:cmdraft,nn=nEl?nEl.value:cndraft;
@@ -308,12 +326,12 @@ function startSNew(gi){
   const c=gi!==undefined&&cnames[gi]?cnames[gi]:'';if(!c)return;
   qsearch='';if(col.has(c)){col.delete(c);saveCol()}
   sedit='__new__';sdraft={course:c,title:'',targetC:c};serr='';
-  cedit=null;qedit=null;pend=null;rpend=null;cpend=null;crpend=null;pq=null;wp=null;home();
+  cedit=null;qedit=null;pend=null;rpend=null;cpend=null;crpend=null;pq=null;wp=null;openMenu=null;home();
   setTimeout(()=>{const el=document.getElementById('esc_t');if(el){el.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth',block:'center'});el.focus()}},30);
 }
 function startSEdit(sid){
   const s=sets.find(x=>x.id===sid);if(!s)return;
-  sedit=sid;sdraft={course:s.course,title:s.title,targetC:''};serr='';cedit=null;qedit=null;pend=null;rpend=null;cpend=null;crpend=null;pq=null;wp=null;home();
+  sedit=sid;sdraft={course:s.course,title:s.title,targetC:''};serr='';cedit=null;qedit=null;pend=null;rpend=null;cpend=null;crpend=null;pq=null;wp=null;openMenu=null;home();
   setTimeout(()=>{const el=document.getElementById('esc_t');if(el){el.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth',block:'center'});el.focus()}},30);
 }
 function cancelSEdit(){sedit=null;sdraft=null;serr='';home()}
@@ -383,14 +401,14 @@ function startQEdit(sid,qi){
     tfWhy:q.fixed?[(q.opts[0]&&q.opts[0].why)||'',(q.opts[1]&&q.opts[1].why)||'']:['',''],
     opts:q.fixed?[{t:'',ok:true,why:''},{t:'',ok:false,why:''}]:q.opts.map(o=>({t:o.t,ok:!!o.ok,why:o.why||''}))
   };
-  qerr='';qImgNote='';qImgBusy=false;cedit=null;sedit=null;pq=null;home();
+  qerr='';qImgNote='';qImgBusy=false;cedit=null;sedit=null;pq=null;openMenu=null;home();
 }
 function startQNew(sid){
   const s=sets.find(x=>x.id===sid);if(!s)return;
   exp.add(sid);saveExp();if(col.has(s.course)){col.delete(s.course);saveCol()}
   qedit=sid+':new';
   qdraft={type:'single',q:'',exp:'',img:'',imgAlt:'',imgPath:'',tfOk:true,tfWhy:['',''],opts:[{t:'',ok:true,why:''},{t:'',ok:false,why:''},{t:'',ok:false,why:''},{t:'',ok:false,why:''}]};
-  qerr='';qImgNote='';qImgBusy=false;cedit=null;sedit=null;pq=null;home();
+  qerr='';qImgNote='';qImgBusy=false;cedit=null;sedit=null;pq=null;openMenu=null;home();
   setTimeout(()=>{const el=document.getElementById('eq_q');if(el){el.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth',block:'center'});el.focus()}},30);
 }
 function cancelQEdit(){qedit=null;qdraft=null;qerr='';qImgNote='';qImgBusy=false;home()}
@@ -476,7 +494,7 @@ function saveQEdit(sid,qi){
 
 function qForm(sid,qi){
   const d=qdraft,isTf=d.type==='tf',isSingle=d.type==='single',tw=d.tfWhy||['',''],hasImg=isValidImageUrl(d.img);
-  return `<div class="qi"><div class="ge">${qi<0?'<b style="display:block;margin-bottom:6px;color:var(--ac)">Neue Frage hinzufügen</b>':''}<label class="mut" for="eq_type">Fragetyp</label><select id="eq_type" data-chg="changeQType" data-args='[]'><option value="single" ${d.type==='single'?'selected':''}>Single Choice</option><option value="multi" ${d.type==='multi'?'selected':''}>Multiple Choice</option><option value="tf" ${isTf?'selected':''}>Wahr / Falsch</option></select><label class="mut" for="eq_q">Frage</label><textarea id="eq_q" style="min-height:64px">${esc(d.q)}</textarea><label class="mut" for="eq_img">Bild / Diagramm (optional)</label><div class="row" style="margin:2px 0 6px"><label class="btn sec sm" style="position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:6px;cursor:pointer">${IC.img}<span>${qImgBusy?'Lade hoch …':'Bild hochladen'}</span><input type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer" ${qImgBusy?'disabled':''} data-act="_clr" data-el data-chg="uploadQImg" data-el></label>${hasImg?`<button class="btn sec sm" type="button" data-act="clearQImg" data-args='[]'>Bild entfernen</button>`:''}</div><input id="eq_img" placeholder="Oder Bild-URL einfügen (https://…)" value="${esc(d.img&&d.img.startsWith('data:')?'':(d.img||''))}"><input id="eq_imgalt" placeholder="Bildbeschreibung / Beschriftung (optional)" value="${esc(d.imgAlt||'')}">${qImgNote?`<p class="mut" style="margin:0 0 6px;font-size:.84rem">${esc(qImgNote)}</p>`:''}${hasImg?`<div class="qimg-prev"><img src="${esc(d.img)}" alt="${esc(d.imgAlt||'Vorschau')}"><span class="mut" style="font-size:.84rem">Vorschau – im Quiz per Klick vergrößerbar.</span></div>`:''}${isTf?`<label class="mut" style="margin-bottom:4px">Richtige Antwort &amp; optionale Begründungen</label><div class="orow" style="grid-template-columns:auto auto 1fr"><input type="radio" name="eq_tf" value="true" ${d.tfOk?'checked':''}><span style="min-width:52px;font-weight:700">Wahr</span><input id="eq_tfw0" placeholder="Begründung zu Wahr (optional)" value="${esc(tw[0]||'')}"></div><div class="orow" style="grid-template-columns:auto auto 1fr;margin-bottom:10px"><input type="radio" name="eq_tf" value="false" ${!d.tfOk?'checked':''}><span style="min-width:52px;font-weight:700">Falsch</span><input id="eq_tfw1" placeholder="Begründung zu Falsch (optional)" value="${esc(tw[1]||'')}"></div>`:`<label class="mut" style="margin-bottom:4px">Antwortoptionen (Häkchen = richtig, optional Begründung)</label>${d.opts.map((o,k)=>`<div class="orow"><input class="eq_ok" type="${isSingle?'radio':'checkbox'}" name="eq_ok_grp" title="Als richtige Antwort markieren" ${o.ok?'checked':''}><input class="eq_ot" placeholder="Antwort ${k+1}" value="${esc(o.t)}"><input class="eq_ow" placeholder="Begründung (optional)" value="${esc(o.why)}"><button class="x" type="button" title="Option entfernen" aria-label="Option entfernen" ${d.opts.length<=2?'disabled':''} data-act="delQOpt" data-args="${esc(JSON.stringify([k]))}">${IC.x}</button></div>`).join('')}<button class="btn sec sm" type="button" style="margin:2px 0 10px" data-act="addQOpt" data-args='[]'>+ Option hinzufügen</button>`}<label class="mut" for="eq_exp">Erklärung</label><textarea id="eq_exp" style="min-height:64px">${esc(d.exp)}</textarea><p class="err" role="alert">${esc(qerr)}</p><div class="row act"><button class="btn sm" type="button" ${qImgBusy?'disabled':''} data-act="saveQEdit" data-args="${esc(JSON.stringify([String(sid),qi]))}">${qi<0?'Anlegen':'Speichern'}</button><button class="btn sec sm" type="button" data-act="cancelQEdit" data-args='[]'>Abbrechen</button></div></div></div>`;
+  return `<div class="qi"><div class="ge">${qi<0?'<b style="display:block;margin-bottom:6px;color:var(--ac)">Neue Frage hinzufügen</b>':''}<label class="mut" for="eq_type">Fragetyp</label><select id="eq_type" data-chg="changeQType" data-args='[]'><option value="single" ${d.type==='single'?'selected':''}>Single Choice</option><option value="multi" ${d.type==='multi'?'selected':''}>Multiple Choice</option><option value="tf" ${isTf?'selected':''}>Wahr / Falsch</option></select><label class="mut" for="eq_q">Frage</label><textarea id="eq_q" style="min-height:64px">${esc(d.q)}</textarea><label class="mut" for="eq_img">Bild / Diagramm (optional)</label><div class="row" style="margin:2px 0 6px"><label class="btn sec sm" style="position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:6px;cursor:pointer">${IC.img}<span>${qImgBusy?'Lade hoch …':'Bild hochladen'}</span><input type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer" ${qImgBusy?'disabled':''} data-act="_clr" data-chg="uploadQImg" data-el></label>${hasImg?`<button class="btn sec sm" type="button" data-act="clearQImg" data-args='[]'>Bild entfernen</button>`:''}</div><input id="eq_img" placeholder="Oder Bild-URL einfügen (https://…)" value="${esc(d.img&&d.img.startsWith('data:')?'':(d.img||''))}"><input id="eq_imgalt" placeholder="Bildbeschreibung / Beschriftung (optional)" value="${esc(d.imgAlt||'')}">${qImgNote?`<p class="mut" style="margin:0 0 6px;font-size:.84rem">${esc(qImgNote)}</p>`:''}${hasImg?`<div class="qimg-prev"><img src="${esc(d.img)}" alt="${esc(d.imgAlt||'Vorschau')}"><span class="mut" style="font-size:.84rem">Vorschau – im Quiz per Klick vergrößerbar.</span></div>`:''}${isTf?`<label class="mut" style="margin-bottom:4px">Richtige Antwort &amp; optionale Begründungen</label><div class="orow" style="grid-template-columns:auto auto 1fr"><input type="radio" name="eq_tf" value="true" ${d.tfOk?'checked':''}><span style="min-width:52px;font-weight:700">Wahr</span><input id="eq_tfw0" placeholder="Begründung zu Wahr (optional)" value="${esc(tw[0]||'')}"></div><div class="orow" style="grid-template-columns:auto auto 1fr;margin-bottom:10px"><input type="radio" name="eq_tf" value="false" ${!d.tfOk?'checked':''}><span style="min-width:52px;font-weight:700">Falsch</span><input id="eq_tfw1" placeholder="Begründung zu Falsch (optional)" value="${esc(tw[1]||'')}"></div>`:`<label class="mut" style="margin-bottom:4px">Antwortoptionen (Häkchen = richtig, optional Begründung)</label>${d.opts.map((o,k)=>`<div class="orow"><input class="eq_ok" type="${isSingle?'radio':'checkbox'}" name="eq_ok_grp" title="Als richtige Antwort markieren" ${o.ok?'checked':''}><input class="eq_ot" placeholder="Antwort ${k+1}" value="${esc(o.t)}"><input class="eq_ow" placeholder="Begründung (optional)" value="${esc(o.why)}"><button class="x" type="button" title="Option entfernen" aria-label="Option entfernen" ${d.opts.length<=2?'disabled':''} data-act="delQOpt" data-args="${esc(JSON.stringify([k]))}">${IC.x}</button></div>`).join('')}<button class="btn sec sm" type="button" style="margin:2px 0 10px" data-act="addQOpt" data-args='[]'>+ Option hinzufügen</button>`}<label class="mut" for="eq_exp">Erklärung</label><textarea id="eq_exp" style="min-height:64px">${esc(d.exp)}</textarea><p class="err" role="alert">${esc(qerr)}</p><div class="row act"><button class="btn sm" type="button" ${qImgBusy?'disabled':''} data-act="saveQEdit" data-args="${esc(JSON.stringify([String(sid),qi]))}">${qi<0?'Anlegen':'Speichern'}</button><button class="btn sec sm" type="button" data-act="cancelQEdit" data-args='[]'>Abbrechen</button></div></div></div>`;
 }
 
 let dragItem=null;
@@ -493,7 +511,7 @@ function reorderCourseAt(fromGi,toGi){
   sets=next.flatMap(c=>byC[c]||[]);
   saveO(true);save(true);rerenderC();
 }
-function moveC(gi,d){reorderCourseAt(gi,gi+d);home()}
+function moveC(gi,d){reorderCourseAt(gi,gi+d)}
 function moveS(sid,d){const a=sets.find(x=>x.id===sid);if(!a)return;const c=sets.filter(x=>x.course===a.course),i=c.findIndex(x=>x.id===sid),t=c[i+d];if(t){reorderSet(sid,t.id);home()}}
 function reorderSet(srcId,targetId){
   if(!srcId||!targetId||srcId===targetId)return;
@@ -510,7 +528,7 @@ function reorderSet(srcId,targetId){
 }
 function dragCStart(ev,gi){
   const tag=(ev.target&&ev.target.tagName)||'';
-  if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'){ev.preventDefault();return}
+  if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'||(ev.target&&ev.target.closest&&ev.target.closest('.menu-pop'))){ev.preventDefault();return}
   dragItem={kind:'c',gi};
   if(ev.dataTransfer){ev.dataTransfer.effectAllowed='move';try{ev.dataTransfer.setData('text/plain','c:'+gi)}catch(e){}}
 }
@@ -532,7 +550,7 @@ function dropC(ev,gi){
 }
 function dragSStart(ev,sid,c){
   const tag=(ev.target&&ev.target.tagName)||'';
-  if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'){ev.preventDefault();return}
+  if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'||(ev.target&&ev.target.closest&&ev.target.closest('.menu-pop'))){ev.preventDefault();return}
   ev.stopPropagation();
   dragItem={kind:'s',sid,c};
   if(ev.dataTransfer){ev.dataTransfer.effectAllowed='move';try{ev.dataTransfer.setData('text/plain','s:'+sid)}catch(e){}}
@@ -557,9 +575,10 @@ function dragEnd(){
 
 function courseCardHtml(c,l,gi,isSetView){
   const mC=l.reduce((a,s)=>a+masteredInSet(s),0),allC=l.reduce((a,s)=>a+s.qs.length,0),gC=gloss.filter(g=>norm(g.course)===norm(c)).length,hasCP=l.some(s=>s.qs.some(q=>(q.streak||0)>0||q.wrong)),hasMC=l.some(s=>s.qs.some(q=>q.type==='multi')),cp=getPass(c),cm=getExamMins(c),cq=getExamCount(c),csm=getScoreMode(c),cnm=getNegMode(c),cCol=mC===allC&&allC?'--ok':l.some(s=>sel.has(s.id))?'--ac':'--ink';
-  const sub=`<span class="mut" style="display:block;font-size:.82rem;margin-bottom:1px">${l.length} Kapitel · ${allC} Fragen${mC?` · ${mC} gemeistert`:''}${gC?` · ${gC} Glossarbegriffe`:''}</span><span class=\"mut\" style=\"display:block;font-size:.82rem;margin-bottom:2px\">Prüfung: ${cq} Fragen · ${cm} Min. · bestanden ab ${cp} %${hasMC?` · ${modeShort(csm)}`:''}${cnm!=='none'?` · ${negShort(cnm)}`:''}</span><b>${esc(c)}</b>`;
-  const canDrag=cnames.length>1&&cedit!==gi;
-  return `<div class="card ccard" style="margin:14px 0 8px;padding:12px 16px;border-left:4px solid var(${cCol})" ${canDrag?`draggable="true" data-dragstart="dragCStart" data-dragover="dragCOver" data-dragleave="dragLeave" data-drop="dropC" data-dragend="dragEnd" data-args="${esc(JSON.stringify([gi]))}"`:''}><div class="crs">${isSetView?`<div class="chb" style="padding:2px 0;cursor:default"><span>${sub}</span></div>`:`<input type="checkbox" aria-label="Alle Kapitel auswählen" ${allSel(l)?'checked':''} ${l.length?'':'disabled'} data-chk="togC" data-args="${esc(JSON.stringify([gi]))}"><button class="chb" style="padding:2px 0" aria-expanded="${!col.has(c)}" data-act="fold" data-args="${esc(JSON.stringify([gi]))}"><span>${col.has(c)?'▸':'▾'}</span><span>${sub}</span></button>`}<span class="gc">${isSetView?'':`<button class="x" title="Neues Kapitel zu diesem Kurs hinzufügen" aria-label="Neues Kapitel hinzufügen" data-act="startSNew" data-args="${esc(JSON.stringify([gi]))}">${IC.plus}</button>`}<button class="x" title="Kurs exportieren" aria-label="Kurs exportieren" data-act="exportC" data-el data-args="${esc(JSON.stringify([gi]))}">${IC.exp}</button>${crpend===gi?`<span class="mut">Zurücksetzen?</span><button class="btn sm" data-act="resetCourseProg" data-args="${esc(JSON.stringify([gi]))}">Ja</button><button class="btn sec sm" data-act="_h1">Nein</button>`:hasCP?`<button class="x" title="Lernstand dieses Kurses zurücksetzen" aria-label="Lernstand dieses Kurses zurücksetzen" data-act="_h2" data-args="${esc(JSON.stringify([gi]))}">${IC.res}</button>`:''}${canDrag?`<button class="x" aria-label="Kurs ${esc(c)} nach oben" title="Nach oben" ${gi===0?'disabled':''} data-act="moveC" data-args="${esc(JSON.stringify([gi,-1]))}">↑</button><button class="x" aria-label="Kurs ${esc(c)} nach unten" title="Nach unten" ${gi===cnames.length-1?'disabled':''} data-act="moveC" data-args="${esc(JSON.stringify([gi,1]))}">↓</button>`:''}<button class="x" title="Kurs, Zeit, Wertung & Notenschema bearbeiten" aria-label="Kurs bearbeiten" data-act="startCEdit" data-args="${esc(JSON.stringify([gi]))}">${IC.edit}</button>${cpend===gi?`<span class="mut">Löschen?</span><button class="btn sm" data-act="delC2" data-args="${esc(JSON.stringify([gi]))}">Ja</button><button class="btn sec sm" data-act="delC" data-args="${esc(JSON.stringify([gi]))}">Nein</button>`:`<button class="x" title="Kurs löschen" aria-label="Kurs löschen" data-act="delC" data-args="${esc(JSON.stringify([gi]))}">${IC.del}</button>`}</span></div>${cedit===gi?cForm(gi,hasMC):''}</div>`;
+  const sub=`<b style="display:block;margin-bottom:2px">${esc(c)}</b><span class="mut" style="display:block;font-size:.82rem;margin-bottom:1px">${l.length} Kapitel · ${allC} Fragen${mC?` · ${mC} gemeistert`:''}${gC?` · ${gC} Glossarbegriffe`:''}</span><span class="mut" style="display:block;font-size:.82rem">Prüfung: ${cq} Fragen · ${cm} Min. · bestanden ab ${cp} %${hasMC?` · ${modeShort(csm)}`:''}${cnm!=='none'?` · ${negShort(cnm)}`:''}</span>`;
+  const canDrag=cnames.length>1&&cedit!==gi,mKey='c:'+c,mOpen=openMenu===mKey;
+  const menuPop=mOpen?`<div class="menu-pop" role="menu">${canDrag?`<button class="mitem" type="button" ${gi===0?'disabled':''} data-act="moveC" data-args="${esc(JSON.stringify([gi,-1]))}">↑ Nach oben</button><button class="mitem" type="button" ${gi===cnames.length-1?'disabled':''} data-act="moveC" data-args="${esc(JSON.stringify([gi,1]))}">↓ Nach unten</button><div class="msep"></div>`:''}<button class="mitem" type="button" data-act="exportC" data-el data-args="${esc(JSON.stringify([gi]))}">${IC.exp}<span>Kurs exportieren</span></button>${hasCP?(crpend===gi?`<div class="mconf"><span class="mut">Zurücksetzen?</span><span class="row" style="gap:4px"><button class="btn sm" data-act="resetCourseProg" data-args="${esc(JSON.stringify([gi]))}">Ja</button><button class="btn sec sm" data-act="_h1">Nein</button></span></div>`:`<button class="mitem" type="button" data-act="_h2" data-args="${esc(JSON.stringify([gi]))}">${IC.res}<span>Lernstand zurücksetzen</span></button>`):''}<div class="msep"></div>${cpend===gi?`<div class="mconf"><span class="mut">Löschen?</span><span class="row" style="gap:4px"><button class="btn sm" data-act="delC2" data-args="${esc(JSON.stringify([gi]))}">Ja</button><button class="btn sec sm" data-act="delC" data-args="${esc(JSON.stringify([gi]))}">Nein</button></span></div>`:`<button class="mitem danger" type="button" data-act="delC" data-args="${esc(JSON.stringify([gi]))}">${IC.del}<span>Kurs löschen</span></button>`}</div>`:'';
+  return `<div class="card ccard" style="margin:14px 0 8px;padding:12px 16px;border-left:4px solid var(${cCol})" ${canDrag?`draggable="true" data-dragstart="dragCStart" data-dragover="dragCOver" data-dragleave="dragLeave" data-drop="dropC" data-dragend="dragEnd" data-args="${esc(JSON.stringify([gi]))}"`:''}><div class="crs">${isSetView?`<div class="chb" style="padding:2px 0;cursor:default"><span>${sub}</span></div>`:`<input type="checkbox" aria-label="Alle Kapitel auswählen" ${allSel(l)?'checked':''} ${l.length?'':'disabled'} data-chk="togC" data-args="${esc(JSON.stringify([gi]))}"><button class="chb" style="padding:2px 0" aria-expanded="${!col.has(c)}" data-act="fold" data-args="${esc(JSON.stringify([gi]))}"><span>${col.has(c)?'▸':'▾'}</span><span>${sub}</span></button>`}<span class="gc">${isSetView?'':`<button class="x" title="Neues Kapitel zu diesem Kurs hinzufügen" aria-label="Neues Kapitel hinzufügen" data-act="startSNew" data-args="${esc(JSON.stringify([gi]))}">${IC.plus}</button>`}<button class="x" title="Kurs, Zeit, Wertung & Notenschema bearbeiten" aria-label="Kurs bearbeiten" data-act="startCEdit" data-args="${esc(JSON.stringify([gi]))}">${IC.edit}</button><span class="menu-wrap"><button class="x" type="button" title="Weitere Aktionen" aria-label="Weitere Aktionen für ${esc(c)}" aria-haspopup="menu" aria-expanded="${mOpen}" data-act="togMenu" data-args="${esc(JSON.stringify([mKey]))}">${IC.more}</button>${menuPop}</span></span></div>${cedit===gi?cForm(gi,hasMC):''}</div>`;
 }
 
 function buildGroups(){
@@ -599,20 +618,22 @@ function home(){stopExamTimer();enforceSingleCourse();const chg=curView!=='q';cu
   ${cnames.length?cnames.map((c,gi)=>{
     const l=groups[c],inNew=sedit==='__new__'&&sdraft&&sdraft.targetC===c;
     return courseCardHtml(c,l,gi,false)+(col.has(c)?'':`<div class="grp" style="margin:0 0 16px 12px">${l.map((s,si)=>{
-      const mS=masteredInSet(s),hasP=s.qs.some(q=>(q.streak||0)>0||q.wrong),sCol=mS===s.qs.length&&s.qs.length?'--ok':sel.has(s.id)?'--ac':'--ink',canDragS=l.length>1&&sedit!==s.id;
-      return `<div class="set" style="border-left:4px solid var(${sCol})" ${canDragS?`draggable="true" data-dragstart="dragSStart" data-dragover="dragSOver" data-dragleave="dragLeave" data-drop="dropS" data-dragend="dragEnd" data-args="${esc(JSON.stringify([String(s.id),c]))}"`:''}><input type="checkbox" aria-label="${esc(s.title)} auswählen" ${sel.has(s.id)?'checked':''} data-chk="tog" data-args="${esc(JSON.stringify([String(s.id)]))}"><button class="sb" style="padding:2px 0" aria-expanded="${exp.has(s.id)}" data-act="openS" data-args="${esc(JSON.stringify([String(s.id)]))}"><span>${exp.has(s.id)?'▾':'▸'}</span><span><span class="mut" style="display:block;font-size:.82rem;margin-bottom:1px">Kapitel ${si+1} · ${s.qs.length} Fragen${mS?` · ${mS} ✓ gemeistert`:''}</span><b>${esc(s.title)}</b></span></button><span class="gc"><button class="x" title="Neue Frage hinzufügen" aria-label="Neue Frage hinzufügen" data-act="startQNew" data-args="${esc(JSON.stringify([String(s.id)]))}">${IC.plus}</button>${rpend===s.id?`<span class="mut">Zurücksetzen?</span><button class="btn sm" data-act="resetProg" data-args="${esc(JSON.stringify([String(s.id)]))}">Ja</button><button class="btn sec sm" data-act="_h3">Nein</button>`:hasP?`<button class="x" title="Lernstand dieses Kapitels zurücksetzen" aria-label="Lernstand zurücksetzen" data-act="_h4" data-args="${esc(JSON.stringify([String(s.id)]))}">${IC.res}</button>`:''}${canDragS?`<button class="x" aria-label="Kapitel ${esc(s.title)} nach oben" title="Nach oben" ${l.indexOf(s)===0?'disabled':''} data-act="moveS" data-args="${esc(JSON.stringify([String(s.id),-1]))}">↑</button><button class="x" aria-label="Kapitel ${esc(s.title)} nach unten" title="Nach unten" ${l.indexOf(s)===l.length-1?'disabled':''} data-act="moveS" data-args="${esc(JSON.stringify([String(s.id),1]))}">↓</button>`:''}<button class="x" title="Kapitel bearbeiten" aria-label="Kapitel bearbeiten" data-act="startSEdit" data-args="${esc(JSON.stringify([String(s.id)]))}">${IC.edit}</button>${pend===s.id?`<span class="mut">Löschen?</span><button class="btn sm" data-act="del2" data-args="${esc(JSON.stringify([String(s.id)]))}">Ja</button><button class="btn sec sm" data-act="del" data-args="${esc(JSON.stringify([String(s.id)]))}">Nein</button>`:`<button class="x" title="Kapitel löschen" aria-label="Kapitel löschen" data-act="del" data-args="${esc(JSON.stringify([String(s.id)]))}">${IC.del}</button>`}</span>${sedit===s.id?sForm(s.id):''}</div>${exp.has(s.id)?`<div class="ql">${s.qs.map((q,i)=>qedit===s.id+':'+i?qForm(s.id,i):`<div class="qi"><span>${q.img?isym(IC.img,'Enthält Bild / Diagramm')+' ':''}${esc(q.q)}</span><span class="gc">${qBadge(s.id,i,q)}<button class="x${q.flagged?' warn':''}" title="${q.flagged?'Markierung aufheben':'Zum Bearbeiten markieren'}" aria-label="Markieren" data-act="togFlag" data-args="${esc(JSON.stringify([String(s.id),i]))}">${IC.flag}</button><button class="x" title="Frage bearbeiten" aria-label="Frage bearbeiten" data-act="startQEdit" data-args="${esc(JSON.stringify([String(s.id),i]))}">${IC.edit}</button>${pq===s.id+':'+i?`<button class="btn sm" data-act="delQ" data-args="${esc(JSON.stringify([String(s.id),i]))}">Löschen</button><button class="btn sec sm" data-act="_h5">Nein</button>`:`<button class="x" title="Frage löschen" aria-label="Frage löschen" data-act="_h6" data-args="${esc(JSON.stringify([s.id,i]))}">${IC.del}</button>`}</span></div>`).join('')}${qedit===s.id+':new'?qForm(s.id,-1):`<div class="qi" style="padding:10px 0 6px"><button class="btn sec sm" type="button" data-act="startQNew" data-args="${esc(JSON.stringify([String(s.id)]))}">+ Neue Frage hinzufügen</button></div>`}</div>`:''}`}).join('')}${inNew?`<div class="set" style="border-left:4px solid var(--ac)">${sForm('__new__')}</div>`:(!l.length?`<div class="set" style="padding:10px 14px"><button class="btn sec sm" type="button" data-act="startSNew" data-args="${esc(JSON.stringify([gi]))}">+ Neues Kapitel hinzufügen</button></div>`:'')}</div>`);
+      const mS=masteredInSet(s),hasP=s.qs.some(q=>(q.streak||0)>0||q.wrong),sCol=mS===s.qs.length&&s.qs.length?'--ok':sel.has(s.id)?'--ac':'--ink',canDragS=l.length>1&&sedit!==s.id,smKey='s:'+s.id,smOpen=openMenu===smKey;
+      const sMenuPop=smOpen?`<div class="menu-pop" role="menu">${canDragS?`<button class="mitem" type="button" ${si===0?'disabled':''} data-act="moveS" data-args="${esc(JSON.stringify([String(s.id),-1]))}">↑ Nach oben</button><button class="mitem" type="button" ${si===l.length-1?'disabled':''} data-act="moveS" data-args="${esc(JSON.stringify([String(s.id),1]))}">↓ Nach unten</button><div class="msep"></div>`:''}${hasP?(rpend===s.id?`<div class="mconf"><span class="mut">Zurücksetzen?</span><span class="row" style="gap:4px"><button class="btn sm" data-act="resetProg" data-args="${esc(JSON.stringify([String(s.id)]))}">Ja</button><button class="btn sec sm" data-act="_h3">Nein</button></span></div>`:`<button class="mitem" type="button" data-act="_h4" data-args="${esc(JSON.stringify([String(s.id)]))}">${IC.res}<span>Lernstand zurücksetzen</span></button>`):''}${hasP?'<div class="msep"></div>':''}${pend===s.id?`<div class="mconf"><span class="mut">Löschen?</span><span class="row" style="gap:4px"><button class="btn sm" data-act="del2" data-args="${esc(JSON.stringify([String(s.id)]))}">Ja</button><button class="btn sec sm" data-act="del" data-args="${esc(JSON.stringify([String(s.id)]))}">Nein</button></span></div>`:`<button class="mitem danger" type="button" data-act="del" data-args="${esc(JSON.stringify([String(s.id)]))}">${IC.del}<span>Kapitel löschen</span></button>`}</div>`:'';
+      return `<div class="set" style="border-left:4px solid var(${sCol})" ${canDragS?`draggable="true" data-dragstart="dragSStart" data-dragover="dragSOver" data-dragleave="dragLeave" data-drop="dropS" data-dragend="dragEnd" data-args="${esc(JSON.stringify([String(s.id),c]))}"`:''}><input type="checkbox" aria-label="${esc(s.title)} auswählen" ${sel.has(s.id)?'checked':''} data-chk="tog" data-args="${esc(JSON.stringify([String(s.id)]))}"><button class="sb" style="padding:2px 0" aria-expanded="${exp.has(s.id)}" data-act="openS" data-args="${esc(JSON.stringify([String(s.id)]))}"><span>${exp.has(s.id)?'▾':'▸'}</span><span><b style="display:block;margin-bottom:1px">${esc(s.title)}</b><span class="mut" style="display:block;font-size:.82rem">Kapitel ${si+1} · ${s.qs.length} Fragen${mS?` · ${mS} ✓ gemeistert`:''}</span></span></button><span class="gc"><button class="x" title="Neue Frage hinzufügen" aria-label="Neue Frage hinzufügen" data-act="startQNew" data-args="${esc(JSON.stringify([String(s.id)]))}">${IC.plus}</button><button class="x" title="Kapitel bearbeiten" aria-label="Kapitel bearbeiten" data-act="startSEdit" data-args="${esc(JSON.stringify([String(s.id)]))}">${IC.edit}</button><span class="menu-wrap"><button class="x" type="button" title="Weitere Aktionen" aria-label="Weitere Aktionen für ${esc(s.title)}" aria-haspopup="menu" aria-expanded="${smOpen}" data-act="togMenu" data-args="${esc(JSON.stringify([smKey]))}">${IC.more}</button>${sMenuPop}</span></span>${sedit===s.id?sForm(s.id):''}</div>${exp.has(s.id)?`<div class="ql">${s.qs.map((q,i)=>qedit===s.id+':'+i?qForm(s.id,i):`<div class="qi"><span>${q.img?isym(IC.img,'Enthält Bild / Diagramm')+' ':''}${esc(q.q)}</span><span class="gc">${qBadge(s.id,i,q)}<button class="x${q.flagged?' warn':''}" title="${q.flagged?'Markierung aufheben':'Zum Bearbeiten markieren'}" aria-label="Markieren" data-act="togFlag" data-args="${esc(JSON.stringify([String(s.id),i]))}">${IC.flag}</button><button class="x" title="Frage bearbeiten" aria-label="Frage bearbeiten" data-act="startQEdit" data-args="${esc(JSON.stringify([String(s.id),i]))}">${IC.edit}</button>${pq===s.id+':'+i?`<button class="btn sm" data-act="delQ" data-args="${esc(JSON.stringify([String(s.id),i]))}">Löschen</button><button class="btn sec sm" data-act="_h5">Nein</button>`:`<button class="x" title="Frage löschen" aria-label="Frage löschen" data-act="_h6" data-args="${esc(JSON.stringify([s.id,i]))}">${IC.del}</button>`}</span></div>`).join('')}${qedit===s.id+':new'?qForm(s.id,-1):`<div class="qi" style="padding:10px 0 6px"><button class="btn sec sm" type="button" data-act="startQNew" data-args="${esc(JSON.stringify([String(s.id)]))}">+ Neue Frage hinzufügen</button></div>`}</div>`:''}`}).join('')}${inNew?`<div class="set" style="border-left:4px solid var(--ac)">${sForm('__new__')}</div>`:(!l.length?`<div class="set" style="padding:10px 14px"><button class="btn sec sm" type="button" data-act="startSNew" data-args="${esc(JSON.stringify([gi]))}">+ Neues Kapitel hinzufügen</button></div>`:'')}</div>`);
   }).join('')+(sets.length?`<div class="mstart"><div class="row"><button class="btn sec" ${allSelCount?'':'disabled'} data-act="startExam" data-args='[]'>Prüfung${eCnt?` (${eCnt})`:''}</button><button class="btn" ${total?'':'disabled'} data-act="start" data-args='[]'>Quiz${qCnt?` (${qCnt})`:''}</button></div></div>`:'')
   :(topNew?'':`<div class="card" style="margin-top:18px"><p><b>Noch keine Kurse oder Fragen vorhanden.</b></p><p class="mut">Lege oben über „+ Neuer Kurs“ einen neuen Kurs an oder lass dir in Claude aus deinen Unterlagen ein Fragenset als JSON erstellen und füge es hier ein.</p></div>`)}
-`;if(chg)toTop();
+`;syncFloatStart();if(chg)toTop();
 }
 let wp=null;
 function topBar(){
   const hasP=hasAnyProgress();
-  return `<div class="row act" style="margin:12px 0 6px"><button class="btn sec ico" title="Fragen importieren" aria-label="Fragen importieren" data-act="imp" data-args='["fragen"]'>${IC.imp}</button><button class="btn sec sm" style="min-height:40px" data-act="startCNew" data-args='[]'>+ Neuer Kurs</button>${sets.length?`<button class="btn sec ico" title="Alle Fragen exportieren" aria-label="Alle Fragen exportieren" data-act="exportQ" data-el>${IC.exp}</button>`:''}${cnames.length?`<span class="gc" style="gap:8px">${hasP?(wp==='r'?`<span class="mut">Zurücksetzen?</span><button class="btn sm" data-act="resetProg" data-args='[]'>Ja</button><button class="btn sec sm" data-act="_h7">Nein</button>`:`<button class="btn sec ico" title="Lernstand zurücksetzen" aria-label="Lernstand zurücksetzen" data-act="_h8">${IC.res}</button>`):''}</span>`:''}</div>`;
+  return `<div class="row act" style="margin:12px 0 6px"><button class="btn sec sm ico-lbl" title="Fragen importieren" aria-label="Fragen importieren" data-act="imp" data-args='["fragen"]'>${IC.imp}<span>Import</span></button><button class="btn sec sm" data-act="startCNew" data-args='[]'>+ Neuer Kurs</button>${sets.length?`<button class="btn sec sm ico-lbl" title="Alle Fragen exportieren" aria-label="Alle Fragen exportieren" data-act="exportQ" data-el>${IC.exp}<span>Export</span></button>`:''}${cnames.length?`<span class="gc" style="gap:8px">${hasP?(wp==='r'?`<span class="mut">Zurücksetzen?</span><button class="btn sm" data-act="resetProg" data-args='[]'>Ja</button><button class="btn sec sm" data-act="_h7">Nein</button>`:`<button class="btn sec ico" title="Lernstand zurücksetzen" aria-label="Lernstand zurücksetzen" data-act="_h8">${IC.res}</button>`):''}</span>`:''}</div>`;
 }
 function optsHtml(total,allSelCount){
-  const mastCount=allSelCount-[...sel].reduce((a,id)=>{const s=sets.find(x=>x.id===id);return a+(s?s.qs.filter(q=>!isMastered(q)).length:0)},0),ap=activePass(),at=activeTime(),aq=activeCount(),asm=activeScoreMode(),anm=activeNegMode(),cs=selCourses(),hasMC=cs.length===1&&courseHasMulti(cs[0]),qCnt=Math.min(getQuizCount(),total);
-  return `<p class="mut" style="margin:8px 0 4px">${total?`<b>${total}</b> ${total===1?'Frage':'Fragen'} zum Üben verfügbar (Quiz: <b>${qCnt}</b>`+(mastCount?` · ${mastCount} gemeisterte ${opts.hideMastered?'ausgeblendet':'enthalten'} · für Prüfung alle ${allSelCount} verfügbar`:'')+`)`:allSelCount&&mastCount===allSelCount?`Alle ${allSelCount} ausgewählten Fragen sind gemeistert – setze den Lernstand zurück oder starte eine Prüfung.`:sel.size?'Noch keine Fragen in den ausgewählten Kapiteln.':'Wähle mindestens ein Kapitel eines Kurses aus.'}${cs.length===1?` · Kurs „${esc(cs[0])}“ (Prüfung: ${aq} Fragen · ${at} Min. · bestanden ab ${ap} %${hasMC?` · ${modeShort(asm)}`:''}${anm!=='none'?` · ${negShort(anm)}`:''})`:''}</p>`;
+  const mastCount=allSelCount-[...sel].reduce((a,id)=>{const s=sets.find(x=>x.id===id);return a+(s?s.qs.filter(q=>!isMastered(q)).length:0)},0),cs=selCourses();
+  const cPref=cs.length===1?`Kurs „<b>${esc(cs[0])}</b>“ · `:'';
+  return `<p class="mut" style="margin:8px 0 4px">${total?`${cPref}<b>${total}</b> ${total===1?'Frage':'Fragen'} zum Üben${mastCount?` · ${mastCount} gemeistert${opts.hideMastered?' (ausgeblendet)':''}`:''}`:allSelCount&&mastCount===allSelCount?`${cPref}Alle ${allSelCount} ausgewählten Fragen sind gemeistert – setze den Lernstand zurück oder starte eine Prüfung.`:sel.size?'Noch keine Fragen in den ausgewählten Kapiteln.':'Wähle mindestens ein Kapitel eines Kurses aus.'}</p>`;
 }
 function wipe(k){if(k==='q'&&!okFlag){appDialog('Löscht alle Fragen, Kurse und (bei aktivem Sync) auch die Cloud-Daten. Zum Bestätigen LÖSCHEN eingeben:',()=>{okFlag=true;try{wipe('q')}finally{okFlag=false}},'LÖSCHEN');return}if(k==='q'){sets=[];courses={};opts.corder=[];sel=new Set();exp=new Set();col=new Set();saveSel();saveExp();saveCol();saveC();saveO();save(true);wp=null;home()}else{gloss=[];gcol=new Set();saveGCol();saveGloss(true);wp=null;glosView()}}
 const allSel=l=>l.length>0&&l.every(s=>sel.has(s.id));
@@ -648,7 +669,7 @@ function exportData(b,kind,crs){const h0=b.innerHTML;
   setTimeout(()=>{b.innerHTML=h0},2000)}
 function tog(id){const s=sets.find(x=>x.id===id);if(!s)return;if(sel.has(id)){sel.delete(id)}else{sets.forEach(x=>{if(x.course!==s.course)sel.delete(x.id)});sel.add(id)}saveSel();home()}
 function del(id){pend=pend===id?null:id;rpend=null;cpend=null;crpend=null;home()}
-function del2(id){const s=sets.find(x=>x.id===id);if(s&&s.course&&!courses[s.course]){courses[s.course]=KINDS.map(x=>x[0]);saveC()}sets=sets.filter(x=>x.id!==id);sel.delete(id);exp.delete(id);saveSel();saveExp();pend=null;rpend=null;cpend=null;crpend=null;save(true);home()}
+function del2(id){const s=sets.find(x=>x.id===id);if(s&&s.course&&!courses[s.course]){courses[s.course]=KINDS.map(x=>x[0]);saveC()}sets=sets.filter(x=>x.id!==id);sel.delete(id);exp.delete(id);saveSel();saveExp();pend=null;rpend=null;cpend=null;crpend=null;openMenu=null;save(true);home()}
 function delC(gi){cpend=cpend===gi?null:gi;pend=null;rpend=null;crpend=null;rerenderC()}
 function delC2(gi){
   const c=cnames[gi];
@@ -659,7 +680,7 @@ function delC2(gi){
     delete courses[c];col.delete(c);if(opts.cpass)delete opts.cpass[c];if(opts.ctime)delete opts.ctime[c];if(opts.cqcount)delete opts.cqcount[c];if(opts.cmode)delete opts.cmode[c];if(opts.cneg)delete opts.cneg[c];if(Array.isArray(opts.corder))opts.corder=opts.corder.filter(x=>x!==c);
     saveSel();saveExp();saveCol();saveC();saveO();save(true);
   }
-  cpend=null;crpend=null;rpend=null;pend=null;rerenderC();
+  cpend=null;crpend=null;rpend=null;pend=null;openMenu=null;rerenderC();
 }
 
 function activeCloudState(){
@@ -739,13 +760,13 @@ function updSyncUI(){
 }
 const nav=a=>`<nav class='nav'><button class='${a==='q'?'on':''}' ${a==='q'?'aria-current="page"':''} title="Fragen" aria-label="Fragen" data-act="_h10">${IC.cap}<span class="nlbl">Fragen</span></button><button class='${a==='g'?'on':''}' ${a==='g'?'aria-current="page"':''} title="Glossar" aria-label="Glossar" data-act='glos'>${IC.book}<span class="nlbl">Glossar</span></button><button class='${a==='t'?'on':''}' ${a==='t'?'aria-current="page"':''} title="Statistik &amp; Verlauf" aria-label="Statistik" data-act='stats'>${IC.chart}<span class="nlbl">Statistik</span></button><button class='${a==='s'?'on':''}' ${a==='s'?'aria-current="page"':''} title="Einstellungen" aria-label="Einstellungen" data-act='settings'>${IC.cog}<span class="nlbl">Einstellungen</span></button><span class="acct-slot acct-desk">${acctBtnHtml()}</span></nav>`;
 const pageHead=(h,extra='')=>`<div class="page-hd">${h}${extra}<span class="acct-slot acct-mob">${acctBtnHtml()}</span></div>`;
-function stats(){histDelPend=null;statsView();toTop()}
+function stats(){histDelPend=null;openMenu=null;statsView();toTop()}
 function setStatsCourse(c){statsCourse=c||'';histDelPend=null;statsView()}
 function togHistExp(id){histExp.has(id)?histExp.delete(id):histExp.add(id);statsView()}
 function delHist(id){histDelPend=histDelPend===id?null:id;statsView()}
 function delHist2(id){examHistory=examHistory.filter(a=>a.id!==id);histExp.delete(id);histDelPend=null;saveHistory(true);statsView()}
 function statsView(){
-  stopExamTimer();curView='t';$app.className='';
+  stopExamTimer();stopStartObs();curView='t';$app.className='';
   const allQs=sets.flatMap(s=>s.qs||[]),totQ=allQs.length,mastQ=allQs.filter(isMastered).length,wrongQ=allQs.filter(q=>q.wrong).length;
   const dueRes=collectDueQuestions(sets,null);
   const histCourses=[...new Set(examHistory.map(a=>a.course).filter(Boolean))];
@@ -787,7 +808,7 @@ function statsView(){
         <div style="display:flex;gap:10px;align-items:flex-start;justify-content:space-between">
           <button class="sb" style="padding:2px 0" aria-expanded="${open}" data-act="togHistExp" data-args="${esc(JSON.stringify([a.id]))}">
             <span>${open?'▾':'▸'}</span>
-            <span><span class="mut" style="display:block;font-size:.82rem;margin-bottom:1px">${esc(dt)} · ⏱ ${fmtTime(a.elapsedSec)} / ${fmtTime(a.durationMins*60)} · ${a.correctCount}/${a.totalCount} komplett richtig</span><b>${esc(a.course)}</b></span>
+            <span><b style="display:block;margin-bottom:1px">${esc(a.course)}</b><span class="mut" style="display:block;font-size:.82rem">${esc(dt)} · ⏱ ${fmtTime(a.elapsedSec)} / ${fmtTime(a.durationMins*60)} · ${a.correctCount}/${a.totalCount} komplett richtig</span></span>
           </button>
           <span class="gc">
             <span class="badge ${a.passed?'ok':'bad'}" style="cursor:default">Note ${a.grade} · ${fmtPct(a.pct)}</span>
@@ -803,10 +824,10 @@ function statsView(){
   `:`<div class="card"><p style="margin:0"><b>Noch keine Prüfungen abgeschlossen.</b></p><p class="mut" style="margin:4px 0 0">Sobald du eine Prüfung abgibst, erscheint hier automatisch dein Verlauf inkl. Notenentwicklung und Kapitel-Analyse.</p></div>`}`;
 }
 let gpend=null,qsearch='',gq='',gedit=null,gdraft=null,gerr='';
-function glos(){gpend=null;gcpend=null;gcedit=null;wp=null;gedit=null;gdraft=null;gq='';glosView();toTop()}
-function settings(){cedit=null;cpend=null;crpend=null;wp=null;settingsView();toTop()}
+function glos(){gpend=null;gcpend=null;gcedit=null;wp=null;gedit=null;gdraft=null;gq='';openMenu=null;glosView();toTop()}
+function settings(){cedit=null;cpend=null;crpend=null;wp=null;openMenu=null;settingsView();toTop()}
 function settingsView(){
-  stopExamTimer();curView='s';$app.className='';
+  stopExamTimer();stopStartObs();curView='s';$app.className='';
   const groups=buildGroups();
   const qn=getQuizCount(),ms=Math.max(1,Math.min(10,+opts.mastery||3)),th=THEMES.includes(opts.theme)?opts.theme:'auto';
   $app.innerHTML=`${nav('s')}${pageHead(`<h1>${IC.cog}<span>Einstellungen</span></h1>`)}<p class="mut">Übungsumfang für das Quiz, Darstellung und Kurseinstellungen verwalten.</p>
@@ -879,17 +900,17 @@ function startGNew(gi){
   const c=gi!==undefined&&gcnames[gi]?gcnames[gi]:'';
   const defC=c||selCourses()[0]||allCourses()[0]||'';
   if(c&&gcol.has(c)){gcol.delete(c);saveGCol()}
-  gedit='__new__';gdraft={c:defC,b:'',i:'',a:'',targetC:c};gerr='';gpend=null;gcpend=null;gcedit=null;wp=null;glosView();
+  gedit='__new__';gdraft={c:defC,b:'',i:'',a:'',targetC:c};gerr='';gpend=null;gcpend=null;gcedit=null;wp=null;openMenu=null;glosView();
   setTimeout(()=>{const el=document.getElementById(defC?'eb':'ec');if(el){el.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth',block:'center'});el.focus()}},30);
 }
 function startGEdit(k){
   const g=gloss[k];if(!g)return;
   gq='';if(gcol.has(g.course)){gcol.delete(g.course);saveGCol()}
-  gedit=k;gdraft={c:g.course,b:g.b,i:g.i,a:g.a.join(', '),targetC:''};gerr='';gpend=null;gcpend=null;gcedit=null;wp=null;glosView();
+  gedit=k;gdraft={c:g.course,b:g.b,i:g.i,a:g.a.join(', '),targetC:''};gerr='';gpend=null;gcpend=null;gcedit=null;wp=null;openMenu=null;glosView();
   setTimeout(()=>{const el=document.getElementById('eb');if(el){el.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth',block:'center'});el.focus()}},30);
 }
 function startGCEdit(gi){
-  gcedit=gi;gcdraft=gcnames[gi]||'';gcerr='';gcpend=null;gpend=null;gedit=null;gdraft=null;wp=null;glosView();
+  gcedit=gi;gcdraft=gcnames[gi]||'';gcerr='';gcpend=null;gpend=null;gedit=null;gdraft=null;wp=null;openMenu=null;glosView();
 }
 function cancelGCEdit(){gcedit=null;gcdraft='';gcerr='';glosView()}
 function saveGCEdit(gi){
@@ -912,7 +933,7 @@ function delGC2(gi){
     gloss=gloss.filter(g=>g.course!==c);
     gcol.delete(c);saveGCol();saveGloss(true);
   }
-  gcpend=null;gpend=null;gcedit=null;glosView();
+  gcpend=null;gpend=null;gcedit=null;openMenu=null;glosView();
 }
 function gRow(g,k,showCourse){
   return `<div class="gi"><div>${showCourse?`<span class="mut" style="display:block;font-size:.82rem;margin-bottom:1px">${esc(g.course)}</span>`:''}<b>${esc(g.b)}</b>${g.a.length?`<span class="mut"> · ${esc(g.a.join(', '))}</span>`:''}<p class="mut" style="margin:.2em 0 0">${esc(g.i)}</p></div>${gpend===k?`<span class="gc"><span class="mut">Löschen?</span><button class="btn sm" data-act="delG" data-args="${esc(JSON.stringify([k]))}">Ja</button><button class="btn sec sm" data-act="_h11">Nein</button></span>`:`<span class="gc"><button class="x" title="Begriff bearbeiten" aria-label="Begriff bearbeiten" data-act="startGEdit" data-args="${esc(JSON.stringify([k]))}">${IC.edit}</button><button class="x" title="Begriff löschen" aria-label="Begriff löschen" data-act="_h12" data-args="${esc(JSON.stringify([k]))}">${IC.del}</button></span>`}</div>`;
@@ -922,9 +943,10 @@ function gForm(g,k){
   return `<div class="gi ge"><div style="width:100%">${isNew?'<b style="display:block;margin-bottom:6px;color:var(--ac)">Neuen Begriff hinzufügen</b>':''}<label class="mut" for="ec">Kurs</label><input id="ec" list="cl" value="${esc(d.c)}" placeholder="Name des Kurses"><label class="mut" for="eb">Begriff</label><input id="eb" value="${esc(d.b)}"><label class="mut" for="ei">Erklärung</label><textarea id="ei" style="min-height:90px">${esc(d.i)}</textarea><label class="mut" for="ea">Alias (durch Komma getrennt)</label><input id="ea" value="${esc(d.a)}"><p class="err" role="alert">${esc(gerr)}</p><div class="row act"><button class="btn sm" type="button" data-act="saveG" data-args="${esc(JSON.stringify([isNew?'__new__':k]))}">${isNew?'Anlegen':'Speichern'}</button><button class="btn sec sm" type="button" data-act="_h13">Abbrechen</button></div></div></div>`;
 }
 function gCourseCardHtml(c,l,gi){
-  const on=isGSel(c),cCol=on?'--ac':'--ink';
-  const sub=`<span class="mut" style="display:block;font-size:.82rem;margin-bottom:1px">${l.length} ${l.length===1?'Begriff':'Begriffe'}${on?' · ✓ Aktiv':''}</span><b>${esc(c)}</b>`;
-  return `<div class="card ccard" style="margin:14px 0 8px;padding:12px 16px;border-left:4px solid var(${cCol})"><div class="crs"><button class="chb" style="padding:2px 0" aria-expanded="${!gcol.has(c)}" data-act="gfold" data-args="${esc(JSON.stringify([gi]))}"><span>${gcol.has(c)?'▸':'▾'}</span><span>${sub}</span></button><span class="gc"><button class="x" title="Neuen Begriff zu diesem Kurs hinzufügen" aria-label="Neuen Begriff hinzufügen" data-act="startGNew" data-args="${esc(JSON.stringify([gi]))}">${IC.plus}</button><button class="x" title="Glossar dieses Kurses exportieren" aria-label="Kurs-Glossar exportieren" data-act="exportGC" data-el data-args="${esc(JSON.stringify([gi]))}">${IC.exp}</button><button class="x" title="Kursname bearbeiten" aria-label="Kursname bearbeiten" data-act="startGCEdit" data-args="${esc(JSON.stringify([gi]))}">${IC.edit}</button>${gcpend===gi?`<span class="mut">Löschen?</span><button class="btn sm" data-act="delGC2" data-args="${esc(JSON.stringify([gi]))}">Ja</button><button class="btn sec sm" data-act="delGC" data-args="${esc(JSON.stringify([gi]))}">Nein</button>`:`<button class="x" title="Glossar dieses Kurses löschen" aria-label="Kurs-Glossar löschen" data-act="delGC" data-args="${esc(JSON.stringify([gi]))}">${IC.del}</button>`}</span></div>${gcedit===gi?`<div class="ge" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)"><label class="mut" for="gecn">Kursname bearbeiten</label><input id="gecn" list="cl" value="${esc(gcdraft)}"><p class="err" role="alert">${esc(gcerr)}</p><div class="row act"><button class="btn sm" data-act="saveGCEdit" data-args="${esc(JSON.stringify([gi]))}">Speichern</button><button class="btn sec sm" data-act="cancelGCEdit" data-args='[]'>Abbrechen</button></div></div>`:''}</div>`;
+  const on=isGSel(c),cCol=on?'--ac':'--ink',mKey='gc:'+c,mOpen=openMenu===mKey;
+  const sub=`<b style="display:block;margin-bottom:1px">${esc(c)}</b><span class="mut" style="display:block;font-size:.82rem">${l.length} ${l.length===1?'Begriff':'Begriffe'}${on?' · ✓ Aktiv':''}</span>`;
+  const menuPop=mOpen?`<div class="menu-pop" role="menu"><button class="mitem" type="button" data-act="exportGC" data-el data-args="${esc(JSON.stringify([gi]))}">${IC.exp}<span>Glossar exportieren</span></button><div class="msep"></div>${gcpend===gi?`<div class="mconf"><span class="mut">Löschen?</span><span class="row" style="gap:4px"><button class="btn sm" data-act="delGC2" data-args="${esc(JSON.stringify([gi]))}">Ja</button><button class="btn sec sm" data-act="delGC" data-args="${esc(JSON.stringify([gi]))}">Nein</button></span></div>`:`<button class="mitem danger" type="button" data-act="delGC" data-args="${esc(JSON.stringify([gi]))}">${IC.del}<span>Glossar löschen</span></button>`}</div>`:'';
+  return `<div class="card ccard" style="margin:14px 0 8px;padding:12px 16px;border-left:4px solid var(${cCol})"><div class="crs"><button class="chb" style="padding:2px 0" aria-expanded="${!gcol.has(c)}" data-act="gfold" data-args="${esc(JSON.stringify([gi]))}"><span>${gcol.has(c)?'▸':'▾'}</span><span>${sub}</span></button><span class="gc"><button class="x" title="Neuen Begriff zu diesem Kurs hinzufügen" aria-label="Neuen Begriff hinzufügen" data-act="startGNew" data-args="${esc(JSON.stringify([gi]))}">${IC.plus}</button><button class="x" title="Kursname bearbeiten" aria-label="Kursname bearbeiten" data-act="startGCEdit" data-args="${esc(JSON.stringify([gi]))}">${IC.edit}</button><span class="menu-wrap"><button class="x" type="button" title="Weitere Aktionen" aria-label="Weitere Aktionen für ${esc(c)}" aria-haspopup="menu" aria-expanded="${mOpen}" data-act="togMenu" data-args="${esc(JSON.stringify([mKey]))}">${IC.more}</button>${menuPop}</span></span></div>${gcedit===gi?`<div class="ge" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)"><label class="mut" for="gecn">Kursname bearbeiten</label><input id="gecn" list="cl" value="${esc(gcdraft)}"><p class="err" role="alert">${esc(gcerr)}</p><div class="row act"><button class="btn sm" data-act="saveGCEdit" data-args="${esc(JSON.stringify([gi]))}">Speichern</button><button class="btn sec sm" data-act="cancelGCEdit" data-args='[]'>Abbrechen</button></div></div>`:''}</div>`;
 }
 function gResHtml(){
   const t=gq.trim().toLowerCase();if(!t)return '';
@@ -934,18 +956,18 @@ function gResHtml(){
   const info=r.length?(crsList.length===1?`<b>${r.length}</b> Treffer im Kurs „<b>${esc(crsList[0])}</b>“`:`<b>${r.length}</b> Treffer in <b>${crsList.length}</b> Kursen (${crsList.map(c=>`„<b>${esc(c)}</b>“`).join(', ')})`):`Keine Treffer (gesucht in ${gcnames.length===1?`Kurs „<b>${esc(gcnames[0])}</b>“`:`allen <b>${gcnames.length}</b> Kursen`})`;
   return `<p class="mut">${info}</p>`+crsList.map(c=>{
     const l=byC[c],on=isGSel(c),cCol=on?'--ac':'--ink';
-    return `<div class="card" style="margin:12px 0 8px;padding:12px 16px;border-left:4px solid var(${cCol})"><span class="mut" style="display:block;font-size:.82rem;margin-bottom:1px">Kurs · ${l.length} Treffer${on?' · ✓ Aktiv':''}</span><b style="font-size:1.1rem">${esc(c)}</b></div><div style="margin:0 0 16px 12px"><div class="card"><div class="ggrid">${l.map(({g,k})=>gRow(g,k,true)).join('')}</div></div></div>`;
+    return `<div class="card" style="margin:12px 0 8px;padding:12px 16px;border-left:4px solid var(${cCol})"><b style="display:block;font-size:1.1rem;margin-bottom:1px">${esc(c)}</b><span class="mut" style="display:block;font-size:.82rem">Kurs · ${l.length} Treffer${on?' · ✓ Aktiv':''}</span></div><div style="margin:0 0 16px 12px"><div class="card"><div class="ggrid">${l.map(({g,k})=>gRow(g,k,true)).join('')}</div></div></div>`;
   }).join('');
 }
 function glosView(){
-  stopExamTimer();curView='g';$app.className=gq.trim()?'searching':'';
+  stopExamTimer();stopStartObs();curView='g';$app.className=gq.trim()?'searching':'';
   const ggroups={};gloss.forEach((g,k)=>(ggroups[g.course]=ggroups[g.course]||[]).push({g,k}));gcnames=Object.keys(ggroups);
   const actC=selCourses()[0]||'',actCnt=actC?gloss.filter(g=>norm(g.course)===norm(actC)).length:0;
   const sPh=gcnames.length===1?`Glossar im Kurs „${esc(gcnames[0])}“ durchsuchen …`:`Glossar in allen ${gcnames.length} Kursen durchsuchen${actC?` (aktiv: ${esc(actC)})`:''} …`;
   const dl=`<datalist id="cl">${allCourses().map(c=>`<option value="${esc(c)}">`).join('')}</datalist>`;
   const topNew=gedit==='__new__'&&(!gdraft||!gdraft.targetC||!ggroups[gdraft.targetC]);
   $app.innerHTML=`${nav('g')}${pageHead(`<h1>${IC.book}<span>Glossar</span></h1>`)}<p class="mut">Fachbegriffe aus deinen Vorlesungsunterlagen pro Kurs verwalten und nachschlagen.</p>
-  <div class="row act" style="margin:12px 0 6px"><button class="btn sec ico" title="Glossar importieren" aria-label="Glossar importieren" data-act="imp" data-args='["glossar"]'>${IC.imp}</button><button class="btn sec sm" style="min-height:40px" data-act="startGNew" data-args='[]'>+ Begriff hinzufügen</button>${gloss.length?`<button class="btn sec ico" title="Alle Glossare exportieren" aria-label="Glossar exportieren" data-act="exportG" data-el>${IC.exp}</button><span class="gc" style="gap:8px">${wp==='g'?`<span class="mut">Löschen?</span><button class="btn sm" data-act="wipe" data-args='["g"]'>Ja</button><button class="btn sec sm" data-act="_h14">Nein</button>`:`<button class="btn sec ico" title="Gesamtes Glossar löschen" aria-label="Gesamtes Glossar löschen" data-act="_h15">${IC.del}</button>`}</span>`:''}</div>
+  <div class="row act" style="margin:12px 0 6px"><button class="btn sec sm ico-lbl" title="Glossar importieren" aria-label="Glossar importieren" data-act="imp" data-args='["glossar"]'>${IC.imp}<span>Import</span></button><button class="btn sec sm" data-act="startGNew" data-args='[]'>+ Begriff</button>${gloss.length?`<button class="btn sec sm ico-lbl" title="Alle Glossare exportieren" aria-label="Glossar exportieren" data-act="exportG" data-el>${IC.exp}<span>Export</span></button><span class="gc" style="gap:8px">${wp==='g'?`<span class="mut">Löschen?</span><button class="btn sm" data-act="wipe" data-args='["g"]'>Ja</button><button class="btn sec sm" data-act="_h14">Nein</button>`:`<button class="btn sec ico" title="Gesamtes Glossar löschen" aria-label="Gesamtes Glossar löschen" data-act="_h15">${IC.del}</button>`}</span>`:''}</div>
   ${gloss.length?`<p class="mut" style="margin:8px 0 4px">${actC?`<b>${actCnt}</b> ${actCnt===1?'Begriff':'Begriffe'} für den ausgewählten Kurs „<b>${esc(actC)}</b>“ aktiv · `:''}Insgesamt <b>${gloss.length}</b> ${gloss.length===1?'Begriff':'Begriffe'} in <b>${gcnames.length}</b> ${gcnames.length===1?'Kurs':'Kursen'}.</p><input id="gs" type="search" class="srch" placeholder="${sPh}" value="${esc(gq)}" data-in="gSearch" data-args='[]'><div id="gres">${gResHtml()}</div>`:''}${dl}
   ${topNew?`<div class="card" style="margin-top:14px">${gForm({course:(gdraft&&gdraft.c)||'',b:'__new__',i:'',a:[]},'__new__')}</div>`:''}
   ${gloss.length?Object.entries(ggroups).map(([c,l],gi)=>{
@@ -970,12 +992,12 @@ function saveG(k){
 }
 function delG(k){if(gloss[k])gloss.splice(k,1);gpend=null;saveGloss(true);glosView()}
 let impMode='fragen';
-function imp(m){curView='i';impMode=m||'fragen';$app.className='';
+function imp(m){stopStartObs();openMenu=null;curView='i';impMode=m||'fragen';$app.className='';
   const allC=allCourses(),dl=`<datalist id="cl">${allC.map(c=>`<option value="${esc(c)}">`).join('')}</datalist>`;
-  const fi=`<label class="btn sec" style="position:relative;overflow:hidden;display:inline-flex;align-items:center;cursor:pointer">Datei wählen<input id="fi" type="file" accept=".json,application/json,text/plain" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer" data-act="_clr" data-el data-chg="fromFile" data-el></label>`;
+  const fi=`<label class="btn sec" style="position:relative;overflow:hidden;display:inline-flex;align-items:center;cursor:pointer">Datei wählen<input id="fi" type="file" accept=".json,application/json,text/plain" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer" data-act="_clr" data-chg="fromFile" data-el></label>`;
   if(impMode==='glossar'){
     gen={name:'',f:KINDS.map(x=>x[0])};
-    $app.innerHTML=`${nav('g')}${pageHead(`<h1>${IC.imp}<span>Glossar importieren</span></h1>`)}<p class='mut'>Füge das JSON von Claude ein, ziehe eine .json-Datei in das Feld oder wähle sie über „Datei wählen“. Gleiche Begriffe desselben Kurses werden aktualisiert.</p><textarea id='t' placeholder='JSON hier einfügen oder .json-Datei hierher ziehen …' data-dragover="_pd" data-drop="dropFile"></textarea><p class='err' id='e' role="alert">${esc(msg)}</p><div class='row'><button class='btn' data-act='doImp'>Importieren</button>${fi}<button class='btn sec' data-act="_h16">Zurück</button></div><h2>Für jeden Kurs</h2><p class='mut'>Lade deine Unterlagen in Claude hoch und kopiere diesen Auftrag dazu. Gib den Kursnamen ein, dann trägt der Auftrag ihn automatisch ein.</p><label>Kursname <input id="gcn" list="cl" data-in="gGName" data-args='[]' style="width:100%;margin-top:4px;background:var(--card);border:1px solid var(--bd);border-radius:6px;padding:8px"></label>${dl}<div id="ggen"></div>`;
+    $app.innerHTML=`${nav('g')}${pageHead(`<h1>${IC.imp}<span>Glossar importieren</span></h1>`)}<p class='mut'>Füge das JSON von Claude ein, ziehe eine .json-Datei in das Feld oder wähle sie über „Datei wählen“. Gleiche Begriffe desselben Kurses werden aktualisiert.</p><textarea id='t' placeholder='JSON hier einfügen oder .json-Datei hierher ziehen …' data-dragover="_pd" data-drop="dropFile"></textarea><p class='err' id='e' role="alert">${esc(msg)}</p><div class='row'><button class='btn' data-act='doImp'>Importieren</button>${fi}<button class='btn sec' data-act="_h16">Zurück</button></div><h2>Für jeden Kurs</h2><p class='mut'>Lade deine Unterlagen in Claude hoch und kopiere diesen Auftrag dazu. Gib den Kursnamen ein, dann trägt der Auftrag ihn automatisch ein.</p><label>Kursname <input id="gcn" list="cl" data-in="gGName" data-args='[]' style="width:100%;margin-top:4px;background:var(--card);border:1px solid var(--ink);border-radius:8px;padding:8px 10px"></label>${dl}<div id="ggen" style="margin-top:10px"></div>`;
     renderGGen();toTop();return;
   }
   $app.innerHTML=`${nav('q')}${pageHead(`<h1>${IC.imp}<span>Fragen importieren</span></h1>`)}
@@ -987,9 +1009,9 @@ function imp(m){curView='i';impMode=m||'fragen';$app.className='';
   <button class="btn sec" data-act="_h17">Zurück</button></div>
   <h2>Für jeden neuen Kurs</h2>
   <p class="mut">Lade deine Unterlagen in Claude hoch und kopiere diesen Auftrag dazu. Ersetze [ANZAHL] durch die gewünschte Zahl. Gib den Kursnamen ein, dann trägt der Auftrag ihn automatisch ein.</p>
-  <label>Kursname <input id="cn" list="cl" data-in="gName" data-args='[]' style="width:100%;margin-top:4px;background:var(--card);border:1px solid var(--bd);border-radius:6px;padding:8px"></label>
+  <label>Kursname <input id="cn" list="cl" data-in="gName" data-args='[]' style="width:100%;margin-top:4px;background:var(--card);border:1px solid var(--ink);border-radius:8px;padding:8px 10px"></label>
   ${dl}
-  <div id="gen"></div>`;
+  <div id="gen" style="margin-top:10px"></div>`;
   gen={name:'',f:KINDS.map(x=>x[0])};renderGen();toTop();
 }
 function readAndImp(f){
@@ -1084,7 +1106,7 @@ function weightedPick(cands,count){
 }
 
 function start(pool){
-  stopExamTimer();examMode=false;
+  stopExamTimer();stopStartObs();openMenu=null;examMode=false;
   let qs;
   if(pool)qs=shuf(pool);
   else{
@@ -1097,7 +1119,7 @@ function start(pool){
   idx=0;log=[];picked=new Set();examPicks=Q.map(()=>new Set());checked=false;gopen=0;quiz();toTop();
 }
 function startExam(){
-  stopExamTimer();
+  stopExamTimer();stopStartObs();openMenu=null;
   enforceSingleCourse();
   const selSets=[...sel].map(id=>sets.find(x=>x.id===id)).filter(s=>s&&s.qs.length);
   if(!selSets.length)return;
@@ -1172,7 +1194,7 @@ function finishExam(timeUp){
   try{localStorage.setItem('pt:exams',JSON.stringify(examHistory))}catch(e){}
   save();result();
 }
-function quiz(){curView='z';
+function quiz(){stopStartObs();curView='z';
   const q=Q[idx],src=q._ref||q,multi=q.type==='multi',tiles=q.opts.every(o=>o.t.length<=55);
   if(examMode){
     const curP=examPicks[idx]||new Set(),ansCnt=examPicks.filter(p=>p.size>0).length,rem=Math.max(0,Math.ceil((examEnd-Date.now())/1000)),sm=getScoreMode(examCourse),nm=getNegMode(examCourse);
@@ -1213,7 +1235,7 @@ function appDialog(msg,onYes,word){
   const prev=document.activeElement,o=document.createElement('div');
   o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');
   o.style.cssText='position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:16px';
-  o.innerHTML='<div style="background:Canvas;color:CanvasText;max-width:420px;width:100%;padding:18px;border-radius:12px;border:2px solid var(--ink)"><p style="margin:0 0 12px"></p>'+(word?'<input style="width:100%;margin-bottom:12px" autocomplete="off" aria-label="Bestätigung">':'')+'<div class="row" style="justify-content:flex-end"><button class="btn sec sm" data-n>Abbrechen</button><button class="btn sm" data-y>OK</button></div></div>';
+  o.innerHTML='<div class="dlg-box"><p style="margin:0 0 12px"></p>'+(word?'<input class="dlg-in" autocomplete="off" aria-label="Bestätigung">':'')+'<div class="row" style="justify-content:flex-end"><button class="btn sec sm" data-n>Abbrechen</button><button class="btn sm" data-y>OK</button></div></div>';
   o.querySelector('p').textContent=msg;
   const inp=o.querySelector('input'),close=()=>{o.remove();if(prev&&prev.focus&&document.contains(prev))prev.focus({preventScroll:true})},
   yes=()=>{if(word&&(!inp||inp.value.trim()!==word)){inp&&inp.focus();return}close();onYes()};
@@ -1285,7 +1307,7 @@ function resQList(title,smode,nmode){
   }).join('')}`;
 }
 
-function result(){stopExamTimer();const chg=curView!=='r';curView='r';$app.className='';
+function result(){stopExamTimer();stopStartObs();const chg=curView!=='r';curView='r';$app.className='';
   if(chg){rexp=new Set(Q.map((_,i)=>i).filter(i=>!log[i]));rgopen={}}
   const ok=log.filter(Boolean).length,exactPct=Q.length?ok/Q.length*100:0,pct=Math.round(exactPct),wrong=Q.filter((_,i)=>!log[i]),newlyM=Q.filter(q=>q._newlyMastered).length;
   if(examMode){
@@ -1649,6 +1671,7 @@ window.addEventListener('pageshow',autoPull);
 window.addEventListener('online',autoPull);
 
 document.addEventListener('keydown',ev=>{
+  if(ev.key==='Escape'&&openMenu){ev.preventDefault();closeMenuDom();return}
   if(!$app.classList.contains('wide')||!Q.length)return;
   const tag=(ev.target&&ev.target.tagName)||'';
   if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT')return;
@@ -1694,7 +1717,7 @@ function _h6(a0,a1){pq=a0+':'+a1;home()}
 function _h7(){wp=null;home()}
 function _h8(){wp='r';home()}
 function _h9(){wp='q';home()}
-function _h10(){wp=null;qsearch='';home();toTop()}
+function _h10(){wp=null;qsearch='';openMenu=null;home();toTop()}
 function _h11(){gpend=null;glosView()}
 function _h12(a0){gpend=a0;gcpend=null;glosView()}
 function _h13(){gedit=null;gdraft=null;gerr='';glosView()}
@@ -1717,10 +1740,13 @@ const handlers={
   sbAuthSubmit,sbSignOut,sbSyncNow,setSbMode,setStatsCourse,
   setAutoCheck,setHideMastered,setMastery,setQuizCount,setShuffle,setTheme,settings,
   start,startCEdit,startCNew,startDue,startExam,startGCEdit,startGEdit,startGNew,startQEdit,
-  startQNew,startSEdit,startSNew,stats,tog,togAllRexp,togC,togExamMark,togFlag,togHistExp,togMastery,
+  startQNew,startSEdit,startSNew,stats,tog,togAllRexp,togC,togExamMark,togFlag,togHistExp,togMastery,togMenu,
   togQGloss,togQuizFlag,togRGloss,togResFlag,togRexp,tryExitExam,tryFinishExam,uploadQImg,wipe
 };
-document.addEventListener('click',e=>{for(let t=e.target.closest('[data-act]');t;t=t.parentElement&&t.parentElement.closest('[data-act]')){const f=handlers[t.dataset.act];if(typeof f==='function'){const a=JSON.parse(t.dataset.args||'[]');t.hasAttribute('data-el')?f(t,...a):f(...a)}}});
+document.addEventListener('click',e=>{
+  if(openMenu&&!e.target.closest('.menu-wrap'))closeMenuDom();
+  for(let t=e.target.closest('[data-act]');t;t=t.parentElement&&t.parentElement.closest('[data-act]')){const f=handlers[t.dataset.act];if(typeof f==='function'){const a=JSON.parse(t.dataset.args||'[]');t.hasAttribute('data-el')?f(t,...a):f(...a)}}
+});
 document.addEventListener('input',e=>{const t=e.target.closest&&e.target.closest('[data-in]');if(t){const f=handlers[t.dataset.in];if(typeof f==='function')f(t.value,...JSON.parse(t.dataset.args||'[]'))}});
 document.addEventListener('change',e=>{const el=e.target.closest&&e.target.closest('[data-chg],[data-chk]');if(!el)return;const a=JSON.parse(el.dataset.args||'[]');
 if(el.dataset.chg){const f=handlers[el.dataset.chg];if(typeof f==='function')el.hasAttribute('data-el')?f(el,...a):f(el.value,...a)}
